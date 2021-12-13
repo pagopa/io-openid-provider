@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: OpenID Provider
+  description: OpenID Provider service
+  version: 0.0.1
+
+servers:
+  - url: https://api.openid-provider.pagopa.it
+    description: Main (production) server
+  - url: https://staging-api.openid-provider.pagopa.it
+    description: Internal staging server for testing
+
+paths:
+  /metrics:
+    get:
+      summary: Return metrics
+      description: Return metrics about this service in phrometheus format.
+      responses:
+        '200':    # status code
+          $ref: '#/components/responses/200MetricResponse'
+        'default':
+          # FIXME this URL points to the commit. Should point to a version
+          $ref: 'https://raw.githubusercontent.com/pagopa/cloudgaap-commons-openapi/main/openapi/index.yaml#/components/responses/5xxErrorResponse'
+
+components:
+
+  responses:
+    200MetricResponse:
+      description: The metrics about this service in prometheus format.
+      content:
+        text/plain:
+          schema:
+            type: string
