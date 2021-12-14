@@ -18,7 +18,7 @@ describe("getInfoEndpointHandler", () => {
 describe("makeRouter", () => {
   it("should return a workable router", async () => {
     const application = express().use(router.makeRouter(records.validConfig));
-    const actual = await request(application).get("/info/api");
+    const actual = await request(application).get("/api/info");
 
     expect(actual.statusCode).toBe(200);
   });
