@@ -2,6 +2,7 @@ import * as C from "../config";
 import * as E from "fp-ts/Either";
 import * as DE from "io-ts/DecodeError";
 import * as FS from "io-ts/FreeSemigroup";
+import * as packageJson from "../../package.json";
 
 describe("Config", () => {
   // TODO integrate with property base test
@@ -56,6 +57,7 @@ describe("Config", () => {
       };
 
       const expected = E.right({
+        info: { name: packageJson.name, version: packageJson.version },
         logger: { logLevel: "trace", logName: "application" },
         server: { hostname: "hostname", port: 1234 },
       });

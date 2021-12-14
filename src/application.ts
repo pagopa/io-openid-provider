@@ -2,6 +2,7 @@ import express from "express";
 import helmet from "helmet";
 // TODO: Remove the @pagopa/cloudgaap-commons-ts dependency
 import { Logger } from "@pagopa/cloudgaap-commons-ts/lib/logger";
+import * as info from "./info/router";
 import { Config } from "./config";
 
 const makeErrorRequestHandler =
@@ -28,6 +29,7 @@ const makeApplication = (config: Config, logger: Logger): Application => {
 
   // Register routers
   // application.use(component.makeRouter(service0, service1, ...));
+  application.use(info.makeRouter(config));
 
   // Register error handler
   application.use(makeErrorRequestHandler(logger));

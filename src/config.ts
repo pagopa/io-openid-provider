@@ -3,15 +3,23 @@ import { pipe } from "fp-ts/function";
 import * as d from "io-ts/Decoder";
 // TODO: Remove this dependency
 import { LogConfig } from "@pagopa/cloudgaap-commons-ts/lib/logger";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as packageJson from "../package.json";
 
 interface ServerConfig {
   readonly hostname: string;
   readonly port: number;
 }
 
+interface Info {
+  readonly name: NonEmptyString;
+  readonly version: NonEmptyString;
+}
+
 interface Config {
   readonly server: ServerConfig;
   readonly logger: LogConfig;
+  readonly info: Info;
 }
 
 type ConfEnv = NodeJS.ProcessEnv;
@@ -36,6 +44,11 @@ const envDecoder = d.struct({
 type EnvStruct = d.TypeOf<typeof envDecoder>;
 
 const makeConfigFromStr = (str: EnvStruct): Config => ({
+  // TODO: Improve the fetch of info
+  info: {
+    name: packageJson.name as NonEmptyString,
+    version: packageJson.version as NonEmptyString,
+  },
   logger: {
     logLevel: str.LOG_LEVEL,
     logName: str.APPLICATION_NAME,
@@ -47,7 +60,7 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
 });
 
 const parseConfig = (processEnv: ConfEnv): e.Either<d.DecodeError, Config> => {
-  const result = envDecoder.decode(processEnv);
+  const result = envDecoder.decode({ ...processEnv });
   return e.map(makeConfigFromStr)(result);
 };
 

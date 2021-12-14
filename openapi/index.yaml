@@ -1,0 +1,52 @@
+swagger: '2.0'
+info:
+  title: OpenID Provider
+  description: OpenID Provider service
+  version: 0.0.1
+host: api.openid-provider.pagopa.it
+
+schemes:
+  - https
+paths:
+  /api/info:
+    get:
+      operationId: "getInfo"
+      summary: "Get info of the service"
+      description: |
+        Return the information of the service, this endpoint
+        can be used as health check.
+      responses:
+        200:
+          $ref: '#/responses/200GetInfoResponse'
+        500:
+          $ref: '#/responses/500ProblemJsonResponse'
+
+definitions:
+  GetInfo:
+    type: object
+    properties:
+      name:
+        type: string
+        minLength: 1
+        description: "The name of the service"
+        example: "name"
+      version:
+        type: string
+        minLength: 1
+        description: "The version of the service"
+        example: "name"
+    required:
+      - name
+      - version
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
+
+responses:
+  200GetInfoResponse:
+    description: "Return the status of the service"
+    schema:
+      $ref: '#/definitions/GetInfo'
+  500ProblemJsonResponse:
+    description: "An error occurred"
+    schema:
+      $ref: '#/definitions/ProblemJson'
