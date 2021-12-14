@@ -1,6 +1,7 @@
 import * as e from "fp-ts/Either";
 import { pipe } from "fp-ts/function";
 import * as d from "io-ts/Decoder";
+// TODO: Remove this dependency
 import { LogConfig } from "@pagopa/cloudgaap-commons-ts/lib/logger";
 
 interface ServerConfig {
@@ -15,7 +16,6 @@ interface Config {
 
 type ConfEnv = NodeJS.ProcessEnv;
 
-// TODO: Move to cloudgaap-commons-ts
 // Decode an integer from a string
 const intFromStringDecoder: d.Decoder<string, number> = {
   decode: (s) =>
@@ -24,7 +24,6 @@ const intFromStringDecoder: d.Decoder<string, number> = {
     ),
 };
 
-// TODO: Move to cloudgaap-commons-ts
 // Decode an integer from an unknown value
 const intFromUnknownDecoder = d.compose(intFromStringDecoder)(d.string);
 
