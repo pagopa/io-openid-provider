@@ -3,16 +3,12 @@ import * as e from "fp-ts/Either";
 import * as d from "io-ts/Decoder";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
-import {
-  Logger,
-  makeLogger,
-  makeSubLogger,
-} from "@pagopa/cloudgaap-commons-ts/lib/logger";
+import * as logger from "@pagopa/cloudgaap-commons-ts/lib/logger";
 import { makeApplication } from "./application";
+// TODO: Remove the @pagopa/cloudgaap-commons-ts dependency
 import * as c from "./config";
-import { makeMetricService } from "./metrics/metricService";
 
-const start = (application: Application, log: Logger): void => {
+const start = (application: Application, log: logger.Logger): void => {
   log.info("Starting application");
   const server = http.createServer(application);
   const port = application.get("port");
@@ -22,7 +18,7 @@ const start = (application: Application, log: Logger): void => {
 };
 
 const exit = (parseError: d.DecodeError): void => {
-  const log = makeLogger({ logLevel: "error", logName: "main" });
+  const log = logger.makeLogger({ logLevel: "error", logName: "main" });
   log.error(`Shutting down application ${d.draw(parseError)}`);
   process.exit(1);
 };
@@ -32,14 +28,9 @@ const exit = (parseError: d.DecodeError): void => {
 const main = pipe(
   e.Do,
   e.bind("conf", () => c.parseConfig(process.env)),
-  e.bind("log", ({ conf }) => e.right(makeLogger(conf.logger))),
-  e.bind("metricService", ({ log }) =>
-    e.right(makeMetricService(makeSubLogger(log, "metricService")))
-  ),
-  e.bind("app", ({ conf, metricService, log }) =>
-    e.right(
-      makeApplication(conf, metricService, makeSubLogger(log, "application"))
-    )
+  e.bind("log", ({ conf }) => e.right(logger.makeLogger(conf.logger))),
+  e.bind("app", ({ conf, log }) =>
+    e.right(makeApplication(conf, logger.makeSubLogger(log, "application")))
   ),
   e.map(({ app, log }) => start(app, log))
 );

@@ -34,3 +34,5 @@ To lint the code:
 yarn run lint
 ```
 
+## TODOs
+1. Remove the @pagopa/cloudgaap-commons-ts dependency

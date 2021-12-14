@@ -1,9 +1,8 @@
 import express from "express";
 import helmet from "helmet";
+// TODO: Remove the @pagopa/cloudgaap-commons-ts dependency
 import { Logger } from "@pagopa/cloudgaap-commons-ts/lib/logger";
 import { Config } from "./config";
-import { metricRoutes } from "./metrics/metricRoutes";
-import { MetricService } from "./metrics/metricService";
 
 const makeErrorRequestHandler =
   (logger: Logger): express.ErrorRequestHandler =>
@@ -16,11 +15,7 @@ const makeErrorRequestHandler =
 
 type Application = express.Application;
 
-const makeApplication = (
-  config: Config,
-  metricService: MetricService,
-  logger: Logger
-): Application => {
+const makeApplication = (config: Config, logger: Logger): Application => {
   const application = express();
 
   // Enable helmet
@@ -32,7 +27,7 @@ const makeApplication = (
   const serverConfig = config.server;
 
   // Register routers
-  application.use(metricRoutes(metricService));
+  // application.use(component.makeRouter(service0, service1, ...));
 
   // Register error handler
   application.use(makeErrorRequestHandler(logger));
