@@ -17,7 +17,7 @@ paths:
         can be used as health check.
       responses:
         200:
-          description: "Return the status of the service"
+          description: "Return the information of the service"
           schema:
             $ref: '#/definitions/GetInfo'
         500:
