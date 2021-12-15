@@ -1,5 +1,5 @@
 {
-  "name": "openid-provider",
+  "name": "io-openid-provider",
   "version": "0.0.1",
   "description": "OpenID Provider service",
   "scripts": {
