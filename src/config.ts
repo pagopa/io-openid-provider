@@ -1,10 +1,9 @@
 import * as e from "fp-ts/Either";
 import { pipe } from "fp-ts/function";
 import * as d from "io-ts/Decoder";
-// TODO: Remove this dependency
-import { LogConfig } from "@pagopa/cloudgaap-commons-ts/lib/logger";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
+import * as logger from "./logger";
 
 interface ServerConfig {
   readonly hostname: string;
@@ -18,7 +17,7 @@ interface Info {
 
 interface Config {
   readonly server: ServerConfig;
-  readonly logger: LogConfig;
+  readonly logger: logger.LogConfig;
   readonly info: Info;
 }
 
@@ -37,7 +36,16 @@ const intFromUnknownDecoder = d.compose(intFromStringDecoder)(d.string);
 
 const envDecoder = d.struct({
   APPLICATION_NAME: d.string,
-  LOG_LEVEL: d.literal("debug", "trace", "error", "info", "fatal", "warn"),
+  LOG_LEVEL: d.literal(
+    "emerg",
+    "alert",
+    "crit",
+    "error",
+    "warning",
+    "notice",
+    "info",
+    "debug"
+  ),
   SERVER_HOSTNAME: d.string,
   SERVER_PORT: intFromUnknownDecoder,
 });

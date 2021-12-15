@@ -1,9 +1,8 @@
 import express from "express";
 import helmet from "helmet";
-// TODO: Remove the @pagopa/cloudgaap-commons-ts dependency
-import { Logger } from "@pagopa/cloudgaap-commons-ts/lib/logger";
 import * as info from "./info/router";
 import { Config } from "./config";
+import { Logger } from "./logger";
 
 const makeErrorRequestHandler =
   (logger: Logger): express.ErrorRequestHandler =>

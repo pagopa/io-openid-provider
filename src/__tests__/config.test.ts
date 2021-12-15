@@ -13,7 +13,7 @@ describe("Config", () => {
         SERVER_PORT: "n",
       };
 
-      const validLogLevel = `"debug" | "trace" | "error" | "info" | "fatal" | "warn"`;
+      const validLogLevel = `"emerg" | "alert" | "crit" | "error" | "warning" | "notice" | "info" | "debug"`;
 
       const expected = E.left(
         FS.concat(
@@ -52,13 +52,13 @@ describe("Config", () => {
       const confEnv = {
         SERVER_HOSTNAME: "hostname",
         SERVER_PORT: "1234",
-        LOG_LEVEL: "trace",
+        LOG_LEVEL: "info",
         APPLICATION_NAME: "application",
       };
 
       const expected = E.right({
         info: { name: packageJson.name, version: packageJson.version },
-        logger: { logLevel: "trace", logName: "application" },
+        logger: { logLevel: "info", logName: "application" },
         server: { hostname: "hostname", port: 1234 },
       });
       const actual = C.parseConfig(confEnv);
