@@ -1,15 +1,16 @@
 import winston from "winston";
 
 type Logger = winston.Logger;
+// TODO: This levels are taken from winston.config.NpmConfigSetLevels,
+// so use something like keyof winston.config.NpmConfigSetLevels
 type LogLevel =
-  | "emerg"
-  | "alert"
-  | "crit"
   | "error"
-  | "warning"
-  | "notice"
+  | "warn"
   | "info"
-  | "debug";
+  | "http"
+  | "verbose"
+  | "debug"
+  | "silly";
 
 interface LogConfig {
   readonly logLevel: LogLevel;

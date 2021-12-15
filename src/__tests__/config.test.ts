@@ -13,7 +13,7 @@ describe("Config", () => {
         SERVER_PORT: "n",
       };
 
-      const validLogLevel = `"emerg" | "alert" | "crit" | "error" | "warning" | "notice" | "info" | "debug"`;
+      const validLogLevel = `"error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly"`;
 
       const expected = E.left(
         FS.concat(

@@ -37,14 +37,13 @@ const intFromUnknownDecoder = d.compose(intFromStringDecoder)(d.string);
 const envDecoder = d.struct({
   APPLICATION_NAME: d.string,
   LOG_LEVEL: d.literal(
-    "emerg",
-    "alert",
-    "crit",
     "error",
-    "warning",
-    "notice",
+    "warn",
     "info",
-    "debug"
+    "http",
+    "verbose",
+    "debug",
+    "silly"
   ),
   SERVER_HOSTNAME: d.string,
   SERVER_PORT: intFromUnknownDecoder,
