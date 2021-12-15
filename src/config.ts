@@ -1,5 +1,4 @@
 import * as e from "fp-ts/Either";
-import { pipe } from "fp-ts/function";
 import * as d from "io-ts/Decoder";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
@@ -7,7 +6,7 @@ import * as logger from "./logger";
 
 interface ServerConfig {
   readonly hostname: string;
-  readonly port: number;
+  readonly port: string;
 }
 
 interface Info {
@@ -23,17 +22,6 @@ interface Config {
 
 type ConfEnv = NodeJS.ProcessEnv;
 
-// Decode an integer from a string
-const intFromStringDecoder: d.Decoder<string, number> = {
-  decode: (s) =>
-    pipe(Number.parseInt(s, 10), (n) =>
-      Number.isNaN(n) ? d.failure(n, "Not a number") : d.success(n)
-    ),
-};
-
-// Decode an integer from an unknown value
-const intFromUnknownDecoder = d.compose(intFromStringDecoder)(d.string);
-
 const envDecoder = d.struct({
   APPLICATION_NAME: d.string,
   LOG_LEVEL: d.literal(
@@ -46,7 +34,7 @@ const envDecoder = d.struct({
     "silly"
   ),
   SERVER_HOSTNAME: d.string,
-  SERVER_PORT: intFromUnknownDecoder,
+  SERVER_PORT: d.string,
 });
 type EnvStruct = d.TypeOf<typeof envDecoder>;
 

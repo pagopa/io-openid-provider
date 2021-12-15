@@ -17,27 +17,18 @@ describe("Config", () => {
 
       const expected = E.left(
         FS.concat(
-          FS.concat(
-            FS.of(
-              DE.key(
-                "LOG_LEVEL",
-                DE.required,
-                FS.of(DE.leaf(undefined, validLogLevel))
-              )
-            ),
-            FS.of(
-              DE.key(
-                "SERVER_HOSTNAME",
-                DE.required,
-                FS.of(DE.leaf(undefined, "string"))
-              )
+          FS.of(
+            DE.key(
+              "LOG_LEVEL",
+              DE.required,
+              FS.of(DE.leaf(undefined, validLogLevel))
             )
           ),
           FS.of(
             DE.key(
-              "SERVER_PORT",
+              "SERVER_HOSTNAME",
               DE.required,
-              FS.of(DE.leaf(NaN, "Not a number"))
+              FS.of(DE.leaf(undefined, "string"))
             )
           )
         )
@@ -59,7 +50,7 @@ describe("Config", () => {
       const expected = E.right({
         info: { name: packageJson.name, version: packageJson.version },
         logger: { logLevel: "info", logName: "application" },
-        server: { hostname: "hostname", port: 1234 },
+        server: { hostname: "hostname", port: "1234" },
       });
       const actual = C.parseConfig(confEnv);
       expect(actual).toStrictEqual(expected);
