@@ -3,7 +3,7 @@ info:
   title: OpenID Provider
   description: OpenID Provider service
   version: 0.0.1
-host: api.openid-provider.pagopa.it
+host: api.openid-provider.io.italia.it
 
 schemes:
   - https
