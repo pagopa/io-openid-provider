@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "OpenID Provider service",
   "scripts": {
+    "validate": "swagger-cli validate ./openapi/index.yaml",
     "generate": "npm-run-all generate:*",
     "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --no-strict --out-dir ./src/generated/definitions",
     "start": "tsc && node -r dotenv/config dist/src/main.js dotenv_config_path=.env.default",
@@ -39,6 +40,7 @@
     "prettier": "^2.4.1",
     "shx": "^0.3.3",
     "supertest": "^6.1.6",
+    "swagger-cli": "^4.0.4",
     "ts-jest": "^27.0.5",
     "typescript": "^4.4.3"
   }
