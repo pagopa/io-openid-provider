@@ -34,5 +34,13 @@ To lint the code:
 yarn run lint
 ```
 
-## TODOs
-1. Remove the @pagopa/cloudgaap-commons-ts dependency
+## Environment variables
+
+Those are all Environment variables needed by the application:
+
+| Variable name    | Description                                                | type   |
+|------------------|------------------------------------------------------------|--------|
+| SERVER_HOSTNAME  | The HOSTNAME the Express server is listening to            | string |
+| SERVER_PORT      | The HTTP port the Express server is listening to           | int    |
+| LOG_LEVEL        | The level of the logger                                    | string |
+| APPLICATION_NAME | The name of the application, used as prefix for the logger | string |
