@@ -24,4 +24,4 @@ ENV APPLICATION_NAME=openid-provider
 RUN yarn --frozen-lockfile && yarn cache clean --force
 
 EXPOSE 3000
-CMD ["pm2-runtime", "/app/main.js"]
+CMD ["pm2-runtime", "/app/src/main.js"]
