@@ -44,13 +44,3 @@ definitions:
       - version
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
-
-# responses:
-#   200GetInfoResponse:
-#     description: "Return the status of the service"
-#     schema:
-#       $ref: '#/definitions/GetInfo'
-#   500ProblemJsonResponse:
-#     description: "An error occurred"
-#     schema:
-#       $ref: '#/definitions/ProblemJson'
