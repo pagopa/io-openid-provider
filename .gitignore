@@ -366,3 +366,7 @@ $RECYCLE.BIN/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,intellij+all,node,macos,emacs,linux,windows,yarn
+
+### custom ###
+# ignore the stuff generated from open-api definition
+src/generated
