@@ -42,7 +42,7 @@ const makeLogger = (logConfig: LogConfig): Logger =>
  *
  * @param logger the logger from which create a sub logger.
  * @param componentName the name of the sub logger.
- * @return a bunyan logger.
+ * @return a Winston logger.
  */
 const makeSubLogger = (logger: Logger, componentName: string): Logger =>
   logger.child({ component: componentName });
