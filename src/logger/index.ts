@@ -21,7 +21,7 @@ interface LogConfig {
  * Create a Winston logger given a configuration.
  *
  * @param logConfig the configuration to use to create a new logger.
- * @return a bunyan logger.
+ * @return a Winston logger.
  */
 const makeLogger = (logConfig: LogConfig): Logger =>
   winston.createLogger({
