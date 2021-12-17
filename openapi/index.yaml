@@ -38,7 +38,7 @@ definitions:
         type: string
         minLength: 1
         description: "The version of the service"
-        example: "name"
+        example: "1.0.0"
     required:
       - name
       - version
