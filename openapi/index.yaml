@@ -8,6 +8,27 @@ host: api.openid-provider.io.italia.it
 schemes:
   - https
 paths:
+  /api/oauth/authorize:
+    get:
+      operationId: authorize
+      summary: Initialize an OAuth 2.0 flow
+      description: >-
+        Initializes an OAuth 2.0 flow using a response_type.
+        See RFC 6749 (https://tools.ietf.org/html/rfc6749) for more details.
+      parameters:
+        - $ref: '#/parameters/queryResponseType'
+        - $ref: '#/parameters/queryClientId'
+        - $ref: '#/parameters/queryResponseMode'
+        - $ref: '#/parameters/queryRedirectUri'
+        - $ref: '#/parameters/queryScope'
+        - $ref: '#/parameters/queryState'
+        - $ref: '#/parameters/queryNonce'
+      responses:
+        200:
+          $ref: '#/responses/200AuthenticationResponse'
+        302:
+          $ref: '#/responses/302AuthenticationResponse'
+
   /api/info:
     get:
       operationId: "getInfo"
@@ -24,6 +45,71 @@ paths:
           description: "An error occurred"
           schema:
             $ref: '#/definitions/ProblemJson'
+
+parameters:
+  queryResponseType:
+    name: response_type
+    in: query
+    required: true
+    description: >-
+      MUST be one of the listed available values.
+      Any response_type other than 'code' or 'token' is only supported in conjunction with scope=openid.
+      As per the OAuth specification: 'code' is used for authorization code grant type flow, 'token' is used for implicit grant type flow, 'token id_token' is an extension provided by OpenID Connect, and 'code id_token', 'id_token', and 'none' are extensions provided by OpenID Connect Multiple Response Types.
+    type: string
+    enum:
+        # - code
+        # - token
+        # - token id_token
+        # - code id_token
+        - id_token
+        # - code token
+        # - code id_token token
+        # - none
+  queryClientId:
+    name: client_id
+    in: query
+    required: true
+    description: >-
+      This is the 'client_id' of the requesting client. Maximum 255 characters.
+    type: string
+  queryRedirectUri:
+    name: redirect_uri
+    in: query
+    required: false
+    description: >-
+      The 'redirect_uri' that was registered for this client. It is required if multiple redirect_uri's have been registered for this client. If the scope contains openid, this field becomes MANDATORY.
+    type: string
+  queryScope:
+    name: scope
+    in: query
+    required: false
+    description: >-
+      Only SCOPE values that were registered for this client will be granted. If only non-matching SCOPE values are requested, the request will fail.
+    type: string
+  queryNonce:
+    name: nonce
+    in: query
+    required: false
+    description: >-
+      This is required for response_type 'token id_token'.  Typically, in an OpenID authorization scheme, the nonce represents a cryptographically strong random  string that is used to prevent intercepted responses from being reused.
+    type: string
+  queryState:
+    name: state
+    in: query
+    required: false
+    description: >-
+      Value opaque to the server, used by the client to track its session. It will be returned as received.
+    type: string
+  queryResponseMode:
+    name: response_mode
+    in: query
+    required: false
+    description: >-
+      Specify the method of returning the authorization response. As per the OpenID specification, use of this parameter is NOT RECOMMENDED if you are using the same response mode as the default response mode for the given response type. It MUST be one of the listed values in order to be accepted: 'fragment', 'form_post'.
+    type: string
+    enum:
+        - fragment
+        - form_post
 
 definitions:
   GetInfo:
@@ -44,3 +130,50 @@ definitions:
       - version
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
+
+responses:
+  200AuthenticationResponse:
+    description: >-
+      TODO: Description for the auto-submit post
+    headers:
+      Pragma:
+          description: Pragma directive
+          type: string
+          default: no-cache
+      Cache-Control:
+          description: Cache control directive
+          type: string
+          default: no-store
+      Content-Type:
+          description: Cache control directive
+          type: string
+          default: text/html;charset=UTF-8
+    schema:
+      type:
+        string
+  302AuthenticationResponse:
+      description: >-
+        Will contain either: A success response including the redirect location header to the server that handles the authentication.  The redirect parameter 'sessionData's structure looks like the model schema shown OR 'invalid mag-identifier' OR 'invalid scope' OR 'unsupported response type' OR 'unauthorized client'. The non-successful conditions may include redirect query params as follows: 'error', string with default value:  invalid_request 'error_description', string with description of error 'state', string with no default value.  It is opaque to the server and returned as received. 'x-ca-err', string with default 3000108
+      headers:
+          location:
+              description: >-
+                These parameters are returned from the Authorization Endpoint:
+                  access_token
+                      OAuth 2.0 Access Token. This is returned unless the response_type value used is id_token.
+                  token_type
+                      OAuth 2.0 Token Type value. The value MUST be Bearer or another token_type value that the Client has negotiated with the Authorization Server. Clients implementing this profile MUST support the OAuth 2.0 Bearer Token Usage [RFC6750] specification. This profile only describes the use of bearer tokens. This is returned in the same cases as access_token is.
+                  id_token
+                      REQUIRED. ID Token.
+                  state
+                      OAuth 2.0 state value. REQUIRED if the state parameter is present in the Authorization Request. Clients MUST verify that the state value is equal to the value of state parameter in the Authorization Request.
+                  expires_in
+                      OPTIONAL. Expiration time of the Access Token in seconds since the response was generated.
+              type: string
+          Pragma:
+              description: Pragma directive
+              type: string
+              default: no-cache
+          Cache-Control:
+              description: Cache control directive
+              type: string
+              default: no-store
