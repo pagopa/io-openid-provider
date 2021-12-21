@@ -9,9 +9,10 @@ describe("getInfoEndpointHandler", () => {
     const actual = await router.getInfoEndpointHandler(records.validConfig)();
     const expected = responses.ResponseSuccessJson(records.validConfig.info);
 
-    // TODO: Find a better way to define this assert, e.g. with one expect
-    expect(actual.kind).toStrictEqual(expected.kind);
-    expect(actual).toMatchObject({ value: expected.value });
+    expect(actual).toMatchObject({
+      value: expected.value,
+      kind: expected.kind,
+    });
   });
 });
 
