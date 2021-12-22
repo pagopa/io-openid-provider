@@ -7,8 +7,9 @@ host: api.openid-provider.io.italia.it
 
 schemes:
   - https
+
 paths:
-  /api/oauth/authorize:
+  /oauth/authorize:
     get:
       operationId: authorize
       summary: Initialize an OAuth 2.0 flow
@@ -29,7 +30,19 @@ paths:
         302:
           $ref: '#/responses/302AuthenticationResponse'
 
-  /api/info:
+  /.well-known/openid-configuration:
+    get:
+      operationId: openidConfiguration
+      summary: OpenID Connect Discovery endpoint
+      description: >-
+        This endpoint follows the specification defined at http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata. It provides a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+      responses:
+        200:
+          $ref: '#/responses/200OpenIDDiscoveryResponse'
+        500:
+          $ref: '#/responses/500InternalServerError'
+
+  /info:
     get:
       operationId: "getInfo"
       summary: "Get info of the service"
@@ -134,6 +147,135 @@ definitions:
     required:
       - name
       - version
+  OpenIDDiscovery:
+    description: >-
+      The OpenID configuration document as defined by the specification: http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+    required:
+        - authorization_endpoint
+        - id_token_signing_alg_values_supported
+        - issuer
+        - jwks_uri
+        - response_types_supported
+        - subject_types_supported
+        - token_endpoint
+    type: object
+    properties:
+        userinfo_endpoint:
+          type: string
+          example: 'https://example.com:8443/openid/connect/v1/userinfo'
+          description: URL of the user info endpoint
+        jwks_uri:
+          type: string
+          example: 'https://example.com/openid/connect/jwks.json'
+          description: URL of JSON Web Key Set document
+        scopes_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - openid
+          description: list of the OAuth 2.0 scope values that this server supports
+        subject_types_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - pairwise
+          description: list of the Subject Identifier types that this OP supports
+        token_endpoint:
+          type: string
+          example: 'https://example.com:8443/auth/oauth/v2/token'
+          description: URL of the OAuth 2.0 token endpoint
+        id_token_signing_alg_values_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - RS256
+              - HS256
+          description: list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
+        response_types_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - code
+              - token_id_token
+          description: ist of the OAuth 2.0 response_type values that this OP supports
+        claims_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - sub
+              - iss
+              - auth_time
+              - acr
+          description: list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for
+        authorization_endpoint:
+          type: string
+          example: 'https://example.com:8443/auth/oauth/v2/authorize'
+          description: URL of the OAuth 2.0 authorization endpoint
+        issuer:
+          type: string
+          example: 'https://example.com'
+          description: "the identifier of the token's issuer. This is identical to the 'iss' Claim value in ID Tokens"
+        grant_types_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - authorization_code
+              - implicit
+          description: list of the OAuth 2.0 Grant Type values that this OP supports
+        acr_values_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - 'urn:mace:incommon:iap:silver'
+          description: list of the Authentication Context Class References that this OP supports
+        token_endpoint_auth_methods_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - client_secret_basic
+          description: list of Client Authentication methods supported by this Token Endpoint
+        token_endpoint_auth_signing_alg_values_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - RS256
+          description: list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods. Servers SHOULD support RS256. The value none MUST NOT be used.
+        display_values_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - page
+              - popup
+          description: list of the display parameter values that the OpenID Provider supports
+        claim_types_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - normal
+          description: list of the Claim Types that the OpenID Provider supports
+        service_documentation:
+          type: string
+          example: 'http://masdemo12.dev.ca.com:8443/openid/connect/v1/service_documentation.html'
+          description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
+        ui_locales_supported:
+          items:
+              type: string
+          type: array
+          example:
+              - en-US
+              - en-GB
+          description: Languages and scripts supported for the user interface
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
 
@@ -183,3 +325,20 @@ responses:
               description: Cache control directive
               type: string
               default: no-store
+  200OpenIDDiscoveryResponse:
+    description: OpenID Discovery Configuration
+    schema:
+      $ref: '#/definitions/OpenIDDiscovery'
+  500InternalServerError:
+    description: Unknown error
+    headers:
+      Pragma:
+        description: Pragma browser directive
+        type: string
+        default: no-cache
+      Cache-Control:
+        description: Cache-Control browser directive
+        type: string
+        default: no-store
+    schema:
+      $ref: '#/definitions/ProblemJson'
