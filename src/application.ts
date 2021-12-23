@@ -1,6 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import * as info from "./info/router";
+import * as oidcprovider from "./oidcprovider/router";
 import { Config } from "./config";
 import { Logger } from "./logger";
 
@@ -28,6 +29,7 @@ const makeApplication = (config: Config, logger: Logger): Application => {
 
   // Register routers
   // application.use(component.makeRouter(service0, service1, ...));
+  application.use(oidcprovider.makeRouter(config));
   application.use(info.makeRouter(config));
 
   // Register error handler
