@@ -3,20 +3,12 @@
 /* eslint-disable prettier/prettier */
 // eslint-disable sonarjs/prefer-immediate-return
 import express from "express";
-import {
-  Configuration,
-  Provider,
-  Account,
-  KoaContextWithOIDC,
-} from "oidc-provider";
+import * as oidc from "oidc-provider";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { Config } from "src/config";
 
-const fakeFindAccount = (
-  _ctx: KoaContextWithOIDC,
-  id: string
-): Promise<Account> =>
+const fakeFindAccount: oidc.FindAccount = (_ctx, id): Promise<oidc.Account> =>
   pipe(
     TE.of({
       accountId: id,
@@ -25,33 +17,42 @@ const fakeFindAccount = (
     TE.toUnion
   )();
 
-const makeRouter = (_config: Config): express.Router => {
-  const configuration: Configuration = {
-    clients: [
-      {
-        client_id: "foo",
-        client_secret: "bar",
-        grant_types: ["none"],
-        redirect_uris: ["http://client.example.org/cb"],
-      },
-    ],
-    features: {
-      rpInitiatedLogout: {
-        enabled: false,
-      },
-      userinfo: {
-        enabled: false,
-      },
+const makeProviderConfig = (_config: Config): oidc.Configuration => ({
+  clients: [
+    {
+      client_id: "foo",
+      client_secret: "bar",
+      grant_types: ["implicit"],
+      redirect_uris: ["https://client.example.org/cb"],
+      response_types: ["id_token"],
+      token_endpoint_auth_method: "none",
     },
-    findAccount: fakeFindAccount,
-    responseTypes: ["id_token"],
-    routes: {
-      authorization: "/oauth/authorize",
+  ],
+  features: {
+    rpInitiatedLogout: {
+      enabled: false,
     },
-    scopes: ["openid"],
-    tokenEndpointAuthMethods: ["none"],
-  };
-  const provider = new Provider("http://localhost:3000", configuration);
+    userinfo: {
+      enabled: false,
+    },
+  },
+  findAccount: fakeFindAccount,
+  responseTypes: ["id_token"],
+  routes: {
+    authorization: "/oauth/authorize",
+  },
+  scopes: ["openid"],
+  tokenEndpointAuthMethods: ["none"],
+});
+
+const makeProvider = (config: Config): oidc.Provider =>
+  new oidc.Provider(
+    `http://${config.server.hostname}:${config.server.port}`,
+    makeProviderConfig(config)
+  );
+
+const makeRouter = (config: Config): express.Router => {
+  const provider = makeProvider(config);
 
   const router = express.Router();
 
