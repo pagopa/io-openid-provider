@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable extra-rules/no-commented-out-code */
-/* eslint-disable prettier/prettier */
-// eslint-disable sonarjs/prefer-immediate-return
 import express from "express";
 import * as oidc from "oidc-provider";
 import { pipe } from "fp-ts/lib/function";
@@ -47,7 +43,7 @@ const makeProviderConfig = (_config: Config): oidc.Configuration => ({
 
 const makeProvider = (config: Config): oidc.Provider =>
   new oidc.Provider(
-    `http://${config.server.hostname}:${config.server.port}`,
+    `https://${config.server.hostname}:${config.server.port}`,
     makeProviderConfig(config)
   );
 
