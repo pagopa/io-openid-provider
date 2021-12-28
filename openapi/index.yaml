@@ -282,7 +282,7 @@ definitions:
 responses:
   200AuthenticationResponse:
     description: >-
-      This response is returned if the choosen response_mode was from_post. In this case the authorization Response parameters are encoded as HTML form values that are auto-submitted in the User Agent, and thus are transmitted via the HTTP POST method to the Client, with the result parameters being encoded in the body using the application/x-www-form-urlencoded format.
+      This response is returned if the chosen response_mode was form_post. In this case the authorization Response parameters are encoded as HTML form values that are auto-submitted in the User Agent, and thus are transmitted via the HTTP POST method to the Client, with the result parameters being encoded in the body using the application/x-www-form-urlencoded format.
     headers:
       Pragma:
           description: Pragma directive
