@@ -1,71 +1,48 @@
 import express from "express";
 import * as oidc from "oidc-provider";
-import * as cp from "cookie-parser";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Config } from "src/config";
+import * as u from "src/userinfo";
 
-const Authorized = t.type({
-  login: t.type({
-    accountId: t.string,
-  }),
-});
-type Authorized = t.TypeOf<typeof Authorized>;
-
-const Unauthorized = t.type({
-  // an error field used as error code indicating a failure during the interaction
-  // TODO: Improve type
-  error: t.string,
-
-  // an optional description for this error
-  // TODO: Improve type
-  error_description: t.string,
-});
-type Unauthorized = t.TypeOf<typeof Unauthorized>;
-
-// TODO: Take the correct error (see the RFC)
-const unauthorizedError: Unauthorized = {
-  error: "unauthorized",
-  error_description: "not authorized",
-};
-
-// TODO: Customize to call IO backend
-const validateFederationToken = (
-  token: string
-): TE.TaskEither<Unauthorized, Authorized> =>
+// TODO: Move to environment
+const cookieKey = "X-IO-Federation-Token";
+const extractFederationToken = (
+  req: express.Request
+): E.Either<oidc.InteractionResults, string> =>
   pipe(
-    TE.of(token),
-    TE.filterOrElse(
-      (_) => _ === "123",
-      (_) => unauthorizedError
-    ),
-    TE.map((_) => ({
-      login: {
-        accountId: "ididididid",
-      },
+    E.tryCatch(() => req.cookies[cookieKey], String),
+    E.chainW(t.string.decode),
+    E.mapLeft((_) => ({
+      error: "unauthorized",
     }))
   );
 
-// TODO: Move to environment
-const cookieKey = "X-Federation-Token";
-const extractFederationToken = (req: express.Request) =>
-  pipe(
-    E.tryCatch(() => req.cookies[cookieKey], String),
-    E.mapLeft((_errorMessage) => unauthorizedError),
-    E.chain(
-      flow(
-        t.string.decode,
-        E.mapLeft((_errors) => unauthorizedError)
-      )
-    )
-  );
+const userInfoToInteractionResults = (
+  userInfo: u.UserInfo
+): oidc.InteractionResults => ({
+  login: {
+    accountId: userInfo.id,
+  },
+});
 
-// related to https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#interactionspolicy
+const userInfoClientErrorToInteractionResults = (
+  error: u.UserInfoClientError
+): oidc.InteractionResults => ({
+  error: error.errorType,
+  error_description: "Not authorized",
+});
+
+// eslint-disable-next-line extra-rules/no-commented-out-code
 // TODO: Refactor
 const interactionHandler =
-  (provider: oidc.Provider): express.Handler =>
+  (
+    provider: oidc.Provider,
+    userInfoClient: u.UserInfoClient
+  ): express.Handler =>
   (req, res, next) =>
     pipe(
       TE.tryCatch(() => provider.interactionDetails(req, res), String),
@@ -74,12 +51,19 @@ const interactionHandler =
         switch (detail.prompt.name) {
           case "login":
             return pipe(
+              // extract the token from request
               TE.fromEither(extractFederationToken(req)),
-              TE.chain((token) => validateFederationToken(token)),
-              TE.fold(
-                (left) => () => provider.interactionFinished(req, res, left),
-                (right) => () => provider.interactionFinished(req, res, right)
-              )
+              // find the user given the token
+              TE.chain(
+                flow(
+                  userInfoClient.findUserByFederationToken,
+                  TE.mapLeft(userInfoClientErrorToInteractionResults)
+                )
+              ),
+              TE.map(userInfoToInteractionResults),
+              TE.toUnion,
+              // resolve the interaction with the given result
+              T.map((result) => provider.interactionFinished(req, res, result))
             )();
           default:
             return next();
@@ -87,59 +71,72 @@ const interactionHandler =
       })
     )();
 
-const fakeFindAccount: oidc.FindAccount = (_ctx, id): Promise<oidc.Account> =>
-  pipe(
-    TE.of({
-      accountId: id,
-      claims: (_use: string, _scope: string) => ({ sub: id }),
-    }),
-    TE.toUnion
-  )();
-
-const makeProviderConfig = (_config: Config): oidc.Configuration => ({
-  clients: [
-    {
-      client_id: "foo",
-      client_secret: "bar",
-      grant_types: ["implicit"],
-      redirect_uris: ["https://client.example.org/cb"],
-      response_types: ["id_token"],
-      token_endpoint_auth_method: "none",
-    },
-  ],
-  features: {
-    devInteractions: {
-      enabled: true,
-    },
-    rpInitiatedLogout: {
-      enabled: false,
-    },
-    userinfo: {
-      enabled: false,
-    },
-  },
-  findAccount: fakeFindAccount,
-  responseTypes: ["id_token"],
-  routes: {
-    authorization: "/oauth/authorize",
-  },
-  scopes: ["openid"],
-  tokenEndpointAuthMethods: ["none"],
+const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
+  accountId: userInfo.id,
+  claims: (_use: string, _scope: string) => ({
+    sub: userInfo.id,
+  }),
 });
 
-const makeProvider = (config: Config): oidc.Provider =>
-  new oidc.Provider(
-    `https://${config.server.hostname}:${config.server.port}`,
-    makeProviderConfig(config)
-  );
+const findAccountAdapter =
+  (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
+  (_ctx, id) =>
+    pipe(
+      userInfoClient.findUserByFederationToken(id),
+      TE.map(userInfoToAccount),
+      TE.mapLeft((_) => undefined),
+      TE.toUnion
+    )();
 
-const makeRouter = (config: Config): express.Router => {
-  const provider = makeProvider(config);
+const makeProvider = (
+  config: Config,
+  userInfoClient: u.UserInfoClient
+): oidc.Provider => {
+  const providerConfig: oidc.Configuration = {
+    clients: [
+      {
+        client_id: "foo",
+        client_secret: "bar",
+        grant_types: ["implicit"],
+        redirect_uris: ["https://client.example.org/cb"],
+        response_types: ["id_token"],
+        token_endpoint_auth_method: "none",
+      },
+    ],
+    features: {
+      devInteractions: {
+        enabled: true,
+      },
+      rpInitiatedLogout: {
+        enabled: false,
+      },
+      userinfo: {
+        enabled: false,
+      },
+    },
+    findAccount: findAccountAdapter(userInfoClient),
+    responseTypes: ["id_token"],
+    routes: {
+      authorization: "/oauth/authorize",
+    },
+    scopes: ["openid"],
+    tokenEndpointAuthMethods: ["none"],
+  };
+  return new oidc.Provider(
+    `https://${config.server.hostname}:${config.server.port}`,
+    providerConfig
+  );
+};
+
+const makeRouter = (
+  config: Config,
+  userInfoClient: u.UserInfoClient
+): express.Router => {
+  const provider = makeProvider(config, userInfoClient);
 
   const router = express.Router();
 
-  router.use(cp.default());
-  router.get("/interaction/:uid", interactionHandler(provider));
+  router.get("/interaction/:uid", interactionHandler(provider, userInfoClient));
 
   router.use("/", provider.callback());
 
