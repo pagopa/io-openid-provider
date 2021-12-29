@@ -1,8 +1,7 @@
 import express from "express";
 import * as oidc from "oidc-provider";
+import * as cp from "cookie-parser";
 import * as t from "io-ts";
-import * as O from "fp-ts/Option";
-import * as A from "fp-ts/Array";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -26,48 +25,41 @@ const Unauthorized = t.type({
 });
 type Unauthorized = t.TypeOf<typeof Unauthorized>;
 
-// TODO: Customize to call IO backend
-const validateFederationToken = (
-  token: string
-): TE.TaskEither<Unauthorized, Authorized> =>
-  pipe(
-    token,
-    TE.fromPredicate(
-      (_) => _ === "123",
-      (_) => "error"
-    ),
-    TE.map((_) => ({
-      login: {
-        accountId: "ididididid",
-      },
-    })),
-    TE.mapLeft((_) => ({
-      error: "no",
-      error_description: "error man",
-    }))
-  );
-
 // TODO: Take the correct error (see the RFC)
 const unauthorizedError: Unauthorized = {
   error: "unauthorized",
   error_description: "not authorized",
 };
 
+// TODO: Customize to call IO backend
+const validateFederationToken = (
+  token: string
+): TE.TaskEither<Unauthorized, Authorized> =>
+  pipe(
+    TE.of(token),
+    TE.filterOrElse(
+      (_) => _ === "123",
+      (_) => unauthorizedError
+    ),
+    TE.map((_) => ({
+      login: {
+        accountId: "ididididid",
+      },
+    }))
+  );
+
 // TODO: Move to environment
 const cookieKey = "X-Federation-Token";
 const extractFederationToken = (req: express.Request) =>
   pipe(
-    req.headers.cookie,
-    t.string.decode,
-    E.map((str) => str.split(";")),
-    E.map(
+    E.tryCatch(() => req.cookies[cookieKey], String),
+    E.mapLeft((_errorMessage) => unauthorizedError),
+    E.chain(
       flow(
-        A.findFirst((_) => _.trim().startsWith(cookieKey)),
-        O.map((_) => _.replace(`${cookieKey}=`, "").trim())
+        t.string.decode,
+        E.mapLeft((_errors) => unauthorizedError)
       )
-    ),
-    E.chainW(E.fromOption(() => "Not found")),
-    E.mapLeft((_) => unauthorizedError)
+    )
   );
 
 // related to https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#interactionspolicy
@@ -146,6 +138,7 @@ const makeRouter = (config: Config): express.Router => {
 
   const router = express.Router();
 
+  router.use(cp.default());
   router.get("/interaction/:uid", interactionHandler(provider));
 
   router.use("/", provider.callback());
