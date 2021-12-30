@@ -14,8 +14,8 @@ const extractFederationToken = (
   req: express.Request
 ): E.Either<oidc.InteractionResults, string> =>
   pipe(
-    E.tryCatch(() => req.cookies[cookieKey], String),
-    E.chainW(t.string.decode),
+    req.cookies[cookieKey],
+    NonEmptyString.decode,
     E.mapLeft((_) => ({
       error: "unauthorized",
     }))
