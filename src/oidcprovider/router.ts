@@ -28,6 +28,35 @@ const userInfoClientErrorToInteractionResults = (
   error_description: "Not authorized",
 });
 
+const interactionLogic = (
+  userInfoClient: u.UserInfoClient,
+  req: express.Request,
+  detail: oidc.PromptDetail
+): T.Task<O.Option<oidc.InteractionResults>> =>
+  pipe(
+    O.of(detail),
+    O.filter((_) => _.name === "login"),
+    O.fold(
+      () => T.of(O.none),
+      (_) =>
+        pipe(
+          // extract the token from request
+          extractIOFederationToken(req),
+          TE.fromOption(() => ({ error: "unauthorized" })),
+          // find the user given the token
+          TE.chain(
+            flow(
+              userInfoClient.findUserByFederationToken,
+              TE.mapLeft(userInfoClientErrorToInteractionResults)
+            )
+          ),
+          TE.map(userInfoToInteractionResults),
+          TE.toUnion,
+          T.map((_) => O.some(_))
+        )
+    )
+  );
+
 // eslint-disable-next-line extra-rules/no-commented-out-code
 // TODO: Refactor
 const interactionHandler =
@@ -37,31 +66,16 @@ const interactionHandler =
   ): express.Handler =>
   (req, res, next) =>
     pipe(
-      TE.tryCatch(() => provider.interactionDetails(req, res), String),
-      TE.map((detail) => {
-        // eslint-disable-next-line sonarjs/no-small-switch
-        switch (detail.prompt.name) {
-          case "login":
-            return pipe(
-              // extract the token from request
-              extractIOFederationToken(req),
-              TE.fromOption(() => ({ error: "unauthorized" })),
-              // find the user given the token
-              TE.chain(
-                flow(
-                  userInfoClient.findUserByFederationToken,
-                  TE.mapLeft(userInfoClientErrorToInteractionResults)
-                )
-              ),
-              TE.map(userInfoToInteractionResults),
-              TE.toUnion,
-              // resolve the interaction with the given result
-              T.map((result) => provider.interactionFinished(req, res, result))
-            )();
-          default:
-            return next();
-        }
-      })
+      () => provider.interactionDetails(req, res),
+      T.chain((interaction) =>
+        interactionLogic(userInfoClient, req, interaction.prompt)
+      ),
+      T.chain(
+        O.fold(
+          () => () => Promise.reject(next()),
+          (result) => () => provider.interactionFinished(req, res, result)
+        )
+      )
     )();
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
@@ -136,4 +150,4 @@ const makeRouter = (
   return router;
 };
 
-export { makeRouter };
+export { makeRouter, extractIOFederationToken, interactionLogic };

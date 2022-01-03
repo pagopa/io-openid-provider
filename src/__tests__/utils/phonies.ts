@@ -7,7 +7,7 @@ import * as mock from "jest-mock-extended";
 
 const makeFakeApplication = () => {
   const config = records.validConfig;
-  const mockUserInfoClient = mock.mock<userinfo.UserInfoClient>();
+  const mockUserInfoClient = makeMockUserInfoClient();
   const log = logger.makeLogger(config.logger);
   // return an application with all mocked services
   return f.tuple(
@@ -16,4 +16,8 @@ const makeFakeApplication = () => {
   );
 };
 
-export { makeFakeApplication };
+const makeMockUserInfoClient = () => {
+  return mock.mock<userinfo.UserInfoClient>();
+}
+
+export { makeFakeApplication, makeMockUserInfoClient };
