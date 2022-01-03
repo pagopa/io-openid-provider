@@ -1,8 +1,7 @@
 import * as f from "fp-ts/function";
-import * as records from "../../__tests__/utils/records";
+import * as records from "./records";
 import * as application from "../../application";
 import * as userinfo from "../../userinfo";
-// import * as constuserinfo from '../../userinfo/fakeuserinfoclient';
 import * as logger from "../../logger";
 import * as mock from "jest-mock-extended";
 
