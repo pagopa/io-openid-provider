@@ -9,7 +9,8 @@
     "start": "tsc && node -r dotenv/config dist/src/main.js dotenv_config_path=.env.default",
     "prebuild": "shx rm -rf dist && yarn generate",
     "build": "tsc",
-    "test": "jest --coverage",
+    "test": "jest -i",
+    "test:coverage": "jest -i --coverage",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
     "prepare": "husky install"
@@ -34,6 +35,8 @@
     "@types/jest": "^27.0.2",
     "@types/oidc-provider": "^7.8.1",
     "@types/supertest": "^2.0.11",
+    "danger": "^4.0.2",
+    "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^4.0.0",
