@@ -10,7 +10,7 @@ import * as strings from "@pagopa/ts-commons/lib/strings";
 
 // TODO: Move to environment
 const cookieKey = "X-IO-Federation-Token";
-const extractFederationToken = (
+const extractIOFederationToken = (
   req: express.Request
 ): E.Either<oidc.InteractionResults, string> =>
   pipe(
@@ -52,7 +52,7 @@ const interactionHandler =
           case "login":
             return pipe(
               // extract the token from request
-              TE.fromEither(extractFederationToken(req)),
+              TE.fromEither(extractIOFederationToken(req)),
               // find the user given the token
               TE.chain(
                 flow(
