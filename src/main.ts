@@ -6,7 +6,7 @@ import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
 import * as c from "./config";
 import * as logger from "./logger";
-import * as userinfo from "./userinfo/fakeuserinfoclient";
+import * as userinfo from "./userinfo/constUserInfoClient";
 
 const start = (application: Application, log: logger.Logger): void => {
   log.info("Starting application");
