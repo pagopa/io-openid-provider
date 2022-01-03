@@ -1,6 +1,6 @@
 import express from "express";
 import * as oidc from "oidc-provider";
-import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -10,16 +10,8 @@ import * as strings from "@pagopa/ts-commons/lib/strings";
 
 // TODO: Move to environment
 const cookieKey = "X-IO-Federation-Token";
-const extractIOFederationToken = (
-  req: express.Request
-): E.Either<oidc.InteractionResults, string> =>
-  pipe(
-    req.cookies[cookieKey],
-    strings.NonEmptyString.decode,
-    E.mapLeft((_) => ({
-      error: "unauthorized",
-    }))
-  );
+const extractIOFederationToken = (req: express.Request): O.Option<string> =>
+  pipe(req.cookies[cookieKey], strings.NonEmptyString.decode, O.fromEither);
 
 const userInfoToInteractionResults = (
   userInfo: u.UserInfo
@@ -52,7 +44,8 @@ const interactionHandler =
           case "login":
             return pipe(
               // extract the token from request
-              TE.fromEither(extractIOFederationToken(req)),
+              extractIOFederationToken(req),
+              TE.fromOption(() => ({ error: "unauthorized" })),
               // find the user given the token
               TE.chain(
                 flow(
