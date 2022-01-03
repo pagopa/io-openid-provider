@@ -56,5 +56,5 @@ curl "http://localhost:3000/oauth/authorize" \
 -d scope=openid \
 -d state=af0ifjsldkj \
 -d nonce=n-0S6_WzA2Mj \
--b X-Federation-Token=12345
+-b X-IO-Federation-Token=12345
 ```
