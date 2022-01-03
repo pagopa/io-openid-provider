@@ -55,5 +55,6 @@ curl "http://localhost:3000/oauth/authorize" \
 -d redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb \
 -d scope=openid \
 -d state=af0ifjsldkj \
--d nonce=n-0S6_WzA2Mj
+-d nonce=n-0S6_WzA2Mj \
+-b X-IO-Federation-Token=12345
 ```

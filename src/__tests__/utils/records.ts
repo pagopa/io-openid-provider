@@ -1,5 +1,6 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
+import * as oidc from "oidc-provider";
 
 const validConfig: config.Config = {
   info: {
@@ -16,4 +17,15 @@ const validConfig: config.Config = {
   },
 };
 
-export { validConfig };
+const loginPromptDetail: oidc.PromptDetail = {
+  name: "login",
+  reasons: [],
+  details: {}
+}
+const consentPromptDetail: oidc.PromptDetail = {
+  name: "consent",
+  reasons: [],
+  details: {}
+}
+
+export { validConfig, loginPromptDetail, consentPromptDetail };
