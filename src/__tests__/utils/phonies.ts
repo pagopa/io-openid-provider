@@ -9,10 +9,11 @@ const makeFakeApplication = () => {
   const config = records.validConfig;
   const mockUserInfoClient = makeMockUserInfoClient();
   const log = logger.makeLogger(config.logger);
+  const dbInMemory = true;
   // return an application with all mocked services
   return f.tuple(
     mockUserInfoClient,
-    application.makeApplication(config, mockUserInfoClient, log)
+    application.makeApplication(config, mockUserInfoClient, log, dbInMemory)
   );
 };
 

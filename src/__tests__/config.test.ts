@@ -2,15 +2,16 @@ import * as C from "../config";
 import * as E from "fp-ts/Either";
 import * as DE from "io-ts/DecodeError";
 import * as FS from "io-ts/FreeSemigroup";
-import * as packageJson from "../../package.json";
+import * as records from "./utils/records";
 
 describe("Config", () => {
   // TODO integrate with property base test
   describe("given an invalid configuration", () => {
     it("should fail because hostname is missing", () => {
       const confEnv = {
-        APPLICATION_NAME: "application.test",
-        SERVER_PORT: "n",
+        ...records.validEnv,
+        LOG_LEVEL: undefined,
+        SERVER_HOSTNAME: undefined,
       };
 
       const validLogLevel = `"error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly"`;
@@ -40,19 +41,11 @@ describe("Config", () => {
 
   describe("given a valid configuration", () => {
     it("should return a configuration", () => {
-      const confEnv = {
-        SERVER_HOSTNAME: "hostname",
-        SERVER_PORT: "1234",
-        LOG_LEVEL: "info",
-        APPLICATION_NAME: "application",
-      };
+      const [validEnv, validConfig] =
+        records.validEnvAndConfig()
 
-      const expected = E.right({
-        info: { name: packageJson.name, version: packageJson.version },
-        logger: { logLevel: "info", logName: "application" },
-        server: { hostname: "hostname", port: "1234" },
-      });
-      const actual = C.parseConfig(confEnv);
+      const expected = E.right(validConfig);
+      const actual = C.parseConfig(validEnv);
       expect(actual).toStrictEqual(expected);
     });
   });

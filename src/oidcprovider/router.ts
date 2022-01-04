@@ -1,5 +1,6 @@
 import express from "express";
 import * as oidc from "oidc-provider";
+import * as b from "fp-ts/boolean";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
@@ -7,6 +8,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { Config } from "src/config";
 import * as u from "src/userinfo";
 import * as strings from "@pagopa/ts-commons/lib/strings";
+import * as redis from "./dal/redis";
 
 // TODO: Move to environment
 const cookieKey = "X-IO-Federation-Token";
@@ -97,9 +99,20 @@ const findAccountAdapter =
 
 const makeProvider = (
   config: Config,
-  userInfoClient: u.UserInfoClient
+  userInfoClient: u.UserInfoClient,
+  dbInMemory: boolean
 ): oidc.Provider => {
+  // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
+  function adapter(str: string) {
+    return redis.makeRedisAdapter(config.redis)(str);
+  }
+  const adapterConfig = b.fold(
+    () => ({ adapter }),
+    () => ({})
+  )(dbInMemory);
+
   const providerConfig: oidc.Configuration = {
+    ...adapterConfig,
     clients: [
       {
         client_id: "foo",
@@ -137,9 +150,10 @@ const makeProvider = (
 
 const makeRouter = (
   config: Config,
-  userInfoClient: u.UserInfoClient
+  userInfoClient: u.UserInfoClient,
+  dbInMemory: boolean
 ): express.Router => {
-  const provider = makeProvider(config, userInfoClient);
+  const provider = makeProvider(config, userInfoClient, dbInMemory);
 
   const router = express.Router();
 

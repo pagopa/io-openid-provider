@@ -2,6 +2,8 @@ import * as e from "fp-ts/Either";
 import * as d from "io-ts/Decoder";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
+import * as decoders from "./utils/decoders";
+import * as redis from "./oidcprovider/dal/redis";
 import * as logger from "./logger";
 
 interface ServerConfig {
@@ -18,6 +20,7 @@ interface Config {
   readonly server: ServerConfig;
   readonly logger: logger.LogConfig;
   readonly info: Info;
+  readonly redis: redis.RedisConfig;
 }
 
 type ConfEnv = NodeJS.ProcessEnv;
@@ -33,6 +36,8 @@ const envDecoder = d.struct({
     "debug",
     "silly"
   ),
+  REDIS_KEY_PREFIX: d.string,
+  REDIS_URL: d.compose(decoders.urlFromStringDecoder)(d.string),
   SERVER_HOSTNAME: d.string,
   SERVER_PORT: d.string,
 });
@@ -47,6 +52,10 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
   logger: {
     logLevel: str.LOG_LEVEL,
     logName: str.APPLICATION_NAME,
+  },
+  redis: {
+    keyPrefix: str.REDIS_KEY_PREFIX,
+    url: str.REDIS_URL,
   },
   server: {
     hostname: str.SERVER_HOSTNAME,
