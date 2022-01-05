@@ -19,6 +19,6 @@ const makeFakeApplication = () => {
 
 const makeMockUserInfoClient = () => {
   return mock.mock<userinfo.UserInfoClient>();
-}
+};
 
 export { makeFakeApplication, makeMockUserInfoClient };

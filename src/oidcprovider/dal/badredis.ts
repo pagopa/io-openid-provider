@@ -1,3 +1,5 @@
+// disable eslint in this file, this file is going to ve removed
+/* eslint-disable */
 import * as ioredis from "ioredis";
 import * as oidc from "oidc-provider";
 

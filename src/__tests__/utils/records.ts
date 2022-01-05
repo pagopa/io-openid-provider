@@ -19,8 +19,8 @@ const validConfig: config.Config = {
   },
   redis: {
     url: new URL("http://localhost:3791"),
-    keyPrefix: "oidc:"
-  }
+    keyPrefix: "oidc:",
+  },
 };
 
 const validEnv = {
@@ -32,19 +32,24 @@ const validEnv = {
   REDIS_KEY_PREFIX: "oidc:",
 };
 const validEnvAndConfig = () => {
-
-  return tuple(validEnv, validConfig)
-}
+  return tuple(validEnv, validConfig);
+};
 
 const loginPromptDetail: oidc.PromptDetail = {
   name: "login",
   reasons: [],
-  details: {}
+  details: {},
 };
 const consentPromptDetail: oidc.PromptDetail = {
   name: "consent",
   reasons: [],
-  details: {}
+  details: {},
 };
 
-export { validEnvAndConfig, validEnv, validConfig, loginPromptDetail, consentPromptDetail };
+export {
+  validEnvAndConfig,
+  validEnv,
+  validConfig,
+  loginPromptDetail,
+  consentPromptDetail,
+};

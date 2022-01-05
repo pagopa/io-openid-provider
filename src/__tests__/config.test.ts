@@ -41,8 +41,7 @@ describe("Config", () => {
 
   describe("given a valid configuration", () => {
     it("should return a configuration", () => {
-      const [validEnv, validConfig] =
-        records.validEnvAndConfig()
+      const [validEnv, validConfig] = records.validEnvAndConfig();
 
       const expected = E.right(validConfig);
       const actual = C.parseConfig(validEnv);
