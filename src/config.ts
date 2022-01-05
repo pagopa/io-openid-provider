@@ -1,6 +1,6 @@
 import * as O from "fp-ts/Option";
-import * as e from "fp-ts/Either";
-import * as d from "io-ts/Decoder";
+import * as E from "fp-ts/Either";
+import * as D from "io-ts/Decoder";
 import * as f from "fp-ts/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
@@ -29,10 +29,10 @@ interface Config {
 
 type ConfEnv = NodeJS.ProcessEnv;
 
-const envDecoder = d.struct({
-  APPLICATION_NAME: d.string,
-  CLIENT_ID: decoders.option(d.string),
-  LOG_LEVEL: d.literal(
+const envDecoder = D.struct({
+  APPLICATION_NAME: D.string,
+  CLIENT_ID: decoders.option(D.string),
+  LOG_LEVEL: D.literal(
     "error",
     "warn",
     "info",
@@ -41,12 +41,12 @@ const envDecoder = d.struct({
     "debug",
     "silly"
   ),
-  REDIS_KEY_PREFIX: d.string,
-  REDIS_URL: d.compose(decoders.UrlFromString)(d.string),
-  SERVER_HOSTNAME: d.string,
-  SERVER_PORT: d.string,
+  REDIS_KEY_PREFIX: D.string,
+  REDIS_URL: D.compose(decoders.UrlFromString)(D.string),
+  SERVER_HOSTNAME: D.string,
+  SERVER_PORT: D.string,
 });
-type EnvStruct = d.TypeOf<typeof envDecoder>;
+type EnvStruct = D.TypeOf<typeof envDecoder>;
 
 const makeConfigFromStr = (str: EnvStruct): Config => ({
   // TODO: Improve the fetch of info
@@ -74,9 +74,9 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
   },
 });
 
-const parseConfig = (processEnv: ConfEnv): e.Either<d.DecodeError, Config> => {
+const parseConfig = (processEnv: ConfEnv): E.Either<D.DecodeError, Config> => {
   const result = envDecoder.decode({ ...processEnv });
-  return e.map(makeConfigFromStr)(result);
+  return E.map(makeConfigFromStr)(result);
 };
 
 export { Config, parseConfig };
