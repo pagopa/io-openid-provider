@@ -1,4 +1,5 @@
 import * as b from "fp-ts/boolean";
+import * as A from "fp-ts/Array";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
@@ -24,13 +25,41 @@ const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
 
 const findAccountAdapter =
   (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
-  (_ctx, id) =>
+  (_, id) =>
     f.pipe(
       userInfoClient.findUserByFederationToken(id),
       TE.map(userInfoToAccount),
-      TE.mapLeft((_) => undefined),
+      TE.mapLeft(f.constant(undefined)),
       TE.toUnion
     )();
+
+const features = {
+  devInteractions: {
+    enabled: true,
+  },
+  rpInitiatedLogout: {
+    enabled: false,
+  },
+  userinfo: {
+    enabled: false,
+  },
+};
+
+const staticClients = (config: ProviderConfig) =>
+  f.pipe(
+    config.staticClient,
+    O.map(
+      (client) =>
+        ({
+          client_id: client.clientId,
+          grant_types: ["implicit"],
+          redirect_uris: ["https://client.example.org/cb"],
+          response_types: ["id_token"],
+          token_endpoint_auth_method: "none",
+        } as oidc.ClientMetadata)
+    ),
+    O.fold(f.constant([]), f.flow(A.of))
+  );
 
 const makeProvider = (
   config: c.Config,
@@ -47,38 +76,10 @@ const makeProvider = (
     () => ({})
   )(dbInMemory);
 
-  const staticClients = f.pipe(
-    config.provider.staticClient,
-    O.map(
-      (client) =>
-        ({
-          client_id: client.clientId,
-          grant_types: ["implicit"],
-          redirect_uris: ["https://client.example.org/cb"],
-          response_types: ["id_token"],
-          token_endpoint_auth_method: "none",
-        } as oidc.ClientMetadata)
-    ),
-    O.fold(
-      () => [],
-      (client) => [client]
-    )
-  );
-
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    clients: staticClients,
-    features: {
-      devInteractions: {
-        enabled: true,
-      },
-      rpInitiatedLogout: {
-        enabled: false,
-      },
-      userinfo: {
-        enabled: false,
-      },
-    },
+    clients: staticClients(config.provider),
+    features,
     findAccount: findAccountAdapter(userInfoClient),
     responseTypes: ["id_token"],
     routes: {
