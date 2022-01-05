@@ -53,7 +53,7 @@ const interactionLogic = (
           ),
           TE.map(userInfoToInteractionResults),
           TE.toUnion,
-          T.map(flow(O.some))
+          T.map(O.some)
         )
     )
   );
