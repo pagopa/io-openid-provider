@@ -1,10 +1,19 @@
 import * as b from "fp-ts/boolean";
+import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
 import * as u from "src/userinfo";
 import * as c from "src/config";
 import * as oidc from "oidc-provider";
 import * as redis from "./dal/redis";
+
+interface Client {
+  readonly clientId: string;
+}
+
+interface ProviderConfig {
+  readonly staticClient: O.Option<Client>;
+}
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
   accountId: userInfo.id,
@@ -38,18 +47,27 @@ const makeProvider = (
     () => ({})
   )(dbInMemory);
 
+  const staticClients = f.pipe(
+    config.provider.staticClient,
+    O.map(
+      (client) =>
+        ({
+          client_id: client.clientId,
+          grant_types: ["implicit"],
+          redirect_uris: ["https://client.example.org/cb"],
+          response_types: ["id_token"],
+          token_endpoint_auth_method: "none",
+        } as oidc.ClientMetadata)
+    ),
+    O.fold(
+      () => [],
+      (client) => [client]
+    )
+  );
+
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    clients: [
-      {
-        client_id: "foo",
-        client_secret: "bar",
-        grant_types: ["implicit"],
-        redirect_uris: ["https://client.example.org/cb"],
-        response_types: ["id_token"],
-        token_endpoint_auth_method: "none",
-      },
-    ],
+    clients: staticClients,
     features: {
       devInteractions: {
         enabled: true,
@@ -75,4 +93,4 @@ const makeProvider = (
   );
 };
 
-export { makeProvider };
+export { ProviderConfig, makeProvider };

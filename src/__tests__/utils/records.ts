@@ -1,10 +1,16 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
 import * as oidc from "oidc-provider";
+import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
 import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
+  provider: {
+    staticClient: O.some({
+      clientId: "client-id",
+    }),
+  },
   info: {
     name: packageJson.name as NonEmptyString,
     version: packageJson.version as NonEmptyString,
@@ -24,6 +30,7 @@ const validConfig: config.Config = {
 };
 
 const validEnv = {
+  CLIENT_ID: "client-id",
   SERVER_HOSTNAME: "0.0.0.0",
   SERVER_PORT: "3000",
   LOG_LEVEL: "debug",
