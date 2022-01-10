@@ -8,11 +8,11 @@ const invalidUrl = "invalid";
 describe("urlFromStringDecoder", () => {
   describe("decode", () => {
     it("should return right given an valid url", () => {
-      const T = d.urlFromStringDecoder;
+      const T = d.UrlFromString;
       assert.deepStrictEqual(T.decode(validUrl), E.right(new URL(validUrl)));
     });
     it("should return left given an invalid url", () => {
-      const T = d.urlFromStringDecoder;
+      const T = d.UrlFromString;
       assert.equal(E.isLeft(T.decode(invalidUrl)), true);
     });
   });

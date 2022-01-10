@@ -6,7 +6,7 @@ const makeUrl = E.tryCatchK(
   (str: string) => new URL(str),
   (_) => new Error("Invalid url")
 );
-const urlFromStringDecoder: D.Decoder<string, URL> = {
+const UrlFromString: D.Decoder<string, URL> = {
   decode: (str) =>
     pipe(
       makeUrl(str),
@@ -14,4 +14,4 @@ const urlFromStringDecoder: D.Decoder<string, URL> = {
     ),
 };
 
-export { urlFromStringDecoder };
+export { UrlFromString };

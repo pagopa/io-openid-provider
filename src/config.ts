@@ -37,7 +37,7 @@ const envDecoder = d.struct({
     "silly"
   ),
   REDIS_KEY_PREFIX: d.string,
-  REDIS_URL: d.compose(decoders.urlFromStringDecoder)(d.string),
+  REDIS_URL: d.compose(decoders.UrlFromString)(d.string),
   SERVER_HOSTNAME: d.string,
   SERVER_PORT: d.string,
 });
