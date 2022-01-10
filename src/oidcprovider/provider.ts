@@ -32,6 +32,7 @@ const makeProvider = (
   function adapter(str: string) {
     return redis.makeRedisAdapter(config.redis)(str);
   }
+
   const adapterConfig = b.fold(
     () => ({ adapter }),
     () => ({})
