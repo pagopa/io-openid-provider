@@ -1,5 +1,4 @@
 import * as b from "fp-ts/boolean";
-import * as A from "fp-ts/Array";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
@@ -41,20 +40,19 @@ const features = {
   },
 };
 
-const staticClients = (config: ProviderConfig) =>
+// eslint-disable-next-line functional/prefer-readonly-type
+const staticClients = (config: ProviderConfig): oidc.ClientMetadata[] =>
   f.pipe(
     config.testClientId,
-    O.map(
-      (clientId) =>
-        ({
-          client_id: clientId,
-          grant_types: ["implicit"],
-          redirect_uris: ["https://client.example.org/cb"],
-          response_types: ["id_token"],
-          token_endpoint_auth_method: "none",
-        } as oidc.ClientMetadata)
-    ),
-    O.fold(f.constant([]), f.flow(A.of))
+    O.fold(f.constant([]), (clientId) => [
+      {
+        client_id: clientId,
+        grant_types: ["implicit"],
+        redirect_uris: ["https://client.example.org/cb"],
+        response_types: ["id_token"],
+        token_endpoint_auth_method: "none",
+      },
+    ])
   );
 
 const makeProvider = (
