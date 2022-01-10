@@ -31,7 +31,7 @@ type ConfEnv = NodeJS.ProcessEnv;
 
 const envDecoder = D.struct({
   APPLICATION_NAME: D.string,
-  CLIENT_ID: decoders.option(D.string),
+  TEST_CLIENT_ID: decoders.option(D.string),
   LOG_LEVEL: D.literal(
     "error",
     "warn",
