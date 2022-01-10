@@ -1,7 +1,5 @@
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as D from "io-ts/Decoder";
-import * as f from "fp-ts/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
 import * as decoders from "./utils/decoders";
@@ -31,7 +29,6 @@ type ConfEnv = NodeJS.ProcessEnv;
 
 const envDecoder = D.struct({
   APPLICATION_NAME: D.string,
-  TEST_CLIENT_ID: decoders.option(D.string),
   LOG_LEVEL: D.literal(
     "error",
     "warn",
@@ -45,6 +42,7 @@ const envDecoder = D.struct({
   REDIS_URL: D.compose(decoders.UrlFromString)(D.string),
   SERVER_HOSTNAME: D.string,
   SERVER_PORT: D.string,
+  TEST_CLIENT_ID: decoders.option(D.string),
 });
 type EnvStruct = D.TypeOf<typeof envDecoder>;
 
@@ -59,10 +57,7 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
     logName: str.APPLICATION_NAME,
   },
   provider: {
-    staticClient: f.pipe(
-      str.CLIENT_ID,
-      O.map((clientId) => ({ clientId }))
-    ),
+    testClientId: str.TEST_CLIENT_ID,
   },
   redis: {
     keyPrefix: str.REDIS_KEY_PREFIX,

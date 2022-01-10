@@ -7,9 +7,7 @@ import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
   provider: {
-    staticClient: O.some({
-      clientId: "client-id",
-    }),
+    testClientId: O.some("client-id"),
   },
   info: {
     name: packageJson.name as NonEmptyString,

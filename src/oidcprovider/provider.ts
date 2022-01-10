@@ -8,10 +8,6 @@ import * as c from "src/config";
 import * as oidc from "oidc-provider";
 import * as redis from "./dal/redis";
 
-interface Client {
-  readonly clientId: string;
-}
-
 interface ProviderConfig {
   readonly testClientId: O.Option<string>;
 }
@@ -47,11 +43,11 @@ const features = {
 
 const staticClients = (config: ProviderConfig) =>
   f.pipe(
-    config.staticClient,
+    config.testClientId,
     O.map(
-      (client) =>
+      (clientId) =>
         ({
-          client_id: client.clientId,
+          client_id: clientId,
           grant_types: ["implicit"],
           redirect_uris: ["https://client.example.org/cb"],
           response_types: ["id_token"],
