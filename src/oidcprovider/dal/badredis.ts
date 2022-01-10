@@ -38,6 +38,7 @@ function uidKeyFor(uid: string) {
 class RedisAdapter {
   readonly name: string;
   readonly client: ioredis.Redis;
+
   constructor(client: ioredis.Redis, name: string) {
     this.client = client;
     this.name = name;
