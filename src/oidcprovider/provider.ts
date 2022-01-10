@@ -13,7 +13,7 @@ interface Client {
 }
 
 interface ProviderConfig {
-  readonly staticClient: O.Option<Client>;
+  readonly testClientId: O.Option<string>;
 }
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
