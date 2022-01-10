@@ -22,7 +22,7 @@ const makeApplication = (
   config: Config,
   userInfoClient: UserInfoClient,
   logger: Logger,
-  // TODO: REMOVE THE FIELD DBINMEMORY
+  // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
   dbInMemory: boolean = false
 ): Application => {
   const application = express();
