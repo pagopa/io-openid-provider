@@ -21,7 +21,9 @@ type Application = express.Application;
 const makeApplication = (
   config: Config,
   userInfoClient: UserInfoClient,
-  logger: Logger
+  logger: Logger,
+  // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
+  dbInMemory: boolean = false
 ): Application => {
   const application = express();
 
@@ -37,7 +39,7 @@ const makeApplication = (
 
   // Register routers
   // application.use(component.makeRouter(service0, service1, ...));
-  application.use(oidcprovider.makeRouter(config, userInfoClient));
+  application.use(oidcprovider.makeRouter(config, userInfoClient, dbInMemory));
   application.use(info.makeRouter(config));
 
   // Register error handler

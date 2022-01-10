@@ -7,6 +7,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { Config } from "src/config";
 import * as u from "src/userinfo";
 import * as strings from "@pagopa/ts-commons/lib/strings";
+import * as p from "./provider";
 
 // TODO: Move to environment
 const cookieKey = "X-IO-Federation-Token";
@@ -25,7 +26,7 @@ const userInfoClientErrorToInteractionResults = (
   error: u.UserInfoClientError
 ): oidc.InteractionResults => ({
   error: error.errorType,
-  error_description: "Not authorized",
+  error_description: "Unauthorized",
 });
 
 const interactionLogic = (
@@ -52,7 +53,7 @@ const interactionLogic = (
           ),
           TE.map(userInfoToInteractionResults),
           TE.toUnion,
-          T.map((_) => O.some(_))
+          T.map(O.some)
         )
     )
   );
@@ -78,68 +79,12 @@ const interactionHandler =
       )
     )();
 
-const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
-  accountId: userInfo.id,
-  claims: (_use: string, _scope: string) => ({
-    sub: userInfo.id,
-  }),
-});
-
-const findAccountAdapter =
-  (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
-  (_ctx, id) =>
-    pipe(
-      userInfoClient.findUserByFederationToken(id),
-      TE.map(userInfoToAccount),
-      TE.mapLeft((_) => undefined),
-      TE.toUnion
-    )();
-
-const makeProvider = (
-  config: Config,
-  userInfoClient: u.UserInfoClient
-): oidc.Provider => {
-  const providerConfig: oidc.Configuration = {
-    clients: [
-      {
-        client_id: "foo",
-        client_secret: "bar",
-        grant_types: ["implicit"],
-        redirect_uris: ["https://client.example.org/cb"],
-        response_types: ["id_token"],
-        token_endpoint_auth_method: "none",
-      },
-    ],
-    features: {
-      devInteractions: {
-        enabled: true,
-      },
-      rpInitiatedLogout: {
-        enabled: false,
-      },
-      userinfo: {
-        enabled: false,
-      },
-    },
-    findAccount: findAccountAdapter(userInfoClient),
-    responseTypes: ["id_token"],
-    routes: {
-      authorization: "/oauth/authorize",
-    },
-    scopes: ["openid"],
-    tokenEndpointAuthMethods: ["none"],
-  };
-  return new oidc.Provider(
-    `https://${config.server.hostname}:${config.server.port}`,
-    providerConfig
-  );
-};
-
 const makeRouter = (
   config: Config,
-  userInfoClient: u.UserInfoClient
+  userInfoClient: u.UserInfoClient,
+  dbInMemory: boolean
 ): express.Router => {
-  const provider = makeProvider(config, userInfoClient);
+  const provider = p.makeProvider(config, userInfoClient, dbInMemory);
 
   const router = express.Router();
 
