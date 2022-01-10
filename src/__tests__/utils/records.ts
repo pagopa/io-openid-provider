@@ -30,7 +30,7 @@ const validConfig: config.Config = {
 };
 
 const validEnv = {
-  CLIENT_ID: "client-id",
+  TEST_CLIENT_ID: "client-id",
   SERVER_HOSTNAME: "0.0.0.0",
   SERVER_PORT: "3000",
   LOG_LEVEL: "debug",
