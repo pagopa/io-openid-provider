@@ -1,5 +1,7 @@
+import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as D from "io-ts/Decoder";
+import * as f from "fp-ts/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as packageJson from "../package.json";
 import * as decoders from "./utils/decoders";
@@ -43,6 +45,9 @@ const envDecoder = D.struct({
   SERVER_HOSTNAME: D.string,
   SERVER_PORT: D.string,
   TEST_CLIENT_ID: decoders.option(D.string),
+  TEST_CLIENT_REDIRECT_URI: decoders.option(
+    D.compose(decoders.UrlFromString)(D.string)
+  ),
 });
 type EnvStruct = D.TypeOf<typeof envDecoder>;
 
@@ -57,7 +62,16 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
     logName: str.APPLICATION_NAME,
   },
   provider: {
-    testClientId: str.TEST_CLIENT_ID,
+    testClient: f.pipe(
+      str.TEST_CLIENT_ID,
+      O.map((clientId) => ({
+        clientId,
+        redirectUris: f.pipe(
+          str.TEST_CLIENT_REDIRECT_URI,
+          O.fold(f.constant([]), (uri) => [uri])
+        ),
+      }))
+    ),
   },
   redis: {
     keyPrefix: str.REDIS_KEY_PREFIX,

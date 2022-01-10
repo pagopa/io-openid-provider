@@ -7,7 +7,10 @@ import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
   provider: {
-    testClientId: O.some("client-id"),
+    testClient: O.some({
+      clientId: "client-id",
+      redirectUris: [new URL("https://relying-party.io/callback")],
+    }),
   },
   info: {
     name: packageJson.name as NonEmptyString,
@@ -29,6 +32,7 @@ const validConfig: config.Config = {
 
 const validEnv = {
   TEST_CLIENT_ID: "client-id",
+  TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
   SERVER_PORT: "3000",
   LOG_LEVEL: "debug",

@@ -7,8 +7,13 @@ import * as c from "src/config";
 import * as oidc from "oidc-provider";
 import * as redis from "./dal/redis";
 
+interface Client {
+  readonly clientId: string;
+  readonly redirectUris: ReadonlyArray<URL>;
+}
+
 interface ProviderConfig {
-  readonly testClientId: O.Option<string>;
+  readonly testClient: O.Option<Client>;
 }
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
@@ -40,15 +45,16 @@ const features = {
   },
 };
 
-// eslint-disable-next-line functional/prefer-readonly-type
-const staticClients = (config: ProviderConfig): oidc.ClientMetadata[] =>
+const staticClients = (
+  config: ProviderConfig
+): ReadonlyArray<oidc.ClientMetadata> =>
   f.pipe(
-    config.testClientId,
-    O.fold(f.constant([]), (clientId) => [
+    config.testClient,
+    O.fold(f.constant([]), (client) => [
       {
-        client_id: clientId,
+        client_id: client.clientId,
         grant_types: ["implicit"],
-        redirect_uris: ["https://client.example.org/cb"],
+        redirect_uris: client.redirectUris.map((_) => _.href).concat(),
         response_types: ["id_token"],
         token_endpoint_auth_method: "none",
       },
@@ -72,7 +78,8 @@ const makeProvider = (
 
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    clients: staticClients(config.provider),
+    // .concact just to transform an immutable to a mutable array
+    clients: staticClients(config.provider).concat(),
     features,
     findAccount: findAccountAdapter(userInfoClient),
     responseTypes: ["id_token"],
