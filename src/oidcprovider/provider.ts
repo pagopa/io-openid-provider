@@ -1,10 +1,20 @@
 import * as b from "fp-ts/boolean";
+import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
 import * as u from "src/userinfo";
 import * as c from "src/config";
 import * as oidc from "oidc-provider";
 import * as redis from "./dal/redis";
+
+interface Client {
+  readonly clientId: string;
+  readonly redirectUris: ReadonlyArray<URL>;
+}
+
+interface ProviderConfig {
+  readonly testClient: O.Option<Client>;
+}
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
   accountId: userInfo.id,
@@ -15,13 +25,41 @@ const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
 
 const findAccountAdapter =
   (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
-  (_ctx, id) =>
+  (_, id) =>
     f.pipe(
       userInfoClient.findUserByFederationToken(id),
       TE.map(userInfoToAccount),
-      TE.mapLeft((_) => undefined),
+      TE.mapLeft(f.constant(undefined)),
       TE.toUnion
     )();
+
+const features = {
+  devInteractions: {
+    enabled: true,
+  },
+  rpInitiatedLogout: {
+    enabled: false,
+  },
+  userinfo: {
+    enabled: false,
+  },
+};
+
+const staticClients = (
+  config: ProviderConfig
+): ReadonlyArray<oidc.ClientMetadata> =>
+  f.pipe(
+    config.testClient,
+    O.fold(f.constant([]), (client) => [
+      {
+        client_id: client.clientId,
+        grant_types: ["implicit"],
+        redirect_uris: client.redirectUris.map((_) => _.href).concat(),
+        response_types: ["id_token"],
+        token_endpoint_auth_method: "none",
+      },
+    ])
+  );
 
 const makeProvider = (
   config: c.Config,
@@ -40,27 +78,9 @@ const makeProvider = (
 
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    clients: [
-      {
-        client_id: "foo",
-        client_secret: "bar",
-        grant_types: ["implicit"],
-        redirect_uris: ["https://client.example.org/cb"],
-        response_types: ["id_token"],
-        token_endpoint_auth_method: "none",
-      },
-    ],
-    features: {
-      devInteractions: {
-        enabled: true,
-      },
-      rpInitiatedLogout: {
-        enabled: false,
-      },
-      userinfo: {
-        enabled: false,
-      },
-    },
+    // .concact just to transform an immutable to a mutable array
+    clients: staticClients(config.provider).concat(),
+    features,
     findAccount: findAccountAdapter(userInfoClient),
     responseTypes: ["id_token"],
     routes: {
@@ -75,4 +95,4 @@ const makeProvider = (
   );
 };
 
-export { makeProvider };
+export { ProviderConfig, makeProvider };

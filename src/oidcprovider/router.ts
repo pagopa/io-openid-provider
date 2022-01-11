@@ -3,7 +3,7 @@ import * as oidc from "oidc-provider";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { constant, flow, pipe } from "fp-ts/lib/function";
 import { Config } from "src/config";
 import * as u from "src/userinfo";
 import * as strings from "@pagopa/ts-commons/lib/strings";
@@ -37,24 +37,22 @@ const interactionLogic = (
   pipe(
     O.of(detail),
     O.filter((_) => _.name === "login"),
-    O.fold(
-      () => T.of(O.none),
-      (_) =>
-        pipe(
-          // extract the token from request
-          extractIOFederationToken(req),
-          TE.fromOption(() => ({ error: "unauthorized" })),
-          // find the user given the token
-          TE.chain(
-            flow(
-              userInfoClient.findUserByFederationToken,
-              TE.mapLeft(userInfoClientErrorToInteractionResults)
-            )
-          ),
-          TE.map(userInfoToInteractionResults),
-          TE.toUnion,
-          T.map(O.some)
-        )
+    O.fold(constant(T.of(O.none)), (_) =>
+      pipe(
+        // extract the token from request
+        extractIOFederationToken(req),
+        TE.fromOption(constant({ error: "unauthorized" })),
+        // find the user given the token
+        TE.chain(
+          flow(
+            userInfoClient.findUserByFederationToken,
+            TE.mapLeft(userInfoClientErrorToInteractionResults)
+          )
+        ),
+        TE.map(userInfoToInteractionResults),
+        TE.toUnion,
+        T.map(flow(O.some))
+      )
     )
   );
 
@@ -67,14 +65,14 @@ const interactionHandler =
   ): express.Handler =>
   (req, res, next) =>
     pipe(
-      () => provider.interactionDetails(req, res),
+      constant(provider.interactionDetails(req, res)),
       T.chain((interaction) =>
         interactionLogic(userInfoClient, req, interaction.prompt)
       ),
       T.chain(
         O.fold(
-          () => () => Promise.reject(next()),
-          (result) => () => provider.interactionFinished(req, res, result)
+          () => constant(Promise.reject(next())),
+          (result) => constant(provider.interactionFinished(req, res, result))
         )
       )
     )();

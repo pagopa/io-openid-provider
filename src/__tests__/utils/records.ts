@@ -1,10 +1,17 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
 import * as oidc from "oidc-provider";
+import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
 import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
+  provider: {
+    testClient: O.some({
+      clientId: "client-id",
+      redirectUris: [new URL("https://relying-party.io/callback")],
+    }),
+  },
   info: {
     name: packageJson.name as NonEmptyString,
     version: packageJson.version as NonEmptyString,
@@ -24,6 +31,8 @@ const validConfig: config.Config = {
 };
 
 const validEnv = {
+  TEST_CLIENT_ID: "client-id",
+  TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
   SERVER_PORT: "3000",
   LOG_LEVEL: "debug",

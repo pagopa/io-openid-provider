@@ -86,9 +86,9 @@ describe("/authorize", () => {
     const response = await request(app)
       .get("/oauth/authorize")
       .query({
-        client_id: "foo",
+        client_id: records.validEnv.TEST_CLIENT_ID,
         response_type: "id_token",
-        redirect_uri: "https://client.example.org/cb",
+        redirect_uri: records.validEnv.TEST_CLIENT_REDIRECT_URI,
         scope: "openid",
         state: "af0ijs",
         nonce: "n-0s6",

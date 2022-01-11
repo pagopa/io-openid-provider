@@ -1,6 +1,6 @@
 import * as http from "http";
-import * as e from "fp-ts/Either";
-import * as d from "io-ts/Decoder";
+import * as E from "fp-ts/Either";
+import * as D from "io-ts/Decoder";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
@@ -17,21 +17,21 @@ const start = (application: Application, log: logger.Logger): void => {
   });
 };
 
-const exit = (parseError: d.DecodeError): void => {
+const exit = (parseError: D.DecodeError): void => {
   const log = logger.makeLogger({ logLevel: "error", logName: "main" });
-  log.error(`Shutting down application ${d.draw(parseError)}`);
+  log.error(`Shutting down application ${D.draw(parseError)}`);
   process.exit(1);
 };
 
 // TODO: add graceful shutdown
 
 const main = pipe(
-  e.Do,
-  e.bind("conf", () => c.parseConfig(process.env)),
-  e.bind("log", ({ conf }) => e.right(logger.makeLogger(conf.logger))),
-  e.bind("userInfoClient", () => e.right(userinfo.makeConstUserInfoClient())),
-  e.bind("app", ({ conf, log, userInfoClient }) =>
-    e.right(
+  E.Do,
+  E.bind("conf", () => c.parseConfig(process.env)),
+  E.bind("log", ({ conf }) => E.right(logger.makeLogger(conf.logger))),
+  E.bind("userInfoClient", () => E.right(userinfo.makeConstUserInfoClient())),
+  E.bind("app", ({ conf, log, userInfoClient }) =>
+    E.right(
       makeApplication(
         conf,
         userInfoClient,
@@ -39,7 +39,7 @@ const main = pipe(
       )
     )
   ),
-  e.map(({ app, log }) => start(app, log))
+  E.map(({ app, log }) => start(app, log))
 );
 
-e.getOrElse(exit)(main);
+E.getOrElse(exit)(main);
