@@ -30,7 +30,7 @@ const asPureDecoder = <A, O, I>(type: t.Type<A, O, I>): D.Decoder<I, A> => ({
     pipe(
       i,
       type.decode,
-      E.mapLeft((_) => D.error(i, type.asDecoder().name))
+      E.mapLeft(constant(D.error(i, type.asDecoder().name)))
     ),
 });
 
