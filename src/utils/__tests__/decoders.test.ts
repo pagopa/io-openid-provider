@@ -1,8 +1,26 @@
+import * as t from "io-ts";
 import * as assert from "assert";
 import * as d from "../decoders";
 import * as D from "io-ts/Decoder";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+
+describe("asDecoder", () => {
+  it("should return a decoder that return the same value of the original decoder on fail", () => {
+    const decoder = d.asPureDecoder(t.string);
+
+    assert.deepStrictEqual(decoder.decode(1), D.string.decode(1));
+  });
+
+  it("should return a decoder that return the same value of the original decoder on success", () => {
+    const decoder = d.asPureDecoder(t.string);
+
+    assert.deepStrictEqual(
+      decoder.decode("test_string"),
+      D.string.decode("test_string")
+    );
+  });
+});
 
 describe("urlFromStringDecoder", () => {
   describe("decode", () => {

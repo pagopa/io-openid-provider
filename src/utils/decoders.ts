@@ -1,8 +1,8 @@
+import * as t from "io-ts";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as D from "io-ts/Decoder";
 import { flow, pipe, unsafeCoerce, constant } from "fp-ts/lib/function";
-
 const makeUrl = E.tryCatchK(
   (str: string) => new URL(str),
   (_) => new Error("Invalid url")
@@ -25,4 +25,13 @@ const option = <A, B>(
   ),
 });
 
-export { option, UrlFromString };
+const asPureDecoder = <A, O, I>(type: t.Type<A, O, I>): D.Decoder<I, A> => ({
+  decode: (i: I) =>
+    pipe(
+      i,
+      type.decode,
+      E.mapLeft((_) => D.error(i, type.asDecoder().name))
+    ),
+});
+
+export { option, UrlFromString, asPureDecoder };
