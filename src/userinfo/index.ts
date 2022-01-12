@@ -19,4 +19,4 @@ interface UserInfoClient {
   ) => TE.TaskEither<UserInfoClientError, UserInfo>;
 }
 
-export { UserInfoClient, UserInfo, UserInfoClientError };
+export { FederationToken, UserInfoClient, UserInfo, UserInfoClientError };
