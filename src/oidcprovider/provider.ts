@@ -37,6 +37,10 @@ const features = {
   devInteractions: {
     enabled: true,
   },
+  registration: {
+    enabled: true,
+    issueRegistrationAccessToken: false,
+  },
   rpInitiatedLogout: {
     enabled: false,
   },
@@ -85,6 +89,7 @@ const makeProvider = (
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
+      registration: "/connect/register",
     },
     scopes: ["openid"],
     tokenEndpointAuthMethods: ["none"],

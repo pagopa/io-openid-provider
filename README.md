@@ -48,15 +48,35 @@ Those are all Environment variables needed by the application:
 | TEST_CLIENT_REDIRECT_URI | The redirect uri of the test client                        | string |
 
 ## Example
-Start the server locally and then:
+Start the server locally:
 
 ``` sh
-curl "http://localhost:3000/oauth/authorize" \
--d client_id=example-client \
--d response_type=id_token \
--d redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb \
--d scope=openid \
--d state=af0ifjsldkj \
--d nonce=n-0S6_WzA2Mj \
--b X-IO-Federation-Token=12345
+./start.sh
+```
+1. Add a new client:
+
+``` sh
+curl --location --request POST 'http://localhost:3000/connect/register' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+   "redirect_uris":
+     ["https://client.example.org/callback"],
+   "client_name": "This is a test client",
+   "grant_types": ["implicit"],
+   "response_types": ["id_token"],
+   "token_endpoint_auth_method": "none"
+}'
+```
+
+2. Copy from the output the value of `client_id` key.
+3. Open the browser on the following endpoint `http://localhost:3000`, and add the following cookie:
+
+```
+X-IO-Federation-Token=<any-value>
+```
+
+4. In the same browser session paste the following endpoint replacing the `<client_id>` with copied `client_id` value and then :
+
+```
+http://localhost:3000/oauth/authorize?client_id=<client_id>&response_type=id_token&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcallback&scope=openid&state=the-state-here&nonce=the-nonce-here
 ```
