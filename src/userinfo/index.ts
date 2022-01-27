@@ -6,7 +6,7 @@ type FederationToken = string;
 const UserInfo = t.type({
   familyName: t.string,
   fiscalCode: t.string,
-  name: t.string,
+  givenName: t.string,
 });
 type UserInfo = t.TypeOf<typeof UserInfo>;
 

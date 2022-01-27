@@ -20,7 +20,11 @@ const userInfoToAccount =
   (federationToken: string) =>
   (userInfo: u.UserInfo): oidc.Account => ({
     accountId: federationToken,
-    claims: (_use: string, _scope: string) => ({
+    // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#findaccount
+    claims: (_use, _scope, _claims, _rejected) => ({
+      family_name: userInfo.familyName,
+      given_name: userInfo.givenName,
+      name: `${userInfo.givenName} ${userInfo.familyName}`,
       sub: userInfo.fiscalCode,
     }),
   });
@@ -102,4 +106,4 @@ const makeProvider = (
   );
 };
 
-export { ProviderConfig, makeProvider };
+export { ProviderConfig, makeProvider, userInfoToAccount };

@@ -9,7 +9,7 @@ import * as I from ".";
 const makeUserInfo = (identity: UserIdentity): I.UserInfo => ({
   familyName: identity.family_name,
   fiscalCode: identity.fiscal_code,
-  name: identity.name,
+  givenName: identity.name,
 });
 
 const getUserInfoFromIOBackend =
