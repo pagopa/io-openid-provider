@@ -78,5 +78,5 @@ X-IO-Federation-Token=<any-value>
 4. In the same browser session paste the following endpoint replacing the `<client_id>` with copied `client_id` value and then :
 
 ```
-http://localhost:3000/oauth/authorize?client_id=<client_id>&response_type=id_token&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcallback&scope=openid&state=the-state-here&nonce=the-nonce-here
+http://localhost:3000/oauth/authorize?client_id=<client_id>&response_type=id_token&redirect_uri=https://client.example.org/callback&scope=openid&state=<state>&nonce=<nonce>
 ```
