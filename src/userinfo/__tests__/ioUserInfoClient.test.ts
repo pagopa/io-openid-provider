@@ -1,43 +1,59 @@
 import * as t from "io-ts";
-import * as f from "fp-ts/function";
 import * as E from "fp-ts/Either";
-import * as S from "../ioUserInfoClient";
-import * as mock from "jest-mock-extended";
-import * as authClient from "../../generated/clients/io-auth/client";
+import * as r from "../../__tests__/utils/records";
+import * as p from "../../__tests__/utils/phonies";
 
-// Move this one into phonies.ts
-const makeService = () => {
-  const mockClient = mock.mock<authClient.Client>();
-  const service = S.makeIOUserInfoClient(mockClient);
-  return f.tuple(service, mockClient);
-};
-
-// TODO: Move into records.ts
-const validUserIdentity = {
-  name: "Asdrubale",
-  family_name: "Roitek",
-  fiscal_code: "¯_(ツ)_/¯",
-  date_of_birth: new Date(),
-};
+const token = "token";
 
 describe("makeIOUserInfoClient", () => {
   describe("findUserByFederationToken", () => {
     it("should return a user info", async () => {
-      const token = "token";
-      const [service, mockClient] = makeService();
+      const { service, mockClient } = p.makeService();
 
       const functionRecorded = mockClient.getUserIdentity.mockReturnValueOnce(
         Promise.resolve(
           t.success({
             status: 200,
             headers: { "Content-Type": "application/json" },
-            value: validUserIdentity,
+            value: r.validUserIdentity,
           })
         )
       );
 
       const actual = await service.findUserByFederationToken(token)();
-      const expected = E.right({ id: validUserIdentity.fiscal_code });
+      const expected = E.right({ id: r.validUserIdentity.fiscal_code });
+
+      expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
+      expect(actual).toEqual(expected);
+    });
+    it("should return an unknown error (e.g. connection error)", async () => {
+      const { service, mockClient } = p.makeService();
+
+      const functionRecorded = mockClient.getUserIdentity.mockReturnValueOnce(
+        Promise.reject("don't care")
+      );
+
+      const actual = await service.findUserByFederationToken(token)();
+      const expected = E.left(p.getExpectedError("unknown"));
+
+      expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
+      expect(actual).toEqual(expected);
+    });
+    it("should return a 401 - invalid token", async () => {
+      const { service, mockClient } = p.makeService();
+
+      const functionRecorded = mockClient.getUserIdentity.mockReturnValueOnce(
+        Promise.resolve(
+          t.success({
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+            value: undefined,
+          })
+        )
+      );
+
+      const actual = await service.findUserByFederationToken(token)();
+      const expected = E.left(p.getExpectedError("invalidToken"));
 
       expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
       expect(actual).toEqual(expected);

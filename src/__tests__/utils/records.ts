@@ -1,9 +1,10 @@
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
 import * as oidc from "oidc-provider";
 import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
 import * as packageJson from "../../../package.json";
+import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
 
 const validConfig: config.Config = {
   provider: {
@@ -55,10 +56,18 @@ const consentPromptDetail: oidc.PromptDetail = {
   details: {},
 };
 
+const validUserIdentity: UserIdentity = {
+  name: "Asdrubale",
+  family_name: "Roitek",
+  fiscal_code: "TMMEXQ60A10Y526X" as FiscalCode,
+  date_of_birth: new Date(),
+};
+
 export {
   validEnvAndConfig,
   validEnv,
   validConfig,
   loginPromptDetail,
   consentPromptDetail,
+  validUserIdentity,
 };
