@@ -50,7 +50,11 @@ describe("interactionLogic", () => {
     const detail = records.loginPromptDetail;
     const mockUserInfoClient = phonies.makeMockUserInfoClient();
     mockUserInfoClient.findUserByFederationToken.mockReturnValue(
-      TE.right({ id: cookieValue })
+      TE.right({
+        fiscalCode: cookieValue,
+        familyName: "Family Name",
+        name: "Name",
+      }) // Move to records
     );
     const request = {
       cookies: { "X-IO-Federation-Token": cookieValue },

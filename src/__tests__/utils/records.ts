@@ -5,6 +5,7 @@ import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
 import * as packageJson from "../../../package.json";
 import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
+import { UserInfo } from "../../userinfo";
 
 const validConfig: config.Config = {
   provider: {
@@ -12,6 +13,9 @@ const validConfig: config.Config = {
       clientId: "client-id",
       redirectUris: [new URL("https://relying-party.io/callback")],
     }),
+  },
+  IOBackend: {
+    baseURL: new URL("https://iobackend.it"),
   },
   info: {
     name: packageJson.name as NonEmptyString,
@@ -32,6 +36,7 @@ const validConfig: config.Config = {
 };
 
 const validEnv = {
+  IO_BACKEND_BASE_URL: "https://iobackend.it",
   TEST_CLIENT_ID: "client-id",
   TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
@@ -56,11 +61,18 @@ const consentPromptDetail: oidc.PromptDetail = {
   details: {},
 };
 
+const fiscalCode = "TMMEXQ60A10Y526X" as FiscalCode:
+
 const validUserIdentity: UserIdentity = {
   name: "Asdrubale",
   family_name: "Roitek",
-  fiscal_code: "TMMEXQ60A10Y526X" as FiscalCode,
+  fiscal_code: fiscalCode,
   date_of_birth: new Date(),
+};
+const validUserInfo: UserInfo = {
+  familyName: validUserIdentity.family_name,
+  fiscalCode: validUserIdentity.fiscal_code,
+  name: validUserIdentity.name,
 };
 
 export {
@@ -70,4 +82,6 @@ export {
   loginPromptDetail,
   consentPromptDetail,
   validUserIdentity,
+  validUserInfo,
+  fiscalCode
 };
