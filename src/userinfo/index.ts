@@ -4,7 +4,9 @@ import * as TE from "fp-ts/TaskEither";
 type FederationToken = string;
 
 const UserInfo = t.type({
-  id: t.string,
+  familyName: t.string,
+  fiscalCode: t.string,
+  name: t.string,
 });
 type UserInfo = t.TypeOf<typeof UserInfo>;
 

@@ -21,9 +21,12 @@ describe("makeIOUserInfoClient", () => {
       );
 
       const actual = await service.findUserByFederationToken(token)();
-      const expected = E.right({ id: r.validUserIdentity.fiscal_code });
+      const expected = E.right(r.validUserInfo);
 
-      expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
+      expect(functionRecorded).toHaveBeenCalledWith({
+        Bearer: `Bearer ${token}`,
+      });
+      expect(functionRecorded).toHaveBeenCalledTimes(1);
       expect(actual).toEqual(expected);
     });
     it("should return an unknown error (e.g. connection error)", async () => {
@@ -36,7 +39,10 @@ describe("makeIOUserInfoClient", () => {
       const actual = await service.findUserByFederationToken(token)();
       const expected = E.left(p.getExpectedError("unknown"));
 
-      expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
+      expect(functionRecorded).toHaveBeenCalledWith({
+        Bearer: `Bearer ${token}`,
+      });
+      expect(functionRecorded).toHaveBeenCalledTimes(1);
       expect(actual).toEqual(expected);
     });
     it("should return a 401 - invalid token", async () => {
@@ -55,7 +61,10 @@ describe("makeIOUserInfoClient", () => {
       const actual = await service.findUserByFederationToken(token)();
       const expected = E.left(p.getExpectedError("invalidToken"));
 
-      expect(functionRecorded).toHaveBeenCalledWith({ Bearer: token });
+      expect(functionRecorded).toHaveBeenCalledWith({
+        Bearer: `Bearer ${token}`,
+      });
+      expect(functionRecorded).toHaveBeenCalledTimes(1);
       expect(actual).toEqual(expected);
     });
   });

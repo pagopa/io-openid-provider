@@ -1,7 +1,9 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import * as f from "fp-ts/function";
+import nodeFetch from "node-fetch";
 import * as authClient from "../generated/clients/io-auth/client";
 import { UserIdentity } from "../generated/clients/io-auth/UserIdentity";
+import { Client, createClient } from "../generated/clients/io-auth/client";
 import * as I from ".";
 
 const toError = (type: I.ErrorType): I.UserInfoClientError => ({
@@ -9,14 +11,16 @@ const toError = (type: I.ErrorType): I.UserInfoClientError => ({
 });
 
 const makeUserInfo = (identity: UserIdentity): I.UserInfo => ({
-  id: identity.fiscal_code,
+  familyName: identity.family_name,
+  fiscalCode: identity.fiscal_code,
+  name: identity.name,
 });
 
 const getUserInfoFromIOBackend =
   (client: authClient.Client) => (federationToken: I.FederationToken) =>
     f.pipe(
       TE.tryCatch(
-        () => client.getUserIdentity({ Bearer: federationToken }),
+        () => client.getUserIdentity({ Bearer: `Bearer ${federationToken}` }), // FIXME Here you have to write Bearer as well (or find another way to tell the client that)
         () => toError("unknown")
       )
     );
@@ -56,4 +60,13 @@ const makeIOUserInfoClient = (client: authClient.Client): I.UserInfoClient => ({
   findUserByFederationToken: findUserBySession(client),
 });
 
-export { makeIOUserInfoClient };
+const makeIOBackendClient = (
+  baseUrl: string,
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
+): Client =>
+  createClient({
+    baseUrl,
+    fetchApi,
+  });
+
+export { makeIOUserInfoClient, makeIOBackendClient };
