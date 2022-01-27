@@ -18,7 +18,7 @@ const userInfoToInteractionResults = (
   userInfo: u.UserInfo
 ): oidc.InteractionResults => ({
   login: {
-    accountId: userInfo.id,
+    accountId: userInfo.fiscalCode,
   },
 });
 

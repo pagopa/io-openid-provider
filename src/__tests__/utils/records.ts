@@ -61,7 +61,7 @@ const consentPromptDetail: oidc.PromptDetail = {
   details: {},
 };
 
-const fiscalCode = "TMMEXQ60A10Y526X" as FiscalCode:
+const fiscalCode = "TMMEXQ60A10Y526X" as FiscalCode;
 
 const validUserIdentity: UserIdentity = {
   name: "Asdrubale",

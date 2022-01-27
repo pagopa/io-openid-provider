@@ -17,9 +17,9 @@ interface ProviderConfig {
 }
 
 const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
-  accountId: userInfo.id,
+  accountId: userInfo.fiscalCode,
   claims: (_use: string, _scope: string) => ({
-    sub: userInfo.id,
+    sub: userInfo.fiscalCode,
   }),
 });
 
@@ -27,6 +27,9 @@ const findAccountAdapter =
   (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
   (_, id) =>
     f.pipe(
+      /* FIXME: This is going to make a request to the backend using the sub
+      instead of using the federation token
+      */
       userInfoClient.findUserByFederationToken(id),
       TE.map(userInfoToAccount),
       TE.mapLeft(f.constant(undefined)),
