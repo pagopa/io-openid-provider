@@ -14,6 +14,10 @@ interface ServerConfig {
   readonly port: string;
 }
 
+interface IOBackend {
+  readonly baseURL: URL;
+}
+
 interface Info {
   readonly name: NonEmptyString;
   readonly version: NonEmptyString;
@@ -21,6 +25,7 @@ interface Info {
 
 interface Config {
   readonly info: Info;
+  readonly IOBackend: IOBackend;
   readonly provider: provider.ProviderConfig;
   readonly server: ServerConfig;
   readonly logger: logger.LogConfig;
@@ -31,6 +36,7 @@ type ConfEnv = NodeJS.ProcessEnv;
 
 const envDecoder = D.struct({
   APPLICATION_NAME: D.string,
+  IO_BACKEND_BASE_URL: D.compose(decoders.UrlFromString)(D.string),
   LOG_LEVEL: D.literal(
     "error",
     "warn",
@@ -53,6 +59,9 @@ type EnvStruct = D.TypeOf<typeof envDecoder>;
 
 const makeConfigFromStr = (str: EnvStruct): Config => ({
   // TODO: Improve the fetch of info
+  IOBackend: {
+    baseURL: str.IO_BACKEND_BASE_URL,
+  },
   info: {
     name: packageJson.name as NonEmptyString,
     version: packageJson.version as NonEmptyString,
