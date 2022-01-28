@@ -83,5 +83,5 @@ export {
   consentPromptDetail,
   validUserIdentity,
   validUserInfo,
-  fiscalCode
+  fiscalCode,
 };
