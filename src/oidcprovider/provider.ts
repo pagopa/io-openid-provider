@@ -16,22 +16,21 @@ interface ProviderConfig {
   readonly testClient: O.Option<Client>;
 }
 
-const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
-  accountId: userInfo.fiscalCode,
-  claims: (_use: string, _scope: string) => ({
-    sub: userInfo.fiscalCode,
-  }),
-});
+const userInfoToAccount =
+  (federationToken: string) =>
+  (userInfo: u.UserInfo): oidc.Account => ({
+    accountId: federationToken,
+    claims: (_use: string, _scope: string) => ({
+      sub: userInfo.fiscalCode,
+    }),
+  });
 
 const findAccountAdapter =
   (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
-  (_, id) =>
+  (_, accountId) =>
     f.pipe(
-      /* FIXME: This is going to make a request to the backend using the sub
-      instead of using the federation token
-      */
-      userInfoClient.findUserByFederationToken(id),
-      TE.map(userInfoToAccount),
+      userInfoClient.findUserByFederationToken(accountId),
+      TE.map(userInfoToAccount(accountId)),
       TE.mapLeft(f.constant(undefined)),
       TE.toUnion
     )();
@@ -81,7 +80,7 @@ const makeProvider = (
 
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    // .concact just to transform an immutable to a mutable array
+    // .concat just to transform an immutable to a mutable array
     clients: staticClients(config.provider).concat(),
     features,
     findAccount: findAccountAdapter(userInfoClient),

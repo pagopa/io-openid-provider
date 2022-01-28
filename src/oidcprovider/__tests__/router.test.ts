@@ -98,7 +98,6 @@ describe("/authorize", () => {
         nonce: "n-0s6",
       })
       .set("Cookie", ["X-IO-Federation-Token=12345667"]);
-    // TODO: this test is not complete
     expect(response.statusCode).toBe(303);
     expect(response.headers["location"]).toContain("/interaction/");
   });
