@@ -6,10 +6,6 @@ import { UserIdentity } from "../generated/clients/io-auth/UserIdentity";
 import { Client, createClient } from "../generated/clients/io-auth/client";
 import * as I from ".";
 
-const toError = (type: I.ErrorType): I.UserInfoClientError => ({
-  errorType: type,
-});
-
 const makeUserInfo = (identity: UserIdentity): I.UserInfo => ({
   familyName: identity.family_name,
   fiscalCode: identity.fiscal_code,
@@ -21,7 +17,7 @@ const getUserInfoFromIOBackend =
     f.pipe(
       TE.tryCatch(
         () => client.getUserIdentity({ Bearer: `Bearer ${federationToken}` }), // FIXME Here you have to write Bearer as well (or find another way to tell the client that)
-        () => toError("unknown")
+        () => I.toError("unknown")
       )
     );
 
@@ -36,7 +32,7 @@ const findUserBySession =
       TE.chainW(
         f.flow(
           TE.fromEither,
-          TE.mapLeft((_) => toError("decoding"))
+          TE.mapLeft((_) => I.toError("decoding"))
         )
       ),
       TE.chain((response) => {
@@ -44,13 +40,13 @@ const findUserBySession =
           case 200:
             return TE.right(response.value);
           case 400:
-            return TE.left(toError("badRequest"));
+            return TE.left(I.toError("badRequest"));
           case 401:
-            return TE.left(toError("invalidToken"));
+            return TE.left(I.toError("invalidToken"));
           case 500:
-            return TE.left(toError("unknown"));
+            return TE.left(I.toError("unknown"));
           default:
-            return TE.left(toError("unknown"));
+            return TE.left(I.toError("unknown"));
         }
       }),
       TE.map(makeUserInfo)
@@ -61,12 +57,12 @@ const makeIOUserInfoClient = (client: authClient.Client): I.UserInfoClient => ({
 });
 
 const makeIOBackendClient = (
-  baseUrl: string,
-  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
+  baseUrl: URL,
+  fetchAPI: typeof fetch = nodeFetch as unknown as typeof fetch
 ): Client =>
   createClient({
-    baseUrl,
-    fetchApi,
+    baseUrl: baseUrl.href,
+    fetchApi: fetchAPI,
   });
 
 export { makeIOUserInfoClient, makeIOBackendClient };

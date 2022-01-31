@@ -23,6 +23,10 @@ const UserInfoClientError = t.type({
 });
 type UserInfoClientError = t.TypeOf<typeof UserInfoClientError>;
 
+const toError = (type: ErrorType): UserInfoClientError => ({
+  errorType: type,
+});
+
 interface UserInfoClient {
   readonly findUserByFederationToken: (
     id: FederationToken
@@ -35,4 +39,5 @@ export {
   UserInfo,
   UserInfoClientError,
   ErrorType,
+  toError,
 };

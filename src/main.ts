@@ -30,7 +30,7 @@ const main = pipe(
   E.bind("conf", () => c.parseConfig(process.env)),
   E.bind("log", ({ conf }) => E.right(logger.makeLogger(conf.logger))),
   E.bind("client", ({ conf }) =>
-    E.right(userinfo.makeIOBackendClient(conf.IOBackend.baseURL.href))
+    E.right(userinfo.makeIOBackendClient(conf.IOBackend.baseURL))
   ),
   E.bind("userInfoClient", ({ client }) =>
     E.right(userinfo.makeIOUserInfoClient(client))
