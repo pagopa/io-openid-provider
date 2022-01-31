@@ -64,7 +64,8 @@ curl --location --request POST 'http://localhost:3000/connect/register' \
    "client_name": "This is a test client",
    "grant_types": ["implicit"],
    "response_types": ["id_token"],
-   "token_endpoint_auth_method": "none"
+   "token_endpoint_auth_method": "none",
+   "scope": "openid profile"
 }'
 ```
 
