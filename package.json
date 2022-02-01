@@ -4,8 +4,9 @@
   "description": "OpenID Provider service",
   "scripts": {
     "validate": "swagger-cli validate ./openapi/index.yaml",
-    "generate": "npm-run-all generate:*",
+    "generate": "npm-run-all generate:**",
     "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --no-strict --out-dir ./src/generated/definitions",
+    "generate:clients:io-auth": "rimraf ./src/generated/clients/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/IOOP-33--definition-references/api_auth.yaml --no-strict --out-dir ./src/generated/clients/io-auth --request-types --response-decoders --client",
     "start": "tsc && node -r dotenv/config dist/src/main.js dotenv_config_path=.env.default",
     "prebuild": "shx rm -rf dist && yarn generate",
     "build": "tsc",
@@ -26,6 +27,7 @@
     "helmet": "^4.6.0",
     "io-ts": "^2.2.16",
     "ioredis": "^4.28.2",
+    "node-fetch": "^2.6.1",
     "oidc-provider": "^7.10.4",
     "prom-client": "^14.0.0",
     "winston": "^3.3.3"
@@ -37,6 +39,7 @@
     "@types/express": "^4.17.13",
     "@types/ioredis": "^4.28.6",
     "@types/jest": "^27.0.2",
+    "@types/node-fetch": "^2.5.12",
     "@types/oidc-provider": "^7.8.1",
     "@types/supertest": "^2.0.11",
     "danger": "^4.0.2",

@@ -4,7 +4,7 @@ import * as responses from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { Config } from "../config";
-import { GetInfo } from "./../generated/definitions/GetInfo";
+import { GetInfo } from "../generated/definitions/GetInfo";
 
 type GetInfoEndpointResponse =
   | responses.IResponseSuccessJson<GetInfo>

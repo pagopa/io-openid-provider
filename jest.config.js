@@ -12,6 +12,7 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
   "modulePathIgnorePatterns": ["__tests__/utils/"],
+  "coveragePathIgnorePatterns": [ "<rootDir>/src/generated/"],
   "coverageThreshold": {
     "global": {
       "branches": 70,

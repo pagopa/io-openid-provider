@@ -14,11 +14,11 @@ const cookieKey = "X-IO-Federation-Token";
 const extractIOFederationToken = (req: express.Request): O.Option<string> =>
   pipe(req.cookies[cookieKey], strings.NonEmptyString.decode, O.fromEither);
 
-const userInfoToInteractionResults = (
-  userInfo: u.UserInfo
+const makeAccountIdInteractionResults = (
+  id: u.FederationToken
 ): oidc.InteractionResults => ({
   login: {
-    accountId: userInfo.id,
+    accountId: id,
   },
 });
 
@@ -43,21 +43,19 @@ const interactionLogic = (
         extractIOFederationToken(req),
         TE.fromOption(constant({ error: "unauthorized" })),
         // find the user given the token
-        TE.chain(
-          flow(
-            userInfoClient.findUserByFederationToken,
-            TE.mapLeft(userInfoClientErrorToInteractionResults)
+        TE.chain((token) =>
+          pipe(
+            userInfoClient.findUserByFederationToken(token),
+            TE.mapLeft(userInfoClientErrorToInteractionResults),
+            TE.map(constant(makeAccountIdInteractionResults(token)))
           )
         ),
-        TE.map(userInfoToInteractionResults),
         TE.toUnion,
         T.map(flow(O.some))
       )
     )
   );
 
-// eslint-disable-next-line extra-rules/no-commented-out-code
-// TODO: Refactor
 const interactionHandler =
   (
     provider: oidc.Provider,

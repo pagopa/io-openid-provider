@@ -16,19 +16,21 @@ interface ProviderConfig {
   readonly testClient: O.Option<Client>;
 }
 
-const userInfoToAccount = (userInfo: u.UserInfo): oidc.Account => ({
-  accountId: userInfo.id,
-  claims: (_use: string, _scope: string) => ({
-    sub: userInfo.id,
-  }),
-});
+const userInfoToAccount =
+  (federationToken: string) =>
+  (userInfo: u.UserInfo): oidc.Account => ({
+    accountId: federationToken,
+    claims: (_use: string, _scope: string) => ({
+      sub: userInfo.fiscalCode,
+    }),
+  });
 
 const findAccountAdapter =
   (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
-  (_, id) =>
+  (_, accountId) =>
     f.pipe(
-      userInfoClient.findUserByFederationToken(id),
-      TE.map(userInfoToAccount),
+      userInfoClient.findUserByFederationToken(accountId),
+      TE.map(userInfoToAccount(accountId)),
       TE.mapLeft(f.constant(undefined)),
       TE.toUnion
     )();
@@ -82,7 +84,7 @@ const makeProvider = (
 
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
-    // .concact just to transform an immutable to a mutable array
+    // .concat just to transform an immutable to a mutable array
     clients: staticClients(config.provider).concat(),
     features,
     findAccount: findAccountAdapter(userInfoClient),

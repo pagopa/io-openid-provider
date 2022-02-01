@@ -6,7 +6,7 @@ import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
 import * as c from "./config";
 import * as logger from "./logger";
-import * as userinfo from "./userinfo/constUserInfoClient";
+import * as userinfo from "./userinfo/ioUserInfoClient";
 
 const start = (application: Application, log: logger.Logger): void => {
   log.info("Starting application");
@@ -29,7 +29,12 @@ const main = pipe(
   E.Do,
   E.bind("conf", () => c.parseConfig(process.env)),
   E.bind("log", ({ conf }) => E.right(logger.makeLogger(conf.logger))),
-  E.bind("userInfoClient", () => E.right(userinfo.makeConstUserInfoClient())),
+  E.bind("client", ({ conf }) =>
+    E.right(userinfo.makeIOBackendClient(conf.IOBackend.baseURL))
+  ),
+  E.bind("userInfoClient", ({ client }) =>
+    E.right(userinfo.makeIOUserInfoClient(client))
+  ),
   E.bind("app", ({ conf, log, userInfoClient }) =>
     E.right(
       makeApplication(
