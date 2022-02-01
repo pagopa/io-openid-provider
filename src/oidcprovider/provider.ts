@@ -89,6 +89,9 @@ const makeProvider = (
   const providerConfig: oidc.Configuration = {
     ...adapterConfig,
     // .concat just to transform an immutable to a mutable array
+    claims: {
+      profile: ["family_name", "given_name", "name"],
+    },
     clients: staticClients(config.provider).concat(),
     features,
     findAccount: findAccountAdapter(userInfoClient),
@@ -97,7 +100,7 @@ const makeProvider = (
       authorization: "/oauth/authorize",
       registration: "/connect/register",
     },
-    scopes: ["openid"],
+    scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],
   };
   return new oidc.Provider(
