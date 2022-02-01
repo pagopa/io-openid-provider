@@ -3,9 +3,9 @@ import * as config from "../../config";
 import * as oidc from "oidc-provider";
 import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
+import * as u from "../../userinfo";
 import * as packageJson from "../../../package.json";
 import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
-import { UserInfo } from "../../userinfo";
 
 const validConfig: config.Config = {
   provider: {
@@ -69,10 +69,10 @@ const validUserIdentity: UserIdentity = {
   fiscal_code: fiscalCode,
   date_of_birth: new Date(),
 };
-const validUserInfo: UserInfo = {
+const validUserInfo: u.UserInfo = {
   familyName: validUserIdentity.family_name,
   fiscalCode: validUserIdentity.fiscal_code,
-  name: validUserIdentity.name,
+  givenName: validUserIdentity.name,
 };
 
 export {
