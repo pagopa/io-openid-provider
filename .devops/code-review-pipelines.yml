@@ -48,6 +48,7 @@ stages:
 
       - job: validate_api_specification     
         steps:
+        - template: templates/node-job-setup/template.yaml@pagopaCommons
         - script: |
             yarn validate
           displayName: 'Validate API specifications'
