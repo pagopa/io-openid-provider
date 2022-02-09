@@ -30,10 +30,7 @@ const findUserBySession =
       federationToken,
       getUserInfoFromIOBackend(client),
       TE.chainW(
-        f.flow(
-          TE.fromEither,
-          TE.mapLeft((_) => I.toError("decoding"))
-        )
+        f.flow(TE.fromEither, TE.mapLeft(f.constant(I.toError("decoding"))))
       ),
       TE.chain((response) => {
         switch (response.status) {
@@ -44,7 +41,6 @@ const findUserBySession =
           case 401:
             return TE.left(I.toError("invalidToken"));
           case 500:
-            return TE.left(I.toError("unknown"));
           default:
             return TE.left(I.toError("unknown"));
         }
