@@ -1,6 +1,5 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import * as f from "fp-ts/function";
-import nodeFetch from "node-fetch";
 import * as authClient from "../generated/clients/io-auth/client";
 import { UserIdentity } from "../generated/clients/io-auth/UserIdentity";
 import { Client, createClient } from "../generated/clients/io-auth/client";
@@ -52,10 +51,7 @@ const makeIOUserInfoClient = (client: authClient.Client): I.UserInfoClient => ({
   findUserByFederationToken: findUserBySession(client),
 });
 
-const makeIOBackendClient = (
-  baseUrl: URL,
-  fetchAPI: typeof fetch = nodeFetch as unknown as typeof fetch
-): Client =>
+const makeIOBackendClient = (baseUrl: URL, fetchAPI: typeof fetch): Client =>
   createClient({
     baseUrl: baseUrl.href,
     fetchApi: fetchAPI,

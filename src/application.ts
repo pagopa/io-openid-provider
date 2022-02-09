@@ -7,23 +7,14 @@ import { Config } from "./config";
 import { Logger } from "./logger";
 import { UserInfoClient } from "./userinfo";
 
-const makeErrorRequestHandler =
-  (logger: Logger): express.ErrorRequestHandler =>
-  (err, _req, resp, _next) => {
-    logger.error(`Something went wrong. Error: ${err}`);
-    resp
-      .status(500)
-      .send({ code: "GENERIC_ERROR", message: "Something went wrong" });
-  };
-
 type Application = express.Application;
 
 const makeApplication = (
   config: Config,
   userInfoClient: UserInfoClient,
-  logger: Logger,
+  _logger: Logger,
   // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
-  dbInMemory: boolean = false
+  dbInMemory: boolean
 ): Application => {
   const application = express();
 
@@ -41,9 +32,6 @@ const makeApplication = (
   // application.use(component.makeRouter(service0, service1, ...));
   application.use(oidcprovider.makeRouter(config, userInfoClient, dbInMemory));
   application.use(info.makeRouter(config));
-
-  // Register error handler
-  application.use(makeErrorRequestHandler(logger));
 
   application.set("port", serverConfig.port);
   application.set("hostname", serverConfig.hostname);
