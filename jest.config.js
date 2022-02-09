@@ -12,7 +12,10 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
   "modulePathIgnorePatterns": ["__tests__/utils/"],
-  "coveragePathIgnorePatterns": [ "<rootDir>/src/generated/"],
+  "coveragePathIgnorePatterns": [
+    "<rootDir>/src/generated/",
+    "<rootDir>/src/oidcprovider/dal/badredis.ts",
+  ],
   "coverageThreshold": {
     "global": {
       "branches": 70,
