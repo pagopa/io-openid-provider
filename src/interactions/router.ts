@@ -32,7 +32,7 @@ const getInteractionDetail =
   (res: express.Response) =>
     TE.tryCatch(() => provider.interactionDetails(req, res), E.toError);
 
-export const finishInteraction =
+const finishInteraction =
   (provider: oidc.Provider) =>
   (req: express.Request) =>
   (res: express.Response) =>
@@ -66,7 +66,7 @@ interface ConsumeInput {
   readonly prompt: oidc.PromptDetail;
 }
 
-export const consumeInteraction =
+const consumeInteraction =
   (provider: oidc.Provider) =>
   (userInfoClient: u.UserInfoClient) =>
   (logger: l.Logger) =>
@@ -85,8 +85,6 @@ export const consumeInteraction =
         return f.pipe(TE.of(logger.info(prompt.name)), TE.map(f.constVoid));
     }
   };
-
-export const releaseInteraction = (next: express.NextFunction) => TE.of(next());
 
 const getInteractionHandler =
   (provider: oidc.Provider) =>
