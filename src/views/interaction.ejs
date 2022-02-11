@@ -1,0 +1,12 @@
+<%- include('partials/header_bootstrap') -%>
+
+<div class="container">
+    <h1>Richiesta di consenso</h1>
+
+    <form autocomplete="off" action="<%= p_submitUrl %>" method="post">
+        <input type="hidden" name="prompt" value="consent"/>
+        <button autotype="button" class="btn btn-primary">Consenti</button>
+    </form>
+</div>
+
+<%- include('partials/footer_bootstrap') -%>
