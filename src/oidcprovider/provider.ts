@@ -41,7 +41,7 @@ const findAccountAdapter =
 
 const features = {
   devInteractions: {
-    enabled: true,
+    enabled: false,
   },
   registration: {
     enabled: true,
