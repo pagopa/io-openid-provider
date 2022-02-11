@@ -42,6 +42,19 @@ const finishInteraction =
       E.toError
     );
 
+const getClient = (provider: oidc.Provider) => (clientId: string) =>
+  f.pipe(
+    TE.tryCatch(() => provider.Client.find(clientId), E.toError),
+    TE.chain(
+      f.flow(
+        O.fromNullable,
+        TE.fromOption(f.constant(new Error("Client not found")))
+      )
+    )
+  );
+
+const wrapUnsafe = <T>(fun: () => Promise<T>) => TE.tryCatch(fun, E.toError);
+
 const authenticate =
   (userInfoClient: u.UserInfoClient) => (req: express.Request) =>
     f.pipe(
@@ -62,17 +75,42 @@ const authenticate =
       TE.toUnion
     );
 
+const renderConsent =
+  (uid: string) =>
+  (params: oidc.UnknownObject) =>
+  (prompt: oidc.PromptDetail) =>
+  (client: unknown) =>
+  (res: express.Response) =>
+    TE.fromEither(
+      E.tryCatch(
+        () =>
+          res.render("interaction", {
+            p_client: client,
+            p_details: prompt.details,
+            p_params: params,
+            p_submitUrl: `/interaction/${uid}/confirm`,
+            p_uid: uid,
+          }),
+        E.toError
+      )
+    );
+
 interface ConsumeInput {
   readonly prompt: oidc.PromptDetail;
+  readonly params: oidc.UnknownObject;
+  readonly uid: string;
+  readonly session?: {
+    readonly accountId: string;
+  };
 }
 
-const consumeInteraction =
+const interactionFun =
   (provider: oidc.Provider) =>
   (userInfoClient: u.UserInfoClient) =>
   (logger: l.Logger) =>
   (req: express.Request) =>
   (res: express.Response) =>
-  ({ prompt }: ConsumeInput): TE.TaskEither<Error, void> => {
+  ({ uid, prompt, params }: ConsumeInput) => {
     switch (prompt.name) {
       case "login":
         return f.pipe(
@@ -80,20 +118,72 @@ const consumeInteraction =
           T.chain(finishInteraction(provider)(req)(res))
         );
       case "consent":
-        return f.pipe(TE.of(logger.info("consent")), TE.map(f.constVoid));
+        return f.pipe(
+          // TODO: remove this cast
+          getClient(provider)(params.client_id as string),
+          TE.chain((client) => renderConsent(uid)(params)(prompt)(client)(res))
+        );
       default:
         return f.pipe(TE.of(logger.info(prompt.name)), TE.map(f.constVoid));
     }
   };
 
-const getInteractionHandler =
+const interactionGetHandler =
   (provider: oidc.Provider) =>
   (userInfoClient: u.UserInfoClient) =>
   (logger: l.Logger): express.Handler =>
   (req, res, next) =>
     f.pipe(
       getInteractionDetail(provider)(req)(res),
-      TE.chainW(consumeInteraction(provider)(userInfoClient)(logger)(req)(res)),
+      TE.chainW(interactionFun(provider)(userInfoClient)(logger)(req)(res)),
+      TE.bimap(
+        (_) => next(),
+        (_) => next()
+      )
+    )();
+
+const consent =
+  (provider: oidc.Provider) =>
+  ({ params, session, prompt }: ConsumeInput) =>
+    f.pipe(
+      O.fromNullable(session),
+      TE.fromOption(f.constant(new Error("no session found"))),
+      TE.map(
+        (s) =>
+          new provider.Grant({
+            accountId: s.accountId,
+            // TODO: Remove the cast
+            clientId: params.client_id as string,
+          })
+      ),
+      TE.map((grant) => {
+        // TODO: Remove this cast
+        const missingScopes =
+          (prompt.details.missingOIDCScope as ReadonlyArray<string>) || [];
+        grant.addOIDCScope(missingScopes.join(" "));
+        return grant;
+      }),
+      TE.chain((grant) => wrapUnsafe(() => grant.save())),
+      TE.map((grantId) => ({
+        consent: {
+          grantId,
+        },
+      }))
+    );
+
+export const confirmPostHandler =
+  (provider: oidc.Provider): express.Handler =>
+  (req, res, next) =>
+    f.pipe(
+      getInteractionDetail(provider)(req)(res),
+      TE.chain(consent(provider)),
+      TE.chain((result) =>
+        wrapUnsafe(() =>
+          provider.interactionFinished(req, res, result, {
+            mergeWithLastSubmission: true,
+          })
+        )
+      ),
       TE.bimap(
         (_) => next(),
         (_) => next()
@@ -109,10 +199,10 @@ const makeRouter =
 
     router.get(
       "/interaction/:uid",
-      getInteractionHandler(provider)(userInfoClient)(logger)
+      interactionGetHandler(provider)(userInfoClient)(logger)
     );
 
-    // router.post("/interaction/:uid/consent", postConsentHandler(provider)(logger))
+    router.post("/interaction/:uid/confirm", confirmPostHandler(provider));
 
     return router;
   };
