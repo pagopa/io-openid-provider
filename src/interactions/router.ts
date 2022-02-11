@@ -179,7 +179,7 @@ const confirm =
       TE.toUnion
     );
 
-export const confirmPostHandler =
+const confirmPostHandler =
   (provider: oidc.Provider): express.Handler =>
   (req, res, next) =>
     f.pipe(
