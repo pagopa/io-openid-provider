@@ -142,7 +142,7 @@ const interactionGetHandler =
       )
     )();
 
-const consent =
+const confirm =
   (provider: oidc.Provider) =>
   ({ params, session, prompt }: ConsumeInput) =>
     f.pipe(
@@ -176,7 +176,7 @@ export const confirmPostHandler =
   (req, res, next) =>
     f.pipe(
       getInteractionDetail(provider)(req)(res),
-      TE.chain(consent(provider)),
+      TE.chain(confirm(provider)),
       TE.chain((result) =>
         wrapUnsafe(() =>
           provider.interactionFinished(req, res, result, {
@@ -207,4 +207,4 @@ const makeRouter =
     return router;
   };
 
-export { makeRouter, authenticate };
+export { makeRouter, authenticate, confirm };
