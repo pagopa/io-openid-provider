@@ -108,44 +108,6 @@ interface ConsumeInput {
   };
 }
 
-const interactionFun =
-  (provider: oidc.Provider) =>
-  (userInfoClient: u.UserInfoClient) =>
-  (logger: l.Logger) =>
-  (req: express.Request) =>
-  (res: express.Response) =>
-  ({ uid, prompt, params }: ConsumeInput) => {
-    switch (prompt.name) {
-      case "login":
-        return f.pipe(
-          authenticate(userInfoClient)(req),
-          T.chain(finishInteraction(provider)(req)(res)(false))
-        );
-      case "consent":
-        return f.pipe(
-          // TODO: remove this cast
-          getClient(provider)(params.client_id as string),
-          TE.chain((client) => renderConsent(uid)(params)(prompt)(client)(res))
-        );
-      default:
-        return f.pipe(TE.of(logger.info(prompt.name)), TE.map(f.constVoid));
-    }
-  };
-
-const interactionGetHandler =
-  (provider: oidc.Provider) =>
-  (userInfoClient: u.UserInfoClient) =>
-  (logger: l.Logger): express.Handler =>
-  (req, res, next) =>
-    f.pipe(
-      getInteractionDetail(provider)(req)(res),
-      TE.chainW(interactionFun(provider)(userInfoClient)(logger)(req)(res)),
-      TE.bimap(
-        (_) => next(),
-        (_) => next()
-      )
-    )();
-
 const confirm =
   (provider: oidc.Provider) =>
   ({ params, session, prompt }: ConsumeInput) =>
@@ -179,9 +141,10 @@ const confirm =
       TE.toUnion
     );
 
-const confirmPostHandler =
-  (provider: oidc.Provider): express.Handler =>
-  (req, res, next) =>
+const confirmFun =
+  (provider: oidc.Provider) =>
+  (req: express.Request) =>
+  (res: express.Response) =>
     f.pipe(
       getInteractionDetail(provider)(req)(res),
       TE.chain(
@@ -189,7 +152,58 @@ const confirmPostHandler =
           confirm(provider),
           T.chain(finishInteraction(provider)(req)(res)(true))
         )
-      ),
+      )
+    );
+
+const confirmPostHandler =
+  (provider: oidc.Provider): express.Handler =>
+  (req, res, next) =>
+    f.pipe(
+      confirmFun(provider)(req)(res),
+      TE.bimap(
+        (_) => next(),
+        (_) => next()
+      )
+    )();
+
+const interactionFun =
+  (provider: oidc.Provider) =>
+  (userInfoClient: u.UserInfoClient) =>
+  (logger: l.Logger) =>
+  (req: express.Request) =>
+  (res: express.Response) =>
+  ({ uid, prompt, params }: ConsumeInput) => {
+    switch (prompt.name) {
+      case "login":
+        return f.pipe(
+          authenticate(userInfoClient)(req),
+          T.chain(finishInteraction(provider)(req)(res)(false))
+        );
+      case "consent":
+        return f.pipe(
+          // TODO: remove this cast
+          getClient(provider)(params.client_id as string),
+          TE.chain((client) => {
+            if (client.bypass_consent) {
+              return confirmFun(provider)(req)(res);
+            } else {
+              return renderConsent(uid)(params)(prompt)(client)(res);
+            }
+          })
+        );
+      default:
+        return f.pipe(TE.of(logger.info(prompt.name)), TE.map(f.constVoid));
+    }
+  };
+
+const interactionGetHandler =
+  (provider: oidc.Provider) =>
+  (userInfoClient: u.UserInfoClient) =>
+  (logger: l.Logger): express.Handler =>
+  (req, res, next) =>
+    f.pipe(
+      getInteractionDetail(provider)(req)(res),
+      TE.chainW(interactionFun(provider)(userInfoClient)(logger)(req)(res)),
       TE.bimap(
         (_) => next(),
         (_) => next()

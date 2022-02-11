@@ -93,6 +93,9 @@ const makeProvider = (
       profile: ["family_name", "given_name", "name"],
     },
     clients: staticClients(config.provider).concat(),
+    extraClientMetadata: {
+      properties: ["bypass_consent"],
+    },
     features,
     findAccount: findAccountAdapter(userInfoClient),
     responseTypes: ["id_token"],
