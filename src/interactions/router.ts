@@ -36,9 +36,13 @@ const finishInteraction =
   (provider: oidc.Provider) =>
   (req: express.Request) =>
   (res: express.Response) =>
+  (mergeWithLastSubmission: boolean) =>
   (result: oidc.InteractionResults) =>
     TE.tryCatch(
-      () => provider.interactionFinished(req, res, result),
+      () =>
+        provider.interactionFinished(req, res, result, {
+          mergeWithLastSubmission,
+        }),
       E.toError
     );
 
@@ -115,7 +119,7 @@ const interactionFun =
       case "login":
         return f.pipe(
           authenticate(userInfoClient)(req),
-          T.chain(finishInteraction(provider)(req)(res))
+          T.chain(finishInteraction(provider)(req)(res)(false))
         );
       case "consent":
         return f.pipe(
@@ -164,11 +168,15 @@ const confirm =
         return grant;
       }),
       TE.chain((grant) => wrapUnsafe(() => grant.save())),
-      TE.map((grantId) => ({
-        consent: {
-          grantId,
-        },
-      }))
+      TE.bimap(
+        () => unauthorizedInteractionResult,
+        (grantId) => ({
+          consent: {
+            grantId,
+          },
+        })
+      ),
+      TE.toUnion
     );
 
 export const confirmPostHandler =
@@ -176,12 +184,10 @@ export const confirmPostHandler =
   (req, res, next) =>
     f.pipe(
       getInteractionDetail(provider)(req)(res),
-      TE.chain(confirm(provider)),
-      TE.chain((result) =>
-        wrapUnsafe(() =>
-          provider.interactionFinished(req, res, result, {
-            mergeWithLastSubmission: true,
-          })
+      TE.chain(
+        f.flow(
+          confirm(provider),
+          T.chain(finishInteraction(provider)(req)(res)(true))
         )
       ),
       TE.bimap(

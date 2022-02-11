@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as oidc from "oidc-provider";
 import * as TE from "fp-ts/TaskEither";
 import * as records from "../../__tests__/utils/records";
 import * as phonies from "../../__tests__/utils/phonies";
@@ -44,5 +45,18 @@ describe("authenticate", () => {
     };
     expect(actual).toStrictEqual(expected);
     expect(mockUserInfoClient.findUserByFederationToken).toBeCalledTimes(1);
+  });
+});
+
+describe("confirm", () => {
+  it("should return a valid grant identifier", async () => {
+    const provider = new oidc.Provider("http://localhost");
+    const input = records.interaction.consent;
+
+    const actual = await _.confirm(provider)(input)();
+
+    const grant = await provider.Grant.find(actual.consent?.grantId || "");
+
+    expect(grant).not.toStrictEqual(undefined);
   });
 });
