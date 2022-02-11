@@ -102,6 +102,10 @@ const makeProvider = (
     },
     scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],
+    ttl: {
+      Interaction: 60 * 5,
+      Session: 60,
+    },
   };
   return new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
