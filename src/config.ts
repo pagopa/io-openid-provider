@@ -48,7 +48,7 @@ const envDecoder = D.struct({
   ),
   PORT: D.string,
   REDIS_KEY_PREFIX: D.string,
-  REDIS_URL: D.string,
+  REDIS_URL: D.compose(decoders.UrlFromString)(D.string),
   SERVER_HOSTNAME: D.string,
   TEST_CLIENT_ID: decoders.option(D.string),
   TEST_CLIENT_REDIRECT_URI: decoders.option(
