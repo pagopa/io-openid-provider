@@ -29,7 +29,7 @@ const validConfig: config.Config = {
     logName: "application",
   },
   redis: {
-    url: new URL("http://localhost:3791"),
+    url: "http://localhost:3791",
     keyPrefix: "oidc:",
   },
 };
