@@ -8,6 +8,9 @@ import { Config } from "./config";
 import { Logger } from "./logger";
 import { UserInfoClient } from "./userinfo";
 
+// TODO: Remove in produciton
+const ENBALE_HELMET = false;
+
 type Application = express.Application;
 
 const makeApplication = (
@@ -20,7 +23,9 @@ const makeApplication = (
   const application = express();
 
   // Enable helmet
-  application.use(helmet());
+  if (ENBALE_HELMET) {
+    application.use(helmet());
+  }
   // Add a middleware that parses JSON HTTP
   // request bodies into JavaScript objects
   application.use(express.json());
