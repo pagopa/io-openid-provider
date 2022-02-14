@@ -41,7 +41,7 @@ Those are all Environment variables needed by the application:
 | Variable name            | Description                                                | type   |
 |--------------------------|------------------------------------------------------------|--------|
 | SERVER_HOSTNAME          | The HOSTNAME the Express server is listening to            | string |
-| SERVER_PORT              | The HTTP port the Express server is listening to           | string |
+| PORT                     | The HTTP port the Express server is listening to           | string |
 | LOG_LEVEL                | The level of the logger                                    | string |
 | APPLICATION_NAME         | The name of the application, used as prefix for the logger | string |
 | TEST_CLIENT_ID           | The client_id of the test client                           | string |

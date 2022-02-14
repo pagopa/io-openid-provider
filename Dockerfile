@@ -17,7 +17,7 @@ COPY --chown=node:node --from=build /app/dist /app/package.json /app/yarn.lock /
 
 ENV NODE_ENV=production
 ENV LOG_LEVEL=error
-ENV SERVER_PORT=3000
+ENV PORT=3000
 ENV SERVER_HOSTNAME=0.0.0.0
 ENV APPLICATION_NAME=openid-provider
 

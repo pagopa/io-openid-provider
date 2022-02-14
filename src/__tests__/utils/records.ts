@@ -39,7 +39,7 @@ const validEnv = {
   TEST_CLIENT_ID: "client-id",
   TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
-  SERVER_PORT: "3000",
+  PORT: "3000",
   LOG_LEVEL: "debug",
   APPLICATION_NAME: "application",
   REDIS_URL: "http://localhost:3791",
