@@ -21,4 +21,5 @@ ENV APPLICATION_NAME=openid-provider
 
 RUN yarn --frozen-lockfile && yarn cache clean --force
 
+EXPOSE 3000
 CMD ["node", "/app/src/main.js"]
