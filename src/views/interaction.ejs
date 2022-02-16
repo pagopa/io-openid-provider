@@ -1,0 +1,37 @@
+<%- include('partials/header_bootstrap') -%>
+
+<% missingOIDCScope = new Set(p_details.missingOIDCScope); missingOIDCScope.delete('openid'); missingOIDCScope.delete('offline_access') %>
+
+<div class="container px-3 mt-3">
+    <h3>Autorizzi l'invio dei dati?</h3>
+    <p>I seguenti dati stanno per essere condivisi con <strong><%= p_client.clientName %> </strong></p>
+
+    <div class="it-list-wrapper">
+      <ul class="it-list">
+        <% if (missingOIDCScope.size) { %>
+            <% missingOIDCScope.forEach((scope) => { %>
+              <li class="py-2 border-bottom">
+                  <div class="it-right-zone">
+                      <span class="text"><%= scope %></span>
+                  </div>
+              </li>
+            <% }) %>
+        <% } %>
+      </ul>
+    </div>
+
+    <form autocomplete="off" action="<%= p_submitUrl %>" method="post" class="fixed-bottom mt-5 px-3">
+        <input type="hidden" name="prompt" value="consent"/>
+        <div class="form-row">
+            <div class="form-group col-4">
+              <a class="btn btn-block btn-sm btn-outline-primary" href="/interaction/<%= p_uid %>/abort">Annulla</a>
+            </div>
+            <div class="fom-group col-8">
+              <button autotype="button" class="btn btn-block btn-sm btn-primary">Conferma</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<%- include('partials/footer_bootstrap') -%>

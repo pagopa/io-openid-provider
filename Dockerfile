@@ -9,19 +9,17 @@ RUN yarn --frozen-lockfile && yarn run build
 # Step 2 - Prepare production image
 FROM node:14.17.6-alpine
 
-RUN yarn global add pm2
-
 USER node
 WORKDIR /app
 COPY --chown=node:node --from=build /app/dist /app/package.json /app/yarn.lock /app/
 
 ENV NODE_ENV=production
-ENV LOG_LEVEL=error
-ENV SERVER_PORT=3000
+ENV LOG_LEVEL=silly
+ENV PORT=3000
 ENV SERVER_HOSTNAME=0.0.0.0
 ENV APPLICATION_NAME=openid-provider
 
 RUN yarn --frozen-lockfile && yarn cache clean --force
 
 EXPOSE 3000
-CMD ["pm2-runtime", "/app/src/main.js"]
+CMD ["node", "/app/src/main.js"]

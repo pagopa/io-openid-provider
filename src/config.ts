@@ -46,10 +46,10 @@ const envDecoder = D.struct({
     "debug",
     "silly"
   ),
+  PORT: D.string,
   REDIS_KEY_PREFIX: D.string,
   REDIS_URL: D.compose(decoders.UrlFromString)(D.string),
   SERVER_HOSTNAME: D.string,
-  SERVER_PORT: D.string,
   TEST_CLIENT_ID: decoders.option(D.string),
   TEST_CLIENT_REDIRECT_URI: decoders.option(
     D.compose(decoders.UrlFromString)(D.string)
@@ -88,7 +88,7 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
   },
   server: {
     hostname: str.SERVER_HOSTNAME,
-    port: str.SERVER_PORT,
+    port: str.PORT,
   },
 });
 

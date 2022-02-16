@@ -1,6 +1,5 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
-import * as oidc from "oidc-provider";
 import * as O from "fp-ts/Option";
 import { tuple } from "fp-ts/lib/function";
 import * as u from "../../userinfo";
@@ -40,7 +39,7 @@ const validEnv = {
   TEST_CLIENT_ID: "client-id",
   TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
-  SERVER_PORT: "3000",
+  PORT: "3000",
   LOG_LEVEL: "debug",
   APPLICATION_NAME: "application",
   REDIS_URL: "http://localhost:3791",
@@ -50,15 +49,19 @@ const validEnvAndConfig = () => {
   return tuple(validEnv, validConfig);
 };
 
-const loginPromptDetail: oidc.PromptDetail = {
-  name: "login",
-  reasons: [],
-  details: {},
-};
-const consentPromptDetail: oidc.PromptDetail = {
-  name: "consent",
-  reasons: [],
-  details: {},
+const interaction = {
+  consent: {
+    params: {},
+    session: {
+      accountId: "account-id",
+    },
+    prompt: {
+      name: "consent",
+      reasons: [],
+      details: {},
+    },
+    uid: "this-is-uid",
+  },
 };
 
 const fiscalCode = "TMMEXQ60A10Y526X" as FiscalCode;
@@ -79,8 +82,7 @@ export {
   validEnvAndConfig,
   validEnv,
   validConfig,
-  loginPromptDetail,
-  consentPromptDetail,
+  interaction,
   validUserIdentity,
   validUserInfo,
   fiscalCode,

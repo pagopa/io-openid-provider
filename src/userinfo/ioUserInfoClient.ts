@@ -1,6 +1,5 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import * as f from "fp-ts/function";
-import nodeFetch from "node-fetch";
 import * as authClient from "../generated/clients/io-auth/client";
 import { UserIdentity } from "../generated/clients/io-auth/UserIdentity";
 import { Client, createClient } from "../generated/clients/io-auth/client";
@@ -30,10 +29,7 @@ const findUserBySession =
       federationToken,
       getUserInfoFromIOBackend(client),
       TE.chainW(
-        f.flow(
-          TE.fromEither,
-          TE.mapLeft((_) => I.toError("decoding"))
-        )
+        f.flow(TE.fromEither, TE.mapLeft(f.constant(I.toError("decoding"))))
       ),
       TE.chain((response) => {
         switch (response.status) {
@@ -44,7 +40,6 @@ const findUserBySession =
           case 401:
             return TE.left(I.toError("invalidToken"));
           case 500:
-            return TE.left(I.toError("unknown"));
           default:
             return TE.left(I.toError("unknown"));
         }
@@ -56,10 +51,7 @@ const makeIOUserInfoClient = (client: authClient.Client): I.UserInfoClient => ({
   findUserByFederationToken: findUserBySession(client),
 });
 
-const makeIOBackendClient = (
-  baseUrl: URL,
-  fetchAPI: typeof fetch = nodeFetch as unknown as typeof fetch
-): Client =>
+const makeIOBackendClient = (baseUrl: URL, fetchAPI: typeof fetch): Client =>
   createClient({
     baseUrl: baseUrl.href,
     fetchApi: fetchAPI,

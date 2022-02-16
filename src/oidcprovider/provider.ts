@@ -41,7 +41,7 @@ const findAccountAdapter =
 
 const features = {
   devInteractions: {
-    enabled: true,
+    enabled: false,
   },
   registration: {
     enabled: true,
@@ -93,6 +93,9 @@ const makeProvider = (
       profile: ["family_name", "given_name", "name"],
     },
     clients: staticClients(config.provider).concat(),
+    extraClientMetadata: {
+      properties: ["bypass_consent"],
+    },
     features,
     findAccount: findAccountAdapter(userInfoClient),
     responseTypes: ["id_token"],
@@ -102,6 +105,10 @@ const makeProvider = (
     },
     scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],
+    ttl: {
+      Interaction: 60 * 5,
+      Session: 60,
+    },
   };
   return new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,

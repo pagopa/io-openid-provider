@@ -1,79 +1,9 @@
 import express from "express";
-import * as oidc from "oidc-provider";
-import * as O from "fp-ts/Option";
-import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
-import { constant, flow, pipe } from "fp-ts/lib/function";
 import { Config } from "src/config";
 import * as u from "src/userinfo";
-import * as strings from "@pagopa/ts-commons/lib/strings";
+import * as interactions from "../interactions/router";
+import * as l from "../logger";
 import * as p from "./provider";
-
-// TODO: Move to environment
-const cookieKey = "X-IO-Federation-Token";
-const extractIOFederationToken = (req: express.Request): O.Option<string> =>
-  pipe(req.cookies[cookieKey], strings.NonEmptyString.decode, O.fromEither);
-
-const makeAccountIdInteractionResults = (
-  id: u.FederationToken
-): oidc.InteractionResults => ({
-  login: {
-    accountId: id,
-  },
-});
-
-const userInfoClientErrorToInteractionResults = (
-  error: u.UserInfoClientError
-): oidc.InteractionResults => ({
-  error: error.errorType,
-  error_description: "Unauthorized",
-});
-
-const interactionLogic = (
-  userInfoClient: u.UserInfoClient,
-  req: express.Request,
-  detail: oidc.PromptDetail
-): T.Task<O.Option<oidc.InteractionResults>> =>
-  pipe(
-    O.of(detail),
-    O.filter((_) => _.name === "login"),
-    O.fold(constant(T.of(O.none)), (_) =>
-      pipe(
-        // extract the token from request
-        extractIOFederationToken(req),
-        TE.fromOption(constant({ error: "unauthorized" })),
-        // find the user given the token
-        TE.chain((token) =>
-          pipe(
-            userInfoClient.findUserByFederationToken(token),
-            TE.mapLeft(userInfoClientErrorToInteractionResults),
-            TE.map(constant(makeAccountIdInteractionResults(token)))
-          )
-        ),
-        TE.toUnion,
-        T.map(flow(O.some))
-      )
-    )
-  );
-
-const interactionHandler =
-  (
-    provider: oidc.Provider,
-    userInfoClient: u.UserInfoClient
-  ): express.Handler =>
-  (req, res, next) =>
-    pipe(
-      constant(provider.interactionDetails(req, res)),
-      T.chain((interaction) =>
-        interactionLogic(userInfoClient, req, interaction.prompt)
-      ),
-      T.chain(
-        O.fold(
-          () => constant(Promise.reject(next())),
-          (result) => constant(provider.interactionFinished(req, res, result))
-        )
-      )
-    )();
 
 const makeRouter = (
   config: Config,
@@ -84,11 +14,15 @@ const makeRouter = (
 
   const router = express.Router();
 
-  router.get("/interaction/:uid", interactionHandler(provider, userInfoClient));
+  router.use(
+    interactions.makeRouter(provider)(userInfoClient)(
+      l.makeLogger(config.logger)
+    )
+  );
 
   router.use("/", provider.callback());
 
   return router;
 };
 
-export { makeRouter, extractIOFederationToken, interactionLogic };
+export { makeRouter };

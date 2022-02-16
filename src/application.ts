@@ -1,3 +1,4 @@
+import * as path from "path";
 import express from "express";
 import helmet from "helmet";
 import * as cookies from "cookie-parser";
@@ -7,33 +8,35 @@ import { Config } from "./config";
 import { Logger } from "./logger";
 import { UserInfoClient } from "./userinfo";
 
-const makeErrorRequestHandler =
-  (logger: Logger): express.ErrorRequestHandler =>
-  (err, _req, resp, _next) => {
-    logger.error(`Something went wrong. Error: ${err}`);
-    resp
-      .status(500)
-      .send({ code: "GENERIC_ERROR", message: "Something went wrong" });
-  };
+// TODO: Remove in produciton
+const ENBALE_HELMET = false;
 
 type Application = express.Application;
 
 const makeApplication = (
   config: Config,
   userInfoClient: UserInfoClient,
-  logger: Logger,
+  _logger: Logger,
   // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
-  dbInMemory: boolean = false
+  dbInMemory: boolean
 ): Application => {
   const application = express();
 
   // Enable helmet
-  application.use(helmet());
+  if (ENBALE_HELMET) {
+    application.use(helmet());
+  }
   // Add a middleware that parses JSON HTTP
   // request bodies into JavaScript objects
   application.use(express.json());
   // Add a middleware that parse cookies
   application.use(cookies.default());
+  // Serve static files
+  application.use(express.static(path.join(__dirname, "../public")));
+
+  // Template engine configuration
+  application.set("views", path.join(__dirname, "../views"));
+  application.set("view engine", "ejs");
 
   const serverConfig = config.server;
 
@@ -41,9 +44,6 @@ const makeApplication = (
   // application.use(component.makeRouter(service0, service1, ...));
   application.use(oidcprovider.makeRouter(config, userInfoClient, dbInMemory));
   application.use(info.makeRouter(config));
-
-  // Register error handler
-  application.use(makeErrorRequestHandler(logger));
 
   application.set("port", serverConfig.port);
   application.set("hostname", serverConfig.hostname);
