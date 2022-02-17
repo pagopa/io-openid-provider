@@ -8,17 +8,14 @@ import * as p from "./provider";
 const makeRouter = (
   config: Config,
   userInfoClient: u.UserInfoClient,
+  logger: l.Logger,
   dbInMemory: boolean
 ): express.Router => {
   const provider = p.makeProvider(config, userInfoClient, dbInMemory);
 
   const router = express.Router();
 
-  router.use(
-    interactions.makeRouter(provider)(userInfoClient)(
-      l.makeLogger(config.logger)
-    )
-  );
+  router.use(interactions.makeRouter(provider)(userInfoClient)(logger));
 
   router.use("/", provider.callback());
 

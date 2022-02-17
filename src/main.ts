@@ -5,11 +5,11 @@ import { Application } from "express";
 import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
 import * as c from "./config";
-import * as logger from "./logger";
+import * as l from "./logger";
 import * as fetch from "./utils/fetch";
 import * as userinfo from "./userinfo/ioUserInfoClient";
 
-const start = (application: Application, log: logger.Logger): void => {
+const start = (application: Application, log: l.Logger): void => {
   log.info("Starting application");
   const server = http.createServer(application);
   const port = application.get("port");
@@ -19,36 +19,30 @@ const start = (application: Application, log: logger.Logger): void => {
 };
 
 const exit = (parseError: D.DecodeError): void => {
-  const log = logger.makeLogger({ logLevel: "error", logName: "main" });
+  const log = l.makeLogger({ logLevel: "error", logName: "main" });
   log.error(`Shutting down application ${D.draw(parseError)}`);
   process.exit(1);
 };
 
 // TODO: add graceful shutdown
-
 const main = pipe(
-  E.Do,
-  E.bind("conf", () => c.parseConfig(process.env)),
-  E.bind("log", ({ conf }) => E.right(logger.makeLogger(conf.logger))),
-  E.bind("client", ({ conf }) =>
-    E.right(
-      userinfo.makeIOBackendClient(conf.IOBackend.baseURL, fetch.timeoutFetch)
-    )
-  ),
-  E.bind("userInfoClient", ({ client }) =>
-    E.right(userinfo.makeIOUserInfoClient(client))
-  ),
-  E.bind("app", ({ conf, log, userInfoClient }) =>
-    E.right(
-      makeApplication(
-        conf,
-        userInfoClient,
-        logger.makeSubLogger(log, "application"),
-        false
-      )
-    )
-  ),
-  E.map(({ app, log }) => start(app, log))
+  c.parseConfig(process.env),
+  E.map((config) => {
+    const ioBackendClient = userinfo.makeIOBackendClient(
+      config.IOBackend.baseURL,
+      fetch.timeoutFetch
+    );
+    const userInfoClient = userinfo.makeIOUserInfoClient(ioBackendClient);
+    const logger = l.makeLogger(config.logger);
+    const dbInMemory = false;
+    const application = makeApplication(
+      config,
+      userInfoClient,
+      logger,
+      dbInMemory
+    );
+    start(application, logger);
+  })
 );
 
 E.getOrElse(exit)(main);
