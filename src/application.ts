@@ -8,22 +8,22 @@ import { Config } from "./config";
 import { Logger } from "./logger";
 import { UserInfoClient } from "./userinfo";
 
-// TODO: Remove in produciton
-const ENBALE_HELMET = false;
+// TODO: Remove in production
+const ENABLE_HELMET = false;
 
 type Application = express.Application;
 
 const makeApplication = (
   config: Config,
   userInfoClient: UserInfoClient,
-  _logger: Logger,
+  logger: Logger,
   // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
   dbInMemory: boolean
 ): Application => {
   const application = express();
 
   // Enable helmet
-  if (ENBALE_HELMET) {
+  if (ENABLE_HELMET) {
     application.use(helmet());
   }
   // Add a middleware that parses JSON HTTP
@@ -42,7 +42,9 @@ const makeApplication = (
 
   // Register routers
   // application.use(component.makeRouter(service0, service1, ...));
-  application.use(oidcprovider.makeRouter(config, userInfoClient, dbInMemory));
+  application.use(
+    oidcprovider.makeRouter(config, userInfoClient, logger, dbInMemory)
+  );
   application.use(info.makeRouter(config));
 
   application.set("port", serverConfig.port);
