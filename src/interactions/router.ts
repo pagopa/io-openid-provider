@@ -6,12 +6,13 @@ import * as TE from "fp-ts/TaskEither";
 import { FederationToken, IdentityService } from "../identities/service";
 import { Logger } from "../logger";
 import { ErrorType, ProviderService } from "./service";
+import { makeCustomInteractionError } from "./domain";
 
 const confirmPostHandler =
   (providerService: ProviderService): express.Handler =>
   (req, res, next) =>
     pipe(
-      // retrieve the interation from request
+      // retrieve the interaction from request
       providerService.getInteraction(req, res),
       // create the grant given the interaction
       TE.chain((interaction) =>
@@ -21,7 +22,7 @@ const confirmPostHandler =
       TE.toUnion,
       // finish the interaction
       T.chain((result) => providerService.finishInteraction(req, res, result)),
-      // the finishInteraction can end in a error,
+      // the finishInteraction can end in an error,
       // in this case call next
       TE.mapLeft((_error) => next())
     )();
@@ -43,7 +44,9 @@ const interactionGetHandler =
               // extract the token
               req.cookies[federationTokenKey],
               FederationToken.decode,
-              E.mapLeft((_errors) => ({ error: ErrorType.accessDenied })),
+              E.mapLeft((_errors) =>
+                makeCustomInteractionError(ErrorType.accessDenied)
+              ),
               TE.fromEither,
               // given the token validate it, then returns the
               // identity AND the federation token, because
@@ -52,7 +55,8 @@ const interactionGetHandler =
                 pipe(
                   identityService.authenticate(federationToken),
                   TE.bimap(
-                    (_error) => ({ error: ErrorType.accessDenied }),
+                    (_error) =>
+                      makeCustomInteractionError(ErrorType.accessDenied),
                     (identity) => ({ federationToken, identity })
                   )
                 )
@@ -90,27 +94,31 @@ const interactionGetHandler =
                           p_submitUrl: `/interaction/${interaction.uid}/confirm`,
                           p_uid: interaction.uid,
                         }),
-                      (_) => ({ error: ErrorType.internalError })
+                      (_) => makeCustomInteractionError(ErrorType.internalError)
                     )
                   );
                 }
               }),
               TE.orElse((_error) =>
-                providerService.finishInteraction(req, res, {
-                  error: ErrorType.internalError,
-                })
+                providerService.finishInteraction(
+                  req,
+                  res,
+                  makeCustomInteractionError(ErrorType.internalError)
+                )
               )
             );
           default:
-            return providerService.finishInteraction(req, res, {
-              error: ErrorType.internalError,
-            });
+            return providerService.finishInteraction(
+              req,
+              res,
+              makeCustomInteractionError(ErrorType.internalError)
+            );
         }
       }),
       TE.mapLeft((_error) => next())
     )();
 
-/* Returns the router that handle interations */
+/* Returns the router that handle interactions */
 const makeRouter = (
   providerService: ProviderService,
   identityService: IdentityService,

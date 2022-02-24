@@ -1,7 +1,7 @@
 import winston from "winston";
 
 type Logger = winston.Logger;
-// TODO: This levels are taken from winston.config.NpmConfigSetLevels,
+// These levels are taken from winston.config.NpmConfigSetLevels,
 // so use something like keyof winston.config.NpmConfigSetLevels
 type LogLevel =
   | "error"

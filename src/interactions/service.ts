@@ -1,66 +1,19 @@
 import express from "express";
-import * as t from "io-ts";
 import * as PR from "io-ts/PathReporter";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
+import { Task } from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Logger } from "../logger";
-import { FederationToken } from "../identities/service";
-
-// this type is a mapping of oidc.Interaction
-// useful to improve typing
-const CustomInteraction = t.intersection([
-  t.type({
-    params: t.type({
-      client_id: t.string,
-    }),
-    prompt: t.type({
-      details: t.partial({
-        missingOIDCScope: t.readonlyArray(t.string),
-      }),
-      name: t.union([t.literal("login"), t.literal("consent")]),
-    }),
-    uid: t.string,
-  }),
-  t.partial({
-    session: t.type({
-      accountId: t.string,
-    }),
-  }),
-]);
-type CustomInteraction = t.TypeOf<typeof CustomInteraction>;
-
-enum ErrorType {
-  internalError = "internal_error",
-  accessDenied = "access_denied",
-  invalidClient = "invalid_client",
-}
-
-// this type is a mapping of oidc.InteractionResult
-// useful to improve typing
-const CustomInteractionResult = t.union([
-  t.type({
-    login: t.type({
-      accountId: FederationToken,
-    }),
-  }),
-  t.type({
-    consent: t.type({
-      grantId: t.string,
-    }),
-  }),
-  t.type({
-    error: t.union([
-      t.literal(ErrorType.internalError),
-      t.literal(ErrorType.accessDenied),
-      t.literal(ErrorType.invalidClient),
-    ]),
-  }),
-]);
-type CustomInteractionResult = t.TypeOf<typeof CustomInteractionResult>;
+import {
+  CustomInteraction,
+  CustomInteractionResult,
+  ErrorType,
+  makeCustomInteractionError,
+} from "./domain";
 
 // Given a t.Errors return an Error
 const errorsToError = flow(
@@ -68,12 +21,12 @@ const errorsToError = flow(
   (errors) => new Error(errors.join("\n"))
 );
 
-const tryCatchWithLogTE = <A>(f: () => Promise<A>, logger: Logger) =>
+const tryCatchWithLogTE = <A>(f: Task<A>, logger: Logger) =>
   pipe(
     TE.tryCatch(f, E.toError),
     TE.mapLeft((error) => {
       logger.error("Error on tryCatchWithLogTE", error);
-      return { error: ErrorType.internalError };
+      return makeCustomInteractionError(ErrorType.internalError);
     })
   );
 
@@ -91,7 +44,7 @@ const getInteraction =
       TE.orElseFirst((error) =>
         TE.of(logger.error("getInteraction decode error", error))
       ),
-      TE.mapLeft((_error) => ({ error: ErrorType.internalError }))
+      TE.mapLeft((_) => makeCustomInteractionError(ErrorType.internalError))
     );
 
 const finishInteraction =
@@ -102,14 +55,14 @@ const finishInteraction =
     result: CustomInteractionResult
   ) =>
     pipe(
-      TE.tryCatch(
+      tryCatchWithLogTE(
         () => provider.interactionFinished(req, res, result),
-        E.toError
+        logger
       ),
       TE.orElseFirst((error) =>
         TE.of(logger.error("finishInteraction error", error))
       ),
-      TE.mapLeft((_error) => ({ error: ErrorType.internalError }))
+      TE.mapLeft((_) => makeCustomInteractionError(ErrorType.internalError))
     );
 
 const createGrant =
@@ -130,10 +83,12 @@ const createGrant =
     );
     // Persist and return the grant
     return pipe(
-      TE.fromOption(() => ({ error: ErrorType.accessDenied }))(maybeGrant),
+      TE.fromOption(() => makeCustomInteractionError(ErrorType.accessDenied))(
+        maybeGrant
+      ),
       TE.chain((grant) => tryCatchWithLogTE(() => grant.save(), logger)),
       TE.bimap(
-        (_error) => ({ error: ErrorType.internalError }),
+        (_) => makeCustomInteractionError(ErrorType.internalError),
         (grantId) => ({
           consent: {
             grantId,
@@ -147,17 +102,19 @@ const createGrant =
 const getClient =
   (provider: oidc.Provider, logger: Logger) => (clientId: string) =>
     pipe(
-      TE.tryCatch(() => provider.Client.find(clientId), E.toError),
-      // transform the error into a internal_error
+      tryCatchWithLogTE(() => provider.Client.find(clientId), logger),
+      // transform the error into an internal_error
       TE.mapLeft((error) => {
         logger.error("getClient error", error);
-        return { error: ErrorType.internalError };
+        return makeCustomInteractionError(ErrorType.internalError);
       }),
-      // transform the undefined into a invalid_client
+      // transform the undefined into an invalid_client
       TE.chain(
         flow(
           O.fromNullable,
-          TE.fromOption(() => ({ error: ErrorType.invalidClient }))
+          TE.fromOption(() =>
+            makeCustomInteractionError(ErrorType.invalidClient)
+          )
         )
       )
     );

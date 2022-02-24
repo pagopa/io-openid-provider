@@ -71,7 +71,7 @@ describe("makeIOUserInfoClient", () => {
     each(records).it(
       "should $title",
       async ({ input, responses, expected }) => {
-        const { service, mockClient } = p.makeService();
+        const { service, mockClient } = p.makeMockServices();
         const { token } = input;
         const { getUserIdentityResp } = responses;
 

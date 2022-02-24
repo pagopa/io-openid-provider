@@ -42,8 +42,6 @@ const makeApplication = (
   application.set("views", path.join(__dirname, "../views"));
   application.set("view engine", "ejs");
 
-  const serverConfig = config.server;
-
   /* Register routers */
   // router that manage the info endpoint
   application.use(info.makeRouter(config));
@@ -54,6 +52,7 @@ const makeApplication = (
   // router that manage the openid-connect endpoints
   application.use(oidcprovider.makeRouter(provider));
 
+  const serverConfig = config.server;
   application.set("port", serverConfig.port);
   application.set("hostname", serverConfig.hostname);
   return application;
