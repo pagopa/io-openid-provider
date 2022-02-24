@@ -3,12 +3,15 @@ import * as E from "fp-ts/Either";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
-import * as c from "./config";
-import * as l from "./logger";
 import * as fetch from "./utils/fetch";
+import * as oidcprovider from "./oidcprovider";
+import * as interactions from "./interactions/service";
+import * as identities from "./identities/service";
 import * as userinfo from "./userinfo/ioUserInfoClient";
+import { Logger, makeLogger } from "./logger";
+import { parseConfig } from "./config";
 
-const start = (application: Application, log: l.Logger): void => {
+const start = (application: Application, log: Logger): void => {
   log.info("Starting application");
   const server = http.createServer(application);
   const port = application.get("port");
@@ -18,27 +21,30 @@ const start = (application: Application, log: l.Logger): void => {
 };
 
 const exit = (error: string): void => {
-  const log = l.makeLogger({ logLevel: "error", logName: "main" });
+  const log = makeLogger({ logLevel: "error", logName: "main" });
   log.error(`Shutting down application ${error}`);
   process.exit(1);
 };
 
 // TODO: add graceful shutdown
 const main = pipe(
-  c.parseConfig(process.env),
+  parseConfig(process.env),
   E.map((config) => {
     const ioBackendClient = userinfo.makeIOBackendClient(
       config.IOBackend.baseURL,
       fetch.timeoutFetch
     );
     const userInfoClient = userinfo.makeIOUserInfoClient(ioBackendClient);
-    const logger = l.makeLogger(config.logger);
-    const dbInMemory = false;
+    const logger = makeLogger(config.logger);
+    const provider = oidcprovider.makeProvider(config, userInfoClient);
+    const providerService = interactions.makeService(provider, logger);
+    const identityService = identities.makeService();
     const application = makeApplication(
       config,
-      userInfoClient,
-      logger,
-      dbInMemory
+      provider,
+      providerService,
+      identityService,
+      logger
     );
     start(application, logger);
   })
