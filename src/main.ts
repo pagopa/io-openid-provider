@@ -1,6 +1,5 @@
 import * as http from "http";
 import * as E from "fp-ts/Either";
-import * as D from "io-ts/Decoder";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
 import { makeApplication } from "./application";
@@ -18,9 +17,9 @@ const start = (application: Application, log: l.Logger): void => {
   });
 };
 
-const exit = (parseError: D.DecodeError): void => {
+const exit = (error: string): void => {
   const log = l.makeLogger({ logLevel: "error", logName: "main" });
-  log.error(`Shutting down application ${D.draw(parseError)}`);
+  log.error(`Shutting down application ${error}`);
   process.exit(1);
 };
 

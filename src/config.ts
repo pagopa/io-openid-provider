@@ -1,13 +1,12 @@
-import * as O from "fp-ts/Option";
+import * as t from "io-ts";
+import * as PR from "io-ts/PathReporter";
 import * as E from "fp-ts/Either";
-import * as D from "io-ts/Decoder";
-import * as f from "fp-ts/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
+import { pipe } from "fp-ts/lib/function";
 import * as packageJson from "../package.json";
-import * as decoders from "./utils/decoders";
 import * as redis from "./oidcprovider/dal/redis";
 import * as logger from "./logger";
-import * as provider from "./oidcprovider/provider";
 
 interface ServerConfig {
   readonly hostname: string;
@@ -26,7 +25,6 @@ interface Info {
 interface Config {
   readonly info: Info;
   readonly IOBackend: IOBackend;
-  readonly provider: provider.ProviderConfig;
   readonly server: ServerConfig;
   readonly logger: logger.LogConfig;
   readonly redis: redis.RedisConfig;
@@ -34,33 +32,29 @@ interface Config {
 
 type ConfEnv = NodeJS.ProcessEnv;
 
-const envDecoder = D.struct({
-  APPLICATION_NAME: D.string,
-  IO_BACKEND_BASE_URL: D.compose(decoders.UrlFromString)(D.string),
-  LOG_LEVEL: D.literal(
-    "error",
-    "warn",
-    "info",
-    "http",
-    "verbose",
-    "debug",
-    "silly"
-  ),
-  PORT: D.string,
-  REDIS_KEY_PREFIX: D.string,
-  REDIS_URL: D.compose(decoders.UrlFromString)(D.string),
-  SERVER_HOSTNAME: D.string,
-  TEST_CLIENT_ID: decoders.option(D.string),
-  TEST_CLIENT_REDIRECT_URI: decoders.option(
-    D.compose(decoders.UrlFromString)(D.string)
-  ),
+const envDecoder = t.type({
+  APPLICATION_NAME: t.string,
+  IO_BACKEND_BASE_URL: UrlFromString,
+  LOG_LEVEL: t.keyof({
+    debug: null,
+    error: null,
+    http: null,
+    info: null,
+    silly: null,
+    verbose: null,
+    warn: null,
+  }),
+  PORT: t.string,
+  REDIS_KEY_PREFIX: t.string,
+  REDIS_URL: UrlFromString,
+  SERVER_HOSTNAME: t.string,
 });
-type EnvStruct = D.TypeOf<typeof envDecoder>;
+type EnvStruct = t.TypeOf<typeof envDecoder>;
 
 const makeConfigFromStr = (str: EnvStruct): Config => ({
   // TODO: Improve the fetch of info
   IOBackend: {
-    baseURL: str.IO_BACKEND_BASE_URL,
+    baseURL: new URL(str.IO_BACKEND_BASE_URL.href),
   },
   info: {
     name: packageJson.name as NonEmptyString,
@@ -70,21 +64,9 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
     logLevel: str.LOG_LEVEL,
     logName: str.APPLICATION_NAME,
   },
-  provider: {
-    testClient: f.pipe(
-      str.TEST_CLIENT_ID,
-      O.map((clientId) => ({
-        clientId,
-        redirectUris: f.pipe(
-          str.TEST_CLIENT_REDIRECT_URI,
-          O.fold(f.constant([]), (uri) => [uri])
-        ),
-      }))
-    ),
-  },
   redis: {
     keyPrefix: str.REDIS_KEY_PREFIX,
-    url: str.REDIS_URL,
+    url: new URL(str.REDIS_URL.href),
   },
   server: {
     hostname: str.SERVER_HOSTNAME,
@@ -92,9 +74,13 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
   },
 });
 
-const parseConfig = (processEnv: ConfEnv): E.Either<D.DecodeError, Config> => {
-  const result = envDecoder.decode({ ...processEnv });
-  return E.map(makeConfigFromStr)(result);
-};
+const parseConfig = (processEnv: ConfEnv): E.Either<string, Config> =>
+  pipe(
+    envDecoder.decode({ ...processEnv }),
+    E.bimap(
+      (errors) => PR.failure(errors).join("\n"),
+      (parsedEnvs) => makeConfigFromStr(parsedEnvs)
+    )
+  );
 
 export { Config, parseConfig };
