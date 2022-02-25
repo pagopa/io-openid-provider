@@ -21,6 +21,7 @@ const errorsToError = flow(
   (errors) => new Error(errors.join("\n"))
 );
 
+// This is just a utility method that logs if any errors occur from f
 const tryCatchWithLogTE = <A>(f: Task<A>, logger: Logger) =>
   pipe(
     TE.tryCatch(f, E.toError),
@@ -30,6 +31,7 @@ const tryCatchWithLogTE = <A>(f: Task<A>, logger: Logger) =>
     })
   );
 
+// Given a request retrieve and return an Interaction
 const getInteraction =
   (provider: oidc.Provider, logger: Logger) =>
   (req: express.Request, res: express.Response) =>
@@ -47,6 +49,8 @@ const getInteraction =
       TE.mapLeft((_) => makeCustomInteractionError(ErrorType.internalError))
     );
 
+// Finish an interaction given a Result. Finish an interaction could end
+// with a send response.
 const finishInteraction =
   (provider: oidc.Provider, logger: Logger) =>
   (
@@ -65,6 +69,7 @@ const finishInteraction =
       TE.mapLeft((_) => makeCustomInteractionError(ErrorType.internalError))
     );
 
+// Create a Grant given an Interaction
 const createGrant =
   (provider: oidc.Provider, logger: Logger) =>
   (interaction: CustomInteraction): T.Task<CustomInteractionResult> => {
