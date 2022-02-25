@@ -1,8 +1,9 @@
 import each from "jest-each";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
-import * as r from "../../__tests__/utils/records";
-import * as p from "../../__tests__/utils/phonies";
+import * as data from "../../__tests__/utils/records";
+import * as phonies from "../../__tests__/utils/phonies";
+import { IdentityServiceErrorType } from "../domain";
 
 const mkResponse = (status: number) => (value: unknown) =>
   Promise.resolve(
@@ -13,8 +14,8 @@ const mkResponse = (status: number) => (value: unknown) =>
     })
   );
 
-describe("makeIOUserInfoClient", () => {
-  describe("findUserByFederationToken", () => {
+describe("IdentityService", () => {
+  describe("authenticate", () => {
     const records = [
       {
         title: "return a user info",
@@ -22,9 +23,9 @@ describe("makeIOUserInfoClient", () => {
           token: "this-is-the-token",
         },
         responses: {
-          getUserIdentityResp: mkResponse(200)(r.validUserIdentity),
+          getUserIdentityResp: mkResponse(200)(data.validUserIdentity),
         },
-        expected: E.right(r.validUserInfo),
+        expected: E.right(data.validIdentity),
       },
       {
         title: "manage unknown error",
@@ -34,7 +35,7 @@ describe("makeIOUserInfoClient", () => {
         responses: {
           getUserIdentityResp: Promise.reject("don't care"),
         },
-        expected: E.left(p.getExpectedError("unknown")),
+        expected: E.left(IdentityServiceErrorType.otherError),
       },
       {
         title: "return invalid token error given a 401 response",
@@ -42,9 +43,9 @@ describe("makeIOUserInfoClient", () => {
           token: "this-is-the-token",
         },
         responses: {
-          getUserIdentityResp: mkResponse(401)(r.validUserIdentity),
+          getUserIdentityResp: mkResponse(401)(data.validUserIdentity),
         },
-        expected: E.left(p.getExpectedError("invalidToken")),
+        expected: E.left(IdentityServiceErrorType.invalidToken),
       },
       {
         title: "return bad request error given a 400 response",
@@ -52,9 +53,9 @@ describe("makeIOUserInfoClient", () => {
           token: "this-is-the-token",
         },
         responses: {
-          getUserIdentityResp: mkResponse(400)(r.validUserIdentity),
+          getUserIdentityResp: mkResponse(400)(data.validUserIdentity),
         },
-        expected: E.left(p.getExpectedError("badRequest")),
+        expected: E.left(IdentityServiceErrorType.badRequest),
       },
       {
         title: "return unknown error given a 501 response",
@@ -62,23 +63,26 @@ describe("makeIOUserInfoClient", () => {
           token: "this-is-the-token",
         },
         responses: {
-          getUserIdentityResp: mkResponse(501)(r.validUserIdentity),
+          getUserIdentityResp: mkResponse(501)(data.validUserIdentity),
         },
-        expected: E.left(p.getExpectedError("unknown")),
+        expected: E.left(IdentityServiceErrorType.otherError),
       },
     ];
 
     each(records).it(
       "should $title",
       async ({ input, responses, expected }) => {
-        const { service, mockClient } = p.makeMockServices();
+        const { identityService, mockAuthClient } =
+          phonies.makeIdentityService();
         const { token } = input;
         const { getUserIdentityResp } = responses;
 
         const functionRecorded =
-          mockClient.getUserIdentity.mockReturnValueOnce(getUserIdentityResp);
+          mockAuthClient.getUserIdentity.mockReturnValueOnce(
+            getUserIdentityResp
+          );
 
-        const actual = await service.findUserByFederationToken(token)();
+        const actual = await identityService.authenticate(token)();
 
         expect(functionRecorded).toHaveBeenCalledWith({
           Bearer: `Bearer ${token}`,

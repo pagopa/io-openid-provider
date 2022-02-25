@@ -1,7 +1,7 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
-import * as u from "../../userinfo";
 import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
+import { Identity } from "../../identities/domain";
 import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
@@ -59,7 +59,7 @@ const validUserIdentity: UserIdentity = {
   fiscal_code: fiscalCode,
   date_of_birth: new Date(),
 };
-const validUserInfo: u.UserInfo = {
+const validIdentity: Identity = {
   familyName: validUserIdentity.family_name,
   fiscalCode: validUserIdentity.fiscal_code,
   givenName: validUserIdentity.name,
@@ -70,6 +70,6 @@ export {
   validConfig,
   interaction,
   validUserIdentity,
-  validUserInfo,
+  validIdentity,
   fiscalCode,
 };

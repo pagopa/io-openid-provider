@@ -7,7 +7,7 @@ import * as fetch from "./utils/fetch";
 import * as oidcprovider from "./oidcprovider";
 import * as interactions from "./interactions/service";
 import * as identities from "./identities/service";
-import * as userinfo from "./userinfo/ioUserInfoClient";
+import * as clients from "./clients";
 import { Logger, makeLogger } from "./logger";
 import { parseConfig } from "./config";
 
@@ -30,15 +30,14 @@ const exit = (error: string): void => {
 const main = pipe(
   parseConfig(process.env),
   E.map((config) => {
-    const ioBackendClient = userinfo.makeIOBackendClient(
+    const logger = makeLogger(config.logger);
+    const { ioAuthClient } = clients.makeIOClients(
       config.IOBackend.baseURL,
       fetch.timeoutFetch
     );
-    const userInfoClient = userinfo.makeIOUserInfoClient(ioBackendClient);
-    const logger = makeLogger(config.logger);
-    const provider = oidcprovider.makeProvider(config, userInfoClient);
+    const identityService = identities.makeService(ioAuthClient);
+    const provider = oidcprovider.makeProvider(config, identityService);
     const providerService = interactions.makeService(provider, logger);
-    const identityService = identities.makeService();
     const application = makeApplication(
       config,
       provider,
