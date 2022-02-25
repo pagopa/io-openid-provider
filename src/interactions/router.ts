@@ -21,7 +21,9 @@ const confirmPostHandler =
       // both left and right are InteractionResult
       TE.toUnion,
       // finish the interaction
-      T.chain((result) => providerService.finishInteraction(req, res, result)),
+      T.chain((result) =>
+        providerService.finishInteraction(req, res, result, true)
+      ),
       // the finishInteraction can end in an error,
       // in this case call next
       TE.mapLeft((_error) => next())
@@ -48,6 +50,8 @@ const interactionGetHandler =
                 makeCustomInteractionError(ErrorType.accessDenied)
               ),
               TE.fromEither,
+              TE.orElseFirst((_) => TE.of(_logger.error(JSON.stringify(_)))),
+              TE.chainFirst((_) => TE.of(_logger.error(JSON.stringify(_)))),
               // given the token validate it, then returns the
               // identity AND the federation token, because
               // we use it to identify the user in the next steps

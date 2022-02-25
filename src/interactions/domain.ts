@@ -14,12 +14,15 @@ const CustomInteraction = t.intersection([
       }),
       name: t.union([t.literal("login"), t.literal("consent")]),
     }),
-    uid: t.string,
   }),
+  // this part is avaiable ony after the login phase
+  // TODO: improve typing in the future, we can split this CustomInteraction
+  // in two different interaction LoginInteraction and ConsentInteraction
   t.partial({
     session: t.type({
       accountId: t.string,
     }),
+    uid: t.string,
   }),
 ]);
 type CustomInteraction = t.TypeOf<typeof CustomInteraction>;

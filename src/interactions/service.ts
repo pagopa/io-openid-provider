@@ -56,11 +56,15 @@ const finishInteraction =
   (
     req: express.Request,
     res: express.Response,
-    result: CustomInteractionResult
+    result: CustomInteractionResult,
+    merge: boolean = false
   ) =>
     pipe(
       tryCatchWithLogTE(
-        () => provider.interactionFinished(req, res, result),
+        () =>
+          provider.interactionFinished(req, res, result, {
+            mergeWithLastSubmission: merge,
+          }),
         logger
       ),
       TE.orElseFirst((error) =>
