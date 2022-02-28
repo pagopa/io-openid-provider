@@ -124,6 +124,26 @@ const interactionGetHandler =
       TE.mapLeft((_error) => next())
     )();
 
+const abortGetHandler =
+  (providerService: ProviderService): express.Handler =>
+  (req, res, next) =>
+    pipe(
+      // retrieve the interaction from request
+      providerService.getInteraction(req, res),
+      // create the abort result
+      TE.map((_interaction) => ({
+        error: ErrorType.accessDenied,
+        error_description: "End-User aborted interaction",
+      })),
+      // both left and right are InteractionResult
+      TE.toUnion,
+      // finish the interaction
+      T.chain((result) => providerService.finishInteraction(req, res, result)),
+      // the finishInteraction can end in an error,
+      // in this case call next
+      TE.mapLeft((_error) => next())
+    )();
+
 /* Returns the router that handle interactions */
 const makeRouter = (
   providerService: ProviderService,
@@ -135,6 +155,7 @@ const makeRouter = (
   router.get(
     "/interaction/:uid",
     interactionGetHandler(
+      // TODO: Take this value from configuration
       "X-IO-Federation-Token",
       providerService,
       identityService,
@@ -143,6 +164,8 @@ const makeRouter = (
   );
 
   router.post("/interaction/:uid/confirm", confirmPostHandler(providerService));
+
+  router.get("/interaction/:uid/abort", abortGetHandler(providerService));
 
   return router;
 };

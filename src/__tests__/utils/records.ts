@@ -62,7 +62,7 @@ const consentInteraction = {
   exp: 1645804133,
   returnTo: "http://localhost:3001/oauth/authorize/nt62KyS3J-IkRmhlG_5rB",
   prompt: {
-    name: "consent",
+    name: "consent" as "consent",
     reasons: ["op_scopes_missing"],
     details: {
       missingOIDCScope: ["openid"],
@@ -83,11 +83,11 @@ const consentInteraction = {
   },
   session: {
     accountId: "123",
-    uid: "Rb2bPapkvqoWxlDSvwMuB",
     cookie: "dcW-CokbngzN18cxaLY1B",
   },
   kind: "Interaction",
   jti: "nt62KyS3J-IkRmhlG_5rB",
+  uid: "Rb2bPapkvqoWxlDSvwMuB",
 };
 
 const interactions = {
