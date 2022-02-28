@@ -1,133 +1,150 @@
-import * as express from "express";
-import * as oidc from "oidc-provider";
-import * as f from "fp-ts/function";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
+import express from "express";
+import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/Task";
+import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import * as strings from "@pagopa/ts-commons/lib/strings";
-import * as u from "../userinfo";
-import * as l from "../logger";
-import * as s from "./service";
-import * as p from "./providerAdapters";
-
-// TODO: Move to environment
-const cookieKey = "X-IO-Federation-Token";
-const extractIOFederationToken = (req: express.Request): O.Option<string> =>
-  f.pipe(req.cookies[cookieKey], strings.NonEmptyString.decode, O.fromEither);
-
-const renderConsent =
-  (uid: string) =>
-  (params: oidc.UnknownObject) =>
-  (prompt: oidc.PromptDetail) =>
-  (client: unknown) =>
-  (res: express.Response) =>
-    TE.fromEither(
-      E.tryCatch(
-        () =>
-          res.render("interaction", {
-            p_client: client,
-            p_details: prompt.details,
-            p_params: params,
-            p_submitUrl: `/interaction/${uid}/confirm`,
-            p_uid: uid,
-          }),
-        E.toError
-      )
-    );
-
-const confirmFun =
-  (provider: oidc.Provider) =>
-  (req: express.Request) =>
-  (res: express.Response) =>
-    f.pipe(
-      p.getInteractionDetail(provider)(req)(res),
-      TE.chainTaskK(s.confirm(provider)),
-      TE.chain(p.finishInteraction(provider)(req)(res)(true))
-    );
+import { FederationToken, IdentityService } from "../identities/service";
+import { Logger } from "../logger";
+import { ErrorType, ProviderService } from "./service";
+import { makeCustomInteractionError } from "./domain";
 
 const confirmPostHandler =
-  (provider: oidc.Provider): express.Handler =>
+  (providerService: ProviderService): express.Handler =>
   (req, res, next) =>
-    f.pipe(
-      confirmFun(provider)(req)(res),
-      TE.bimap(
-        (_) => next(),
-        (_) => next()
-      )
+    pipe(
+      // retrieve the interaction from request
+      providerService.getInteraction(req, res),
+      // create the grant given the interaction
+      TE.chain((interaction) =>
+        TE.fromTask(providerService.createGrant(interaction))
+      ),
+      // both left and right are InteractionResult
+      TE.toUnion,
+      // finish the interaction
+      T.chain((result) =>
+        providerService.finishInteraction(req, res, result, true)
+      ),
+      // the finishInteraction can end in an error,
+      // in this case call next
+      TE.mapLeft((_error) => next())
     )();
-
-const interactionFun =
-  (provider: oidc.Provider) =>
-  (userInfoClient: u.UserInfoClient) =>
-  (logger: l.Logger) =>
-  (req: express.Request) =>
-  (res: express.Response) =>
-  ({ uid, prompt, params }: s.ConsumeInput) => {
-    switch (prompt.name) {
-      case "login":
-        return f.pipe(
-          // extract the token from request
-          extractIOFederationToken(req),
-          // if not found respond with unauthorized
-          TE.fromOption(f.constant(p.unauthorizedInteractionResult)),
-          // find the user given the token
-          TE.fold(
-            (left) => T.of(left),
-            (right) => s.authenticate(userInfoClient)(right)
-          ),
-          T.chain(p.finishInteraction(provider)(req)(res)(false))
-        );
-      case "consent":
-        return f.pipe(
-          // TODO: remove this cast
-          p.getClient(provider)(params.client_id as string),
-          TE.chain((client) => {
-            if (client.bypass_consent) {
-              return confirmFun(provider)(req)(res);
-            } else {
-              return renderConsent(uid)(params)(prompt)(client)(res);
-            }
-          })
-        );
-      default:
-        return f.pipe(
-          T.of({ error: "invalid_request" }),
-          T.chainFirst((_) => T.of(logger.info(`Unknown input: ${_}`))),
-          T.chain(p.finishInteraction(provider)(req)(res)(false))
-        );
-    }
-  };
 
 const interactionGetHandler =
-  (provider: oidc.Provider) =>
-  (userInfoClient: u.UserInfoClient) =>
-  (logger: l.Logger): express.Handler =>
+  (
+    federationTokenKey: string,
+    providerService: ProviderService,
+    identityService: IdentityService,
+    logger: Logger
+  ): express.Handler =>
   (req, res, next) =>
-    f.pipe(
-      p.getInteractionDetail(provider)(req)(res),
-      TE.chain(interactionFun(provider)(userInfoClient)(logger)(req)(res)),
-      TE.bimap(
-        (_) => next(),
-        (_) => next()
-      )
+    pipe(
+      providerService.getInteraction(req, res),
+      TE.chain((interaction) => {
+        switch (interaction.prompt.name) {
+          case "login":
+            return pipe(
+              // extract the token
+              req.cookies[federationTokenKey],
+              FederationToken.decode,
+              E.mapLeft((_errors) =>
+                makeCustomInteractionError(ErrorType.accessDenied)
+              ),
+              TE.fromEither,
+              // given the token validate it, then returns the
+              // identity AND the federation token, because
+              // we use it to identify the user in the next steps
+              TE.chain((federationToken) =>
+                pipe(
+                  identityService.authenticate(federationToken),
+                  TE.bimap(
+                    (error) => {
+                      logger.error(
+                        `The identity service reply with the following error: ${error}`
+                      );
+                      return makeCustomInteractionError(ErrorType.accessDenied);
+                    },
+                    (identity) => ({ federationToken, identity })
+                  )
+                )
+              ),
+              TE.fold(
+                (error) => providerService.finishInteraction(req, res, error),
+                ({ federationToken }) =>
+                  providerService.finishInteraction(req, res, {
+                    // we can't use the tax code as accountId because we
+                    // can't use it to retrieve the user information in the consent phase.
+                    login: { accountId: federationToken },
+                  })
+              )
+            );
+          case "consent":
+            return pipe(
+              // retrieve the client from database
+              providerService.getClient(interaction.params.client_id),
+              // if the client has the bypass_consent property set to true
+              // don't render the consent page, just confirm the interaction
+              TE.chain((client) => {
+                if (client.bypass_consent) {
+                  return TE.of(
+                    confirmPostHandler(providerService)(req, res, next)
+                  );
+                } else {
+                  // render the interaction view
+                  return TE.fromEither(
+                    E.tryCatch(
+                      () =>
+                        res.render("interaction", {
+                          p_client: client,
+                          p_details: interaction.prompt.details,
+                          p_params: interaction.params,
+                          p_submitUrl: `/interaction/${interaction.uid}/confirm`,
+                          p_uid: interaction.uid,
+                        }),
+                      (_) => makeCustomInteractionError(ErrorType.internalError)
+                    )
+                  );
+                }
+              }),
+              TE.orElse((_error) =>
+                providerService.finishInteraction(
+                  req,
+                  res,
+                  makeCustomInteractionError(ErrorType.internalError)
+                )
+              )
+            );
+          default:
+            return providerService.finishInteraction(
+              req,
+              res,
+              makeCustomInteractionError(ErrorType.internalError)
+            );
+        }
+      }),
+      TE.mapLeft((_error) => next())
     )();
 
-/* Returns the router that provide routes for interaction */
-const makeRouter =
-  (provider: oidc.Provider) =>
-  (userInfoClient: u.UserInfoClient) =>
-  (logger: l.Logger): express.Router => {
-    const router = express.Router();
+/* Returns the router that handle interactions */
+const makeRouter = (
+  providerService: ProviderService,
+  identityService: IdentityService,
+  logger: Logger
+): express.Router => {
+  const router = express.Router();
 
-    router.get(
-      "/interaction/:uid",
-      interactionGetHandler(provider)(userInfoClient)(logger)
-    );
+  router.get(
+    "/interaction/:uid",
+    interactionGetHandler(
+      "X-IO-Federation-Token",
+      providerService,
+      identityService,
+      logger
+    )
+  );
 
-    router.post("/interaction/:uid/confirm", confirmPostHandler(provider));
+  router.post("/interaction/:uid/confirm", confirmPostHandler(providerService));
 
-    return router;
-  };
+  return router;
+};
 
 export { makeRouter };

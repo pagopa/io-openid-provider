@@ -1,31 +1,35 @@
-import * as b from "fp-ts/boolean";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
-import * as u from "src/userinfo";
-import * as c from "src/config";
 import * as oidc from "oidc-provider";
+import * as c from "../config";
+import { FederationToken, Identity } from "../identities/domain";
+import { IdentityService } from "../identities/service";
 import * as redis from "./dal/redis";
 
 const userInfoToAccount =
   (federationToken: string) =>
-  (userInfo: u.UserInfo): oidc.Account => ({
+  (identity: Identity): oidc.Account => ({
     accountId: federationToken,
     // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#findaccount
     claims: (_use, _scope, _claims, _rejected) => ({
-      family_name: userInfo.familyName,
-      given_name: userInfo.givenName,
-      name: `${userInfo.givenName} ${userInfo.familyName}`,
-      sub: userInfo.fiscalCode,
+      family_name: identity.familyName,
+      given_name: identity.givenName,
+      name: `${identity.givenName} ${identity.familyName}`,
+      sub: identity.fiscalCode,
     }),
   });
 
 const findAccountAdapter =
-  (userInfoClient: u.UserInfoClient): oidc.FindAccount =>
+  (identityService: IdentityService): oidc.FindAccount =>
   (_, accountId) =>
     f.pipe(
-      userInfoClient.findUserByFederationToken(accountId),
-      TE.map(userInfoToAccount(accountId)),
-      TE.mapLeft(f.constant(undefined)),
+      FederationToken.decode(accountId),
+      TE.fromEither,
+      TE.chainW((parsed) => identityService.authenticate(parsed)),
+      TE.bimap(
+        (_error) => undefined,
+        (identity) => userInfoToAccount(accountId)(identity)
+      ),
       TE.toUnion
     )();
 
@@ -47,22 +51,15 @@ const features = {
 
 const makeProvider = (
   config: c.Config,
-  userInfoClient: u.UserInfoClient,
-  dbInMemory: boolean
+  indentityService: IdentityService
 ): oidc.Provider => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
   function adapter(str: string) {
     return redis.makeRedisAdapter(config.redis)(str);
   }
 
-  const adapterConfig = b.fold(
-    () => ({ adapter }),
-    () => ({})
-  )(dbInMemory);
-
   const providerConfig: oidc.Configuration = {
-    ...adapterConfig,
-    // .concat just to transform an immutable to a mutable array
+    ...{ adapter },
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
@@ -70,7 +67,7 @@ const makeProvider = (
       properties: ["bypass_consent"],
     },
     features,
-    findAccount: findAccountAdapter(userInfoClient),
+    findAccount: findAccountAdapter(indentityService),
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",

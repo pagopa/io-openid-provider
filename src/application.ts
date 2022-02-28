@@ -1,13 +1,17 @@
 import * as path from "path";
 import express from "express";
 import helmet from "helmet";
+import { Provider } from "oidc-provider";
 import * as cookies from "cookie-parser";
 import * as info from "./info/router";
 import * as oidcprovider from "./oidcprovider/router";
+import * as interactions from "./interactions/router";
 import { Config } from "./config";
 import { Logger } from "./logger";
-import { UserInfoClient } from "./userinfo";
+import { ProviderService } from "./interactions/service";
+import { IdentityService } from "./identities/service";
 
+// eslint-disable-next-line extra-rules/no-commented-out-code
 // TODO: Remove in production
 const ENABLE_HELMET = false;
 
@@ -15,10 +19,10 @@ type Application = express.Application;
 
 const makeApplication = (
   config: Config,
-  userInfoClient: UserInfoClient,
-  logger: Logger,
-  // TODO: REMOVE THE FIELD DBINMEMORY (https://pagopa.atlassian.net/browse/IOOP-30)
-  dbInMemory: boolean
+  provider: Provider,
+  providerService: ProviderService,
+  identityService: IdentityService,
+  logger: Logger
 ): Application => {
   const application = express();
 
@@ -38,15 +42,17 @@ const makeApplication = (
   application.set("views", path.join(__dirname, "../views"));
   application.set("view engine", "ejs");
 
-  const serverConfig = config.server;
-
-  // Register routers
-  // application.use(component.makeRouter(service0, service1, ...));
-  application.use(
-    oidcprovider.makeRouter(config, userInfoClient, logger, dbInMemory)
-  );
+  /* Register routers */
+  // router that manage the info endpoint
   application.use(info.makeRouter(config));
+  // router that manage the interactions (login and consent)
+  application.use(
+    interactions.makeRouter(providerService, identityService, logger)
+  );
+  // router that manage the openid-connect endpoints
+  application.use(oidcprovider.makeRouter(provider));
 
+  const serverConfig = config.server;
   application.set("port", serverConfig.port);
   application.set("hostname", serverConfig.hostname);
   return application;

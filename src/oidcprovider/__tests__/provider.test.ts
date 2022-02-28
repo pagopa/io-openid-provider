@@ -1,10 +1,10 @@
-import * as p from "../provider";
+import * as p from "../.";
 import * as records from "../../__tests__/utils/records";
 
 describe("userInfoToAccount", () => {
   it("should map properties", async () => {
     const token = "token-value";
-    const user = records.validUserInfo;
+    const user = records.validIdentity;
     const expected = user;
     const actual = p.userInfoToAccount(token)(user);
     const actualClaims = await actual.claims("id_token", "profile", {}, []);

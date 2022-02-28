@@ -1,42 +1,33 @@
-import * as f from "fp-ts/function";
+import * as oidc from "oidc-provider";
 import * as records from "./records";
 import * as application from "../../application";
-import * as userinfo from "../../userinfo";
 import * as logger from "../../logger";
 import * as mock from "jest-mock-extended";
 import * as authClient from "../../generated/clients/io-auth/client";
-import * as S from "../../userinfo/ioUserInfoClient";
-import { ErrorType, UserInfoClientError } from "../../userinfo";
+import * as identities from "../../identities/service";
+import { ProviderService } from "../../interactions/service";
 
 const makeFakeApplication = () => {
   const config = records.validConfig;
-  const mockUserInfoClient = makeMockUserInfoClient();
+  const mockProvider = mock.mock<oidc.Provider>();
+  const mockProviderService = mock.mock<ProviderService>();
+  const mockIdentityService = mock.mock<identities.IdentityService>();
   const log = logger.makeLogger(config.logger);
-  const dbInMemory = true;
   // return an application with all mocked services
-  return f.tuple(
-    mockUserInfoClient,
-    application.makeApplication(config, mockUserInfoClient, log, dbInMemory)
+  const app = application.makeApplication(
+    config,
+    mockProvider,
+    mockProviderService,
+    mockIdentityService,
+    log
   );
+  return { mockProvider, mockProviderService, mockIdentityService, app };
 };
 
-const makeMockUserInfoClient = () => {
-  return mock.mock<userinfo.UserInfoClient>();
+const makeIdentityService = () => {
+  const mockAuthClient = mock.mock<authClient.Client>();
+  const identityService = identities.makeService(mockAuthClient);
+  return { identityService, mockAuthClient };
 };
 
-const makeService = () => {
-  const mockClient = mock.mock<authClient.Client>();
-  const service = S.makeIOUserInfoClient(mockClient);
-  return { service, mockClient };
-};
-
-const getExpectedError = (type: ErrorType): UserInfoClientError => ({
-  errorType: type,
-});
-
-export {
-  makeFakeApplication,
-  makeMockUserInfoClient,
-  makeService,
-  getExpectedError,
-};
+export { makeFakeApplication, makeIdentityService };
