@@ -34,7 +34,7 @@ const interactionGetHandler =
     federationTokenKey: string,
     providerService: ProviderService,
     identityService: IdentityService,
-    _logger: Logger
+    logger: Logger
   ): express.Handler =>
   (req, res, next) =>
     pipe(
@@ -50,8 +50,6 @@ const interactionGetHandler =
                 makeCustomInteractionError(ErrorType.accessDenied)
               ),
               TE.fromEither,
-              TE.orElseFirst((_) => TE.of(_logger.error(JSON.stringify(_)))),
-              TE.chainFirst((_) => TE.of(_logger.error(JSON.stringify(_)))),
               // given the token validate it, then returns the
               // identity AND the federation token, because
               // we use it to identify the user in the next steps
@@ -59,8 +57,12 @@ const interactionGetHandler =
                 pipe(
                   identityService.authenticate(federationToken),
                   TE.bimap(
-                    (_error) =>
-                      makeCustomInteractionError(ErrorType.accessDenied),
+                    (error) => {
+                      logger.error(
+                        `The identity service reply with the following error: ${error}`
+                      );
+                      return makeCustomInteractionError(ErrorType.accessDenied);
+                    },
                     (identity) => ({ federationToken, identity })
                   )
                 )
