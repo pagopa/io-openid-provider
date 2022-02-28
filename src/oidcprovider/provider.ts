@@ -1,20 +1,10 @@
 import * as b from "fp-ts/boolean";
-import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
 import * as u from "src/userinfo";
 import * as c from "src/config";
 import * as oidc from "oidc-provider";
 import * as redis from "./dal/redis";
-
-interface Client {
-  readonly clientId: string;
-  readonly redirectUris: ReadonlyArray<URL>;
-}
-
-interface ProviderConfig {
-  readonly testClient: O.Option<Client>;
-}
 
 const userInfoToAccount =
   (federationToken: string) =>
@@ -55,22 +45,6 @@ const features = {
   },
 };
 
-const staticClients = (
-  config: ProviderConfig
-): ReadonlyArray<oidc.ClientMetadata> =>
-  f.pipe(
-    config.testClient,
-    O.fold(f.constant([]), (client) => [
-      {
-        client_id: client.clientId,
-        grant_types: ["implicit"],
-        redirect_uris: client.redirectUris.map((_) => _.href).concat(),
-        response_types: ["id_token"],
-        token_endpoint_auth_method: "none",
-      },
-    ])
-  );
-
 const makeProvider = (
   config: c.Config,
   userInfoClient: u.UserInfoClient,
@@ -92,7 +66,6 @@ const makeProvider = (
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
-    clients: staticClients(config.provider).concat(),
     extraClientMetadata: {
       properties: ["bypass_consent"],
     },
@@ -116,4 +89,4 @@ const makeProvider = (
   );
 };
 
-export { ProviderConfig, makeProvider, userInfoToAccount };
+export { makeProvider, userInfoToAccount };

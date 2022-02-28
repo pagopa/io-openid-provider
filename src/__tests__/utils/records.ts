@@ -1,18 +1,10 @@
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
-import * as O from "fp-ts/Option";
-import { tuple } from "fp-ts/lib/function";
 import * as u from "../../userinfo";
-import * as packageJson from "../../../package.json";
 import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
+import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
-  provider: {
-    testClient: O.some({
-      clientId: "client-id",
-      redirectUris: [new URL("https://relying-party.io/callback")],
-    }),
-  },
   IOBackend: {
     baseURL: new URL("https://iobackend.it"),
   },
@@ -34,19 +26,14 @@ const validConfig: config.Config = {
   },
 };
 
-const validEnv = {
+const envs = {
   IO_BACKEND_BASE_URL: "https://iobackend.it",
-  TEST_CLIENT_ID: "client-id",
-  TEST_CLIENT_REDIRECT_URI: "https://relying-party.io/callback",
   SERVER_HOSTNAME: "0.0.0.0",
   PORT: "3000",
   LOG_LEVEL: "debug",
   APPLICATION_NAME: "application",
   REDIS_URL: "http://localhost:3791",
   REDIS_KEY_PREFIX: "oidc:",
-};
-const validEnvAndConfig = () => {
-  return tuple(validEnv, validConfig);
 };
 
 const interaction = {
@@ -79,8 +66,7 @@ const validUserInfo: u.UserInfo = {
 };
 
 export {
-  validEnvAndConfig,
-  validEnv,
+  envs,
   validConfig,
   interaction,
   validUserIdentity,
