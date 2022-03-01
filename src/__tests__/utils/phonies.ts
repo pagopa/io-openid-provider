@@ -52,11 +52,15 @@ const makeLocalProvider = () => {
     bypass_consent: true,
   };
   const mockIdentityService = mock.mock<identities.IdentityService>();
+  const overridenConfiguration = {
+    ...oidcprovider.defaultConfiguration(records.validConfig),
+    adapter: undefined,
+    clients: [client, clientSkipConsent],
+  };
   const provider = oidcprovider.makeProvider(
     records.validConfig,
     mockIdentityService,
-    [client, clientSkipConsent],
-    true // in memory database
+    overridenConfiguration
   );
   return { provider, client, clientSkipConsent, mockIdentityService };
 };

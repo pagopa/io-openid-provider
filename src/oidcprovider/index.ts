@@ -49,34 +49,20 @@ const features = {
   },
 };
 
-/**
- * @param testClient: A static client used on tests
- * @param storageInMemory: If true use a in-memory database (used only on tests)
- *                         otherwise use redis as database
- */
-const makeProvider = (
-  config: Config,
-  indentityService: IdentityService,
-  // these two parameters are used on tests
-  testClients: ReadonlyArray<oidc.ClientMetadata> | undefined = undefined,
-  storageInMemory: boolean = false
-): oidc.Provider => {
+const defaultConfiguration = (config: Config): oidc.Configuration => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
   function adapter(str: string) {
     return redis.makeRedisAdapter(config.redis)(str);
   }
-
-  const providerConfig: oidc.Configuration = {
-    ...(storageInMemory ? {} : { adapter }),
+  return {
+    ...{ adapter },
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
-    clients: testClients ? testClients.concat() : undefined,
     extraClientMetadata: {
       properties: ["bypass_consent"],
     },
     features,
-    findAccount: findAccountAdapter(indentityService),
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
@@ -89,10 +75,28 @@ const makeProvider = (
       Session: 60,
     },
   };
+};
+
+/**
+ * @param providerConfiguration: The configuration used to configure the provider,
+ *                               this parameter is used to override configuration on
+ *                               tests, for production use the default one.
+ */
+const makeProvider = (
+  config: Config,
+  indentityService: IdentityService,
+  // this parameter is used to override configuration on tests
+  // for production use the default one!
+  providerConfiguration: oidc.Configuration = defaultConfiguration(config)
+): oidc.Provider => {
+  const providerConfig: oidc.Configuration = {
+    ...providerConfiguration,
+    findAccount: findAccountAdapter(indentityService),
+  };
   return new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
     providerConfig
   );
 };
 
-export { makeProvider, userInfoToAccount };
+export { makeProvider, userInfoToAccount, defaultConfiguration };
