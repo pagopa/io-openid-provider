@@ -34,7 +34,7 @@ const interactionGetHandler =
     federationTokenKey: string,
     providerService: ProviderService,
     identityService: IdentityService,
-    logger: Logger
+    _logger: Logger
   ): express.Handler =>
   (req, res, next) =>
     pipe(
@@ -57,12 +57,8 @@ const interactionGetHandler =
                 pipe(
                   identityService.authenticate(federationToken),
                   TE.bimap(
-                    (error) => {
-                      logger.error(
-                        `The identity service reply with the following error: ${error}`
-                      );
-                      return makeCustomInteractionError(ErrorType.accessDenied);
-                    },
+                    (_error) =>
+                      makeCustomInteractionError(ErrorType.accessDenied),
                     (identity) => ({ federationToken, identity })
                   )
                 )
@@ -90,18 +86,14 @@ const interactionGetHandler =
                   );
                 } else {
                   // render the interaction view
-                  return TE.fromEither(
-                    E.tryCatch(
-                      () =>
-                        res.render("interaction", {
-                          p_client: client,
-                          p_details: interaction.prompt.details,
-                          p_params: interaction.params,
-                          p_submitUrl: `/interaction/${interaction.uid}/confirm`,
-                          p_uid: interaction.uid,
-                        }),
-                      (_) => makeCustomInteractionError(ErrorType.internalError)
-                    )
+                  return TE.of(
+                    res.render("interaction", {
+                      p_client: client,
+                      p_details: interaction.prompt.details,
+                      p_params: interaction.params,
+                      p_submitUrl: `/interaction/${interaction.uid}/confirm`,
+                      p_uid: interaction.uid,
+                    })
                   );
                 }
               }),
