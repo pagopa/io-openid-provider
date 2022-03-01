@@ -2,15 +2,14 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as config from "../../config";
 import { UserIdentity } from "../../generated/clients/io-auth/UserIdentity";
 import { Identity } from "../../identities/domain";
-import * as packageJson from "../../../package.json";
 
 const validConfig: config.Config = {
   IOBackend: {
     baseURL: new URL("https://iobackend.it"),
   },
   info: {
-    name: packageJson.name as NonEmptyString,
-    version: packageJson.version as NonEmptyString,
+    name: "application-name" as NonEmptyString,
+    version: "v0.0.0" as NonEmptyString,
   },
   server: {
     hostname: "0.0.0.0",
@@ -18,7 +17,7 @@ const validConfig: config.Config = {
   },
   logger: {
     logLevel: "debug",
-    logName: "application",
+    logName: "application-name",
   },
   redis: {
     url: new URL("http://localhost:3791"),
@@ -31,9 +30,10 @@ const envs = {
   SERVER_HOSTNAME: "0.0.0.0",
   PORT: "3000",
   LOG_LEVEL: "debug",
-  APPLICATION_NAME: "application",
+  APPLICATION_NAME: validConfig.info.name,
   REDIS_URL: "http://localhost:3791",
   REDIS_KEY_PREFIX: "oidc:",
+  VERSION: validConfig.info.version,
 };
 
 const loginInteraction = {

@@ -1,5 +1,13 @@
 version: "3.9"
 services:
+  service:
+    build: .
+    environment:
+      - REDIS_KEY_PREFIX="oidc:"
+      - REDIS_URL=redis://db:6379
+      - IO_BACKEND_BASE_URL=https://app-backend.io.italia.it
+    ports:
+      - "3000:3000"
   db:
     image: "redis:6.2.6-alpine"
     ports:
