@@ -15,38 +15,12 @@ describe("Router", () => {
   it("should generate an id_token given an client with skip consent", async () => {
     const { clientSkipConsent, mockIdentityService, app } =
       phonies.makeFakeApplication();
-    const authenticationCookie = "X-IO-Federation-Token=12345667";
     const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
 
-    // initialize the implicit flow
-    const authorizeResponse = await phonies.doAuthorizeRequest(
-      app,
-      clientSkipConsent
-    );
-    // follow the redirect and perform the login
-    const loginResponse = await request(app)
-      .get(authorizeResponse.headers["location"])
-      .set("cookie", [
-        ...authorizeResponse.headers["set-cookie"],
-        authenticationCookie,
-      ] as any)
-      .send();
-    // follow the redirect of loginResponse (the flow land you to /oauth/authorize/:interaction-id)
-    const authorizeRedirectResponse = await request(app)
-      // we need to wrap into a URL because the location is absolut in this response
-      .get(new URL(loginResponse.headers["location"]).pathname)
-      .set("cookie", [
-        ...authorizeResponse.headers["set-cookie"],
-        authenticationCookie,
-      ] as any)
-      .send();
-    // follow the redirect of authorize towards consent step
-    const consentResponse = await request(app)
-      .get(authorizeRedirectResponse.headers["location"])
-      .set("cookie", authorizeRedirectResponse.headers["set-cookie"])
-      .send();
+    const { consentResponse, authorizeRedirectResponse } =
+      await phonies.doAuthorizeRequestUntilConsent(app, clientSkipConsent);
     const consentFollowRedirect = await request(app)
       // we need to wrap into a URL because the location is absolut in this response
       .get(new URL(consentResponse.headers["location"]).pathname)
@@ -59,6 +33,30 @@ describe("Router", () => {
     );
     // TODO: Check why it is called 3 times!
     expect(authenticateFn).toBeCalledTimes(3);
+  });
+
+  it("should render the consent page", async () => {
+    const { client, mockIdentityService, app } = phonies.makeFakeApplication();
+    const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
+      TE.right(records.validIdentity)
+    );
+
+    const { authorizeRedirectResponse, consentResponse } =
+      await phonies.doAuthorizeRequestUntilConsent(app, client);
+
+    const interactionId = authorizeRedirectResponse.headers["location"].replace(
+      "/interaction/",
+      ""
+    );
+
+    expect(consentResponse.statusCode).toBe(200);
+    expect(consentResponse.text).toContain(
+      `"/interaction/${interactionId}/confirm"`
+    );
+    expect(consentResponse.text).toContain(
+      `"/interaction/${interactionId}/abort"`
+    );
+    expect(authenticateFn).toBeCalledTimes(2);
   });
 
   it("should abort the authorization request", async () => {
