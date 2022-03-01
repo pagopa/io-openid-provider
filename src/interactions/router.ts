@@ -63,14 +63,12 @@ const interactionGetHandler =
                   )
                 )
               ),
-              TE.fold(
-                (error) => providerService.finishInteraction(req, res, error),
-                ({ federationToken }) =>
-                  providerService.finishInteraction(req, res, {
-                    // we can't use the tax code as accountId because we
-                    // can't use it to retrieve the user information in the consent phase.
-                    login: { accountId: federationToken },
-                  })
+              TE.chain(({ federationToken }) =>
+                providerService.finishInteraction(req, res, {
+                  // we can't use the tax code as accountId because we
+                  // can't use it to retrieve the user information in the consent phase.
+                  login: { accountId: federationToken },
+                })
               )
             );
           case "consent":
@@ -96,24 +94,13 @@ const interactionGetHandler =
                     })
                   );
                 }
-              }),
-              TE.orElse((_error) =>
-                providerService.finishInteraction(
-                  req,
-                  res,
-                  makeCustomInteractionError(ErrorType.internalError)
-                )
-              )
+              })
             );
           default:
-            return providerService.finishInteraction(
-              req,
-              res,
-              makeCustomInteractionError(ErrorType.internalError)
-            );
+            return TE.left(makeCustomInteractionError(ErrorType.internalError));
         }
       }),
-      TE.mapLeft((_error) => next())
+      TE.mapLeft((error) => providerService.finishInteraction(req, res, error))
     )();
 
 const abortGetHandler =
