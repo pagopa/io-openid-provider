@@ -1,9 +1,9 @@
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
 import * as oidc from "oidc-provider";
-import * as c from "../config";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
+import { Config } from "../config";
 import * as redis from "./dal/redis";
 
 const userInfoToAccount =
@@ -49,9 +49,17 @@ const features = {
   },
 };
 
+/**
+ * @param testClient: A static client used on tests
+ * @param storageInMemory: If true use a in-memory database (used only on tests)
+ *                         otherwise use redis as database
+ */
 const makeProvider = (
-  config: c.Config,
-  indentityService: IdentityService
+  config: Config,
+  indentityService: IdentityService,
+  // these two parameters are used on tests
+  testClients: ReadonlyArray<oidc.ClientMetadata> | undefined = undefined,
+  storageInMemory: boolean = false
 ): oidc.Provider => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
   function adapter(str: string) {
@@ -59,10 +67,11 @@ const makeProvider = (
   }
 
   const providerConfig: oidc.Configuration = {
-    ...{ adapter },
+    ...(storageInMemory ? {} : { adapter }),
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
+    clients: testClients ? testClients.concat() : undefined,
     extraClientMetadata: {
       properties: ["bypass_consent"],
     },
