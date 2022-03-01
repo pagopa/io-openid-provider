@@ -1,5 +1,3 @@
-import request from "supertest";
-import * as express from "express";
 import * as mock from "jest-mock-extended";
 import * as oidc from "oidc-provider";
 import * as records from "./records";
@@ -65,69 +63,10 @@ const makeLocalProvider = () => {
   return { provider, client, clientSkipConsent, mockIdentityService };
 };
 
-const doAuthorizeRequest = (
-  app: express.Application,
-  client: oidc.ClientMetadata
-) => {
-  return request(app)
-    .get("/oauth/authorize")
-    .query({
-      client_id: client.client_id,
-      response_type: (client.response_types || [""])[0],
-      redirect_uri: (client.redirect_uris || [""])[0],
-      response_mode: "form_post",
-      scope: client.scope || "openid",
-      state: "af0ijs",
-      nonce: "n-0s6",
-    });
-};
-const doAuthorizeRequestUntilConsent = async (
-  app: express.Application,
-  client: oidc.ClientMetadata
-) => {
-  const authenticationCookie = "X-IO-Federation-Token=12345667";
-  // initialize the implicit flow
-  const authorizeResponse = await doAuthorizeRequest(app, client);
-  // follow the redirect and perform the login
-  const loginResponse = await request(app)
-    .get(authorizeResponse.headers["location"])
-    .set("cookie", [
-      ...authorizeResponse.headers["set-cookie"],
-      authenticationCookie,
-    ] as any)
-    .send();
-  // follow the redirect of loginResponse (the flow land you to /oauth/authorize/:interaction-id)
-  const authorizeRedirectResponse = await request(app)
-    // we need to wrap into a URL because the location is absolut in this response
-    .get(new URL(loginResponse.headers["location"]).pathname)
-    .set("cookie", [
-      ...authorizeResponse.headers["set-cookie"],
-      authenticationCookie,
-    ] as any)
-    .send();
-  // follow the redirect of authorize towards consent step
-  const consentResponse = await request(app)
-    .get(authorizeRedirectResponse.headers["location"])
-    .set("cookie", authorizeRedirectResponse.headers["set-cookie"])
-    .send();
-  return {
-    authorizeResponse,
-    loginResponse,
-    authorizeRedirectResponse,
-    consentResponse,
-  };
-};
-
 const makeIdentityService = () => {
   const mockAuthClient = mock.mock<authClient.Client>();
   const identityService = identities.makeService(mockAuthClient);
   return { identityService, mockAuthClient };
 };
 
-export {
-  makeFakeApplication,
-  makeIdentityService,
-  makeLocalProvider,
-  doAuthorizeRequest,
-  doAuthorizeRequestUntilConsent,
-};
+export { makeFakeApplication, makeIdentityService, makeLocalProvider };
