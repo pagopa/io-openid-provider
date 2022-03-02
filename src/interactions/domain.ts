@@ -15,7 +15,7 @@ const CustomInteraction = t.intersection([
       name: t.union([t.literal("login"), t.literal("consent")]),
     }),
   }),
-  // this part is avaiable ony after the login phase
+  // this part is available ony after the login phase
   // TODO: improve typing in the future, we can split this CustomInteraction
   // in two different interaction LoginInteraction and ConsentInteraction
   t.partial({

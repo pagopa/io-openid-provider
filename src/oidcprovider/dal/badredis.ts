@@ -4,7 +4,7 @@ import * as ioredis from "ioredis";
 import * as oidc from "oidc-provider";
 
 // ///////////////////////////////////////////////////////////////////////////////////
-//              THIS CODE WAS TAKED FROM WE ARE NOT GOING TO KEEP IT               //
+//              THIS CODE WAS TAKEN FROM WE ARE NOT GOING TO KEEP IT               //
 // https://github.com/panva/node-oidc-provider/blob/main/example/adapters/redis.js //
 // ///////////////////////////////////////////////////////////////////////////////////
 
