@@ -136,7 +136,13 @@ const abortGetHandler =
       TE.mapLeft((_error) => next())
     )();
 
-/* Returns the router that handle interactions */
+/**
+ * Returns the router that handle interactions.
+ *
+ * @param providerService: An instance of ProviderService.
+ * @param identityService: An instance of IdentityService.
+ * @returns An instance of express Router.
+ */
 const makeRouter = (
   providerService: ProviderService,
   identityService: IdentityService,

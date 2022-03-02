@@ -78,9 +78,12 @@ const defaultConfiguration = (config: Config): oidc.Configuration => {
 };
 
 /**
+ * Return an instance of oidc-provider Provider ready to be used.
+ *
  * @param providerConfiguration: The configuration used to configure the provider,
- *                               this parameter is used to override configuration on
- *                               tests, for production use the default one.
+ *  this parameter is used to override configuration on tests, for production keep the default one.
+ * @param identityService: The IdentityService used to authenticate the user.
+ * @returns An instance of oidc-provider Provider.
  */
 const makeProvider = (
   config: Config,

@@ -8,9 +8,10 @@ import * as interactions from "../../interactions/service";
 import * as identities from "../../identities/service";
 import * as oidcprovider from "../../oidcprovider";
 
-// Create a fake application used to run some test
-// usually tests of routers, you need to mock the services,
-// expect the provider
+/**
+ * Create and return a fake application and the mocks required by the system.
+ * The returned mocks are not instructed.
+ */
 const makeFakeApplication = () => {
   const config = records.validConfig;
   const { client, clientSkipConsent, provider, mockIdentityService } =
@@ -34,8 +35,10 @@ const makeFakeApplication = () => {
   };
 };
 
-// Create a provider to use during tests.
-// This provider use a in-memory database.
+/**
+ * Create a provider for test purposes. This provider uses the in-memory
+ * database provided by the library oidc-provider.
+ */
 const makeLocalProvider = () => {
   const client: oidc.ClientMetadata = {
     client_id: "client-id",
@@ -63,6 +66,9 @@ const makeLocalProvider = () => {
   return { provider, client, clientSkipConsent, mockIdentityService };
 };
 
+/**
+ * Create and return an IdentityService and its mocks. The mocks are not instructed.
+ */
 const makeIdentityService = () => {
   const mockAuthClient = mock.mock<authClient.Client>();
   const identityService = identities.makeService(mockAuthClient);

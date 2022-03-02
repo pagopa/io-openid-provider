@@ -128,12 +128,51 @@ const getClient =
       )
     );
 
+/**
+ * Simplifies the interaction with the Provider of oidc-provider library.
+ * The aim of this service is to wrap the functions of the provider into functional structures.
+ */
 type ProviderService = ReturnType<typeof makeService>;
 
+/**
+ * Create a ProviderService.
+ *
+ * @param provider The provider to use.
+ * @param logger An instance of the Logger.
+ * @returns An instance of ProviderService.
+ */
 const makeService = (provider: oidc.Provider, logger: Logger) => ({
+  /**
+   * Create and persist a Grant given an interuction.
+   *
+   * @param interaction: Given a CustomInteraction return a CustomInteractionResult
+   */
   createGrant: createGrant(provider, logger),
+
+  /**
+   * Finish an interaction with the given result.
+   *
+   * @param req: The express Request from which retrieve interaction.
+   * @param res: The express Response where write the result.
+   * @param result: The result to finish the interaction.
+   * @param merge: If true the previous result (if any) is merget into this one.
+   */
   finishInteraction: finishInteraction(provider, logger),
+
+  /**
+   * Return the client.
+   *
+   * @param clientId: The client identifier.
+   */
   getClient: getClient(provider, logger),
+
+  /**
+   * Try to retrieve an CustomInteraction from the request.
+   *
+   * @param req: The express Request from which retrieve interaction.
+   * @param res: The express Response (the oidc-provider require also the response).
+   * @returns A TaskEither with an error or the CustomInteraction.
+   */
   getInteraction: getInteraction(provider, logger),
 });
 
