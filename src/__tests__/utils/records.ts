@@ -62,7 +62,7 @@ const consentInteraction = {
   exp: 1645804133,
   returnTo: "http://localhost:3001/oauth/authorize/nt62KyS3J-IkRmhlG_5rB",
   prompt: {
-    name: "consent" as "consent",
+    name: "consent",
     reasons: ["op_scopes_missing"],
     details: {
       missingOIDCScope: ["openid"],
