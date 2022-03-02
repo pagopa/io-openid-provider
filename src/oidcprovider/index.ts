@@ -84,14 +84,14 @@ const defaultConfiguration = (config: Config): oidc.Configuration => {
  */
 const makeProvider = (
   config: Config,
-  indentityService: IdentityService,
+  identityService: IdentityService,
   // this parameter is used to override configuration on tests
   // for production use the default one!
   providerConfiguration: oidc.Configuration = defaultConfiguration(config)
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
     ...providerConfiguration,
-    findAccount: findAccountAdapter(indentityService),
+    findAccount: findAccountAdapter(identityService),
   };
   return new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
