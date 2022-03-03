@@ -29,13 +29,25 @@ const authenticate = (client: authClient.Client) => (token: FederationToken) =>
     })
   );
 
+/**
+ * The service that manage the identities, an Identity is something that
+ * coud be authenticated (e.g.: Users).
+ */
 interface IdentityService {
-  // given a token return an identity
+  /**
+   * Try to authenticate given a FederationToken
+   *
+   * @param federationToken: The token used to authenticate.
+   * @returns A TaskEither filled with an error or a authenticated Identity.
+   */
   readonly authenticate: (
     federationToken: FederationToken
   ) => TE.TaskEither<IdentityServiceErrorType, Identity>;
 }
 
+/**
+ * Create an instance of IdentityService from a io AuthClient
+ */
 const makeService = (client: authClient.Client): IdentityService => ({
   authenticate: authenticate(client),
 });

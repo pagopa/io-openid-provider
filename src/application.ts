@@ -36,10 +36,10 @@ const makeApplication = (
   // Add a middleware that parse cookies
   application.use(cookies.default());
   // Serve static files
-  application.use(express.static(path.join(__dirname, "../public")));
+  application.use(express.static(path.join(__dirname, "public")));
 
   // Template engine configuration
-  application.set("views", path.join(__dirname, "../views"));
+  application.set("views", path.join(__dirname, "views"));
   application.set("view engine", "ejs");
 
   /* Register routers */

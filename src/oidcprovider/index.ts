@@ -1,9 +1,9 @@
 import * as TE from "fp-ts/TaskEither";
 import * as f from "fp-ts/lib/function";
 import * as oidc from "oidc-provider";
-import * as c from "../config";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
+import { Config } from "../config";
 import * as redis from "./dal/redis";
 
 const userInfoToAccount =
@@ -49,16 +49,12 @@ const features = {
   },
 };
 
-const makeProvider = (
-  config: c.Config,
-  indentityService: IdentityService
-): oidc.Provider => {
+const defaultConfiguration = (config: Config): oidc.Configuration => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
   function adapter(str: string) {
     return redis.makeRedisAdapter(config.redis)(str);
   }
-
-  const providerConfig: oidc.Configuration = {
+  return {
     ...{ adapter },
     claims: {
       profile: ["family_name", "given_name", "name"],
@@ -67,7 +63,6 @@ const makeProvider = (
       properties: ["bypass_consent"],
     },
     features,
-    findAccount: findAccountAdapter(indentityService),
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
@@ -80,10 +75,31 @@ const makeProvider = (
       Session: 60,
     },
   };
+};
+
+/**
+ * Return an instance of oidc-provider Provider ready to be used.
+ *
+ * @param providerConfiguration: The configuration used to configure the provider,
+ *  this parameter is used to override configuration on tests, for production keep the default one.
+ * @param identityService: The IdentityService used to authenticate the user.
+ * @returns An instance of oidc-provider Provider.
+ */
+const makeProvider = (
+  config: Config,
+  identityService: IdentityService,
+  // this parameter is used to override configuration on tests
+  // for production use the default one!
+  providerConfiguration: oidc.Configuration = defaultConfiguration(config)
+): oidc.Provider => {
+  const providerConfig: oidc.Configuration = {
+    ...providerConfiguration,
+    findAccount: findAccountAdapter(identityService),
+  };
   return new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
     providerConfig
   );
 };
 
-export { makeProvider, userInfoToAccount };
+export { makeProvider, userInfoToAccount, defaultConfiguration };

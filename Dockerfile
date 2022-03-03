@@ -18,8 +18,10 @@ ENV LOG_LEVEL=silly
 ENV PORT=3000
 ENV SERVER_HOSTNAME=0.0.0.0
 ENV APPLICATION_NAME=openid-provider
+# TODO: Review version node -p "require('./app/package.json').version"
+ENV VERSION=0.0.0
 
 RUN yarn --frozen-lockfile && yarn cache clean --force
 
 EXPOSE 3000
-CMD ["node", "/app/src/main.js"]
+CMD ["node", "/app/main.js"]

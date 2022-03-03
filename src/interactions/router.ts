@@ -34,7 +34,7 @@ const interactionGetHandler =
     federationTokenKey: string,
     providerService: ProviderService,
     identityService: IdentityService,
-    logger: Logger
+    _logger: Logger
   ): express.Handler =>
   (req, res, next) =>
     pipe(
@@ -57,12 +57,8 @@ const interactionGetHandler =
                 pipe(
                   identityService.authenticate(federationToken),
                   TE.bimap(
-                    (error) => {
-                      logger.error(
-                        `The identity service reply with the following error: ${error}`
-                      );
-                      return makeCustomInteractionError(ErrorType.accessDenied);
-                    },
+                    (_error) =>
+                      makeCustomInteractionError(ErrorType.accessDenied),
                     (identity) => ({ federationToken, identity })
                   )
                 )
@@ -90,18 +86,14 @@ const interactionGetHandler =
                   );
                 } else {
                   // render the interaction view
-                  return TE.fromEither(
-                    E.tryCatch(
-                      () =>
-                        res.render("interaction", {
-                          p_client: client,
-                          p_details: interaction.prompt.details,
-                          p_params: interaction.params,
-                          p_submitUrl: `/interaction/${interaction.uid}/confirm`,
-                          p_uid: interaction.uid,
-                        }),
-                      (_) => makeCustomInteractionError(ErrorType.internalError)
-                    )
+                  return TE.of(
+                    res.render("interaction", {
+                      p_client: client,
+                      p_details: interaction.prompt.details,
+                      p_params: interaction.params,
+                      p_submitUrl: `/interaction/${interaction.uid}/confirm`,
+                      p_uid: interaction.uid,
+                    })
                   );
                 }
               }),
@@ -124,7 +116,33 @@ const interactionGetHandler =
       TE.mapLeft((_error) => next())
     )();
 
-/* Returns the router that handle interactions */
+const abortGetHandler =
+  (providerService: ProviderService): express.Handler =>
+  (req, res, next) =>
+    pipe(
+      // retrieve the interaction from request
+      providerService.getInteraction(req, res),
+      // create the abort result
+      TE.map((_interaction) => ({
+        error: ErrorType.accessDenied,
+        error_description: "End-User aborted interaction",
+      })),
+      // both left and right are InteractionResult
+      TE.toUnion,
+      // finish the interaction
+      T.chain((result) => providerService.finishInteraction(req, res, result)),
+      // the finishInteraction can end in an error,
+      // in this case call next
+      TE.mapLeft((_error) => next())
+    )();
+
+/**
+ * Returns the router that handle interactions.
+ *
+ * @param providerService: An instance of ProviderService.
+ * @param identityService: An instance of IdentityService.
+ * @returns An instance of express Router.
+ */
 const makeRouter = (
   providerService: ProviderService,
   identityService: IdentityService,
@@ -135,6 +153,7 @@ const makeRouter = (
   router.get(
     "/interaction/:uid",
     interactionGetHandler(
+      // TODO: Take this value from configuration
       "X-IO-Federation-Token",
       providerService,
       identityService,
@@ -143,6 +162,8 @@ const makeRouter = (
   );
 
   router.post("/interaction/:uid/confirm", confirmPostHandler(providerService));
+
+  router.get("/interaction/:uid/abort", abortGetHandler(providerService));
 
   return router;
 };

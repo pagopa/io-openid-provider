@@ -4,7 +4,6 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
-import * as packageJson from "../package.json";
 import * as redis from "./oidcprovider/dal/redis";
 import * as logger from "./logger";
 
@@ -33,7 +32,7 @@ interface Config {
 type ConfEnv = NodeJS.ProcessEnv;
 
 const envDecoder = t.type({
-  APPLICATION_NAME: t.string,
+  APPLICATION_NAME: NonEmptyString,
   IO_BACKEND_BASE_URL: UrlFromString,
   LOG_LEVEL: t.keyof({
     debug: null,
@@ -48,6 +47,7 @@ const envDecoder = t.type({
   REDIS_KEY_PREFIX: t.string,
   REDIS_URL: UrlFromString,
   SERVER_HOSTNAME: t.string,
+  VERSION: NonEmptyString,
 });
 type EnvStruct = t.TypeOf<typeof envDecoder>;
 
@@ -57,8 +57,8 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
     baseURL: new URL(str.IO_BACKEND_BASE_URL.href),
   },
   info: {
-    name: packageJson.name as NonEmptyString,
-    version: packageJson.version as NonEmptyString,
+    name: str.APPLICATION_NAME,
+    version: str.VERSION,
   },
   logger: {
     logLevel: str.LOG_LEVEL,
