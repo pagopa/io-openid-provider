@@ -24,7 +24,7 @@ const doAuthorizeRequest = (
     });
 };
 
-// follow redirect given a request with localtion header
+// follow redirect given a request with location header
 const followRedirect = (
   app: express.Application,
   requestWithLocation: request.Response,

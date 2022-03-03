@@ -143,7 +143,7 @@ type ProviderService = ReturnType<typeof makeService>;
  */
 const makeService = (provider: oidc.Provider, logger: Logger) => ({
   /**
-   * Create and persist a Grant given an interuction.
+   * Create and persist a Grant given an interaction.
    *
    * @param interaction: Given a CustomInteraction return a CustomInteractionResult
    */
@@ -155,7 +155,7 @@ const makeService = (provider: oidc.Provider, logger: Logger) => ({
    * @param req: The express Request from which retrieve interaction.
    * @param res: The express Response where write the result.
    * @param result: The result to finish the interaction.
-   * @param merge: If true the previous result (if any) is merget into this one.
+   * @param merge: If true the previous result (if any) is merged into this one.
    */
   finishInteraction: finishInteraction(provider, logger),
 

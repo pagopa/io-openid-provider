@@ -68,7 +68,7 @@ parameters:
       MUST be one of the listed available values.
       Any response_type other than 'code' or 'token' is only supported in conjunction with scope=openid.
       As per the OAuth specification: 'code' is used for authorization code grant type flow, 'token' is used for implicit grant type flow, 'token id_token' is an extension provided by OpenID Connect, and 'code id_token', 'id_token', and 'none' are extensions provided by OpenID Connect Multiple Response Types.
-      At the moment the only avalable value is id_token.
+      At the moment the only available value is id_token.
     type: string
     enum:
         # - code
