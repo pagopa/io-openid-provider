@@ -29,6 +29,8 @@ paths:
           $ref: '#/responses/200AuthenticationResponse'
         302:
           $ref: '#/responses/302AuthenticationResponse'
+        400:
+          $ref: '#/responses/400HtmlBadRequest'
 
   /.well-known/openid-configuration:
     get:
@@ -329,6 +331,25 @@ responses:
     description: OpenID Discovery Configuration
     schema:
       $ref: '#/definitions/OpenIDDiscovery'
+  400HtmlBadRequest:
+    description: >-
+      This response is returned if an error occurred but we can't redirect to a given client callback.
+    headers:
+      Pragma:
+          description: Pragma directive
+          type: string
+          default: no-cache
+      Cache-Control:
+          description: Cache control directive
+          type: string
+          default: no-store
+      Content-Type:
+          description: Cache control directive
+          type: string
+          default: text/html;charset=UTF-8
+    schema:
+      type:
+        string
   500InternalServerError:
     description: Unknown error
     headers:
