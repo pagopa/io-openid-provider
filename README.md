@@ -54,7 +54,7 @@ Those are all Environment variables needed by the application:
 Start the server locally:
 
 ``` sh
-./start.sh
+make start.dev
 ```
 1. Add a new client:
 
