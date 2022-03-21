@@ -54,7 +54,7 @@ const makeLocalProvider = () => {
   };
   const mockIdentityService = mock.mock<identities.IdentityService>();
   const overridenConfiguration = {
-    ...oidcprovider.defaultConfiguration(records.validConfig),
+    ...oidcprovider.defaultConfiguration({} as any),
     adapter: undefined,
     clients: [client, clientSkipConsent],
   };

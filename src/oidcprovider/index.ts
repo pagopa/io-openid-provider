@@ -4,7 +4,6 @@ import * as oidc from "oidc-provider";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
 import { Config } from "../config";
-import * as redis from "./dal/redis";
 
 const userInfoToAccount =
   (federationToken: string) =>
@@ -49,13 +48,16 @@ const features = {
   },
 };
 
-const defaultConfiguration = (config: Config): oidc.Configuration => {
+const defaultConfiguration = (
+  adapter: (name: string) => oidc.Adapter
+): oidc.Configuration => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
-  function adapter(str: string) {
-    return redis.makeRedisAdapter(config.redis)(str);
+  // :D
+  function adaptTheAdapterFun(str: string) {
+    return adapter(str);
   }
   return {
-    ...{ adapter },
+    ...{ adapter: adaptTheAdapterFun },
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
@@ -88,9 +90,7 @@ const defaultConfiguration = (config: Config): oidc.Configuration => {
 const makeProvider = (
   config: Config,
   identityService: IdentityService,
-  // this parameter is used to override configuration on tests
-  // for production use the default one!
-  providerConfiguration: oidc.Configuration = defaultConfiguration(config)
+  providerConfiguration: oidc.Configuration
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
     ...providerConfiguration,

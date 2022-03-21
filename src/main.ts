@@ -10,6 +10,7 @@ import * as identities from "./identities/service";
 import * as clients from "./clients";
 import { Logger, makeLogger } from "./logger";
 import { parseConfig } from "./config";
+import { adapterProvider } from "./oidcprovider/adapters";
 
 const start = (application: Application, log: Logger): void => {
   log.info("Starting application");
@@ -36,7 +37,14 @@ const main = pipe(
       fetch.timeoutFetch
     );
     const identityService = identities.makeService(ioAuthClient);
-    const provider = oidcprovider.makeProvider(config, identityService);
+    const providerConfig = oidcprovider.defaultConfiguration(
+      adapterProvider(config.redis)
+    );
+    const provider = oidcprovider.makeProvider(
+      config,
+      identityService,
+      providerConfig
+    );
     const providerService = interactions.makeService(provider, logger);
     const application = makeApplication(
       config,

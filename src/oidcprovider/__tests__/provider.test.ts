@@ -17,8 +17,12 @@ describe("userInfoToAccount", () => {
 });
 
 describe("defaultConfiguration", () => {
-  it("should provide an adapter", () => {
-    const configuration = index.defaultConfiguration(records.validConfig);
-    expect(configuration.adapter).not.toStrictEqual(undefined);
+  it("should provide the given adapter", () => {
+    // just to match the adapter factory type
+    const adapter = (_: string) => ({} as any);
+
+    expect(index.defaultConfiguration(adapter).adapter).not.toStrictEqual(
+      undefined
+    );
   });
 });
