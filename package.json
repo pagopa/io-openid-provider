@@ -11,7 +11,7 @@
     "start": "tsc && node -r dotenv/config dist/main.js dotenv_config_path=.env.default",
     "prebuild": "shx rm -rf dist && yarn generate && yarn copy-assets",
     "build": "tsc",
-    "test": "jest -i",
+    "test": "DOTENV_CONFIG_PATH=./.env.default jest --setupFiles dotenv/config -i",
     "test:coverage": "jest -i --coverage",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
