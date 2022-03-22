@@ -5,7 +5,7 @@
   "scripts": {
     "copy-assets": "gulp",
     "validate": "swagger-cli validate ./openapi/index.yaml",
-    "generate": "npm-run-all generate:**",
+    "generate": "npm-run-all generate:** && prisma generate",
     "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --no-strict --out-dir ./src/generated/definitions",
     "generate:clients:io-auth": "rimraf ./src/generated/clients/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/IOOP-33--definition-references/api_auth.yaml --no-strict --out-dir ./src/generated/clients/io-auth --request-types --response-decoders --client",
     "start": "tsc && node -r dotenv/config dist/main.js dotenv_config_path=.env.default",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@pagopa/io-functions-commons": "^22.2.1",
     "@pagopa/ts-commons": "^10.2.1",
+    "@prisma/client": "^3.11.0",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.1",
     "fp-ts": "^2.11.4",
@@ -58,6 +59,7 @@
     "jest-mock-extended": "^2.0.4",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.4.1",
+    "prisma": "^3.11.0",
     "shx": "^0.3.3",
     "supertest": "^6.1.6",
     "swagger-cli": "^4.0.4",
