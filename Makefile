@@ -3,6 +3,7 @@
 start.dev:
 	echo "Starting docker images"
 	docker-compose up -d db
+	docker-compose up -d postgres
 	echo "Docker images started"
 
 	echo "Run application"
