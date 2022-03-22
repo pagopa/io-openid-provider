@@ -13,12 +13,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "resolveJsonModule": true,
-    "paths": {
-      "src/*": [
-        "./src/*"
-      ]
-    }
+    "resolveJsonModule": true
   },
   "include": [
     "./src/**/*"

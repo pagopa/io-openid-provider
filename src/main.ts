@@ -2,6 +2,7 @@ import * as http from "http";
 import * as E from "fp-ts/Either";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
+import * as postgres from "./postgres";
 import { makeApplication } from "./application";
 import * as fetch from "./utils/fetch";
 import * as oidcprovider from "./oidcprovider";
@@ -37,8 +38,9 @@ const main = pipe(
       fetch.timeoutFetch
     );
     const identityService = identities.makeService(ioAuthClient);
+    const clientRepository = postgres.makeClientRepository(config.postgres);
     const providerConfig = oidcprovider.defaultConfiguration(
-      adapterProvider(config.redis)
+      adapterProvider(logger, config.redis, clientRepository)
     );
     const provider = oidcprovider.makeProvider(
       config,

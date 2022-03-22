@@ -1,9 +1,6 @@
 import * as TE from "fp-ts/TaskEither";
-import {
-  Client,
-  ClientRepository,
-  DomainErrorTypes,
-} from "src/core/repositories/ClientRepository";
+import { Client, DomainErrorTypes } from "../core/domain";
+import { ClientRepository } from "../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
 
 /**
