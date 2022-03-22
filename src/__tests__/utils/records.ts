@@ -19,6 +19,9 @@ const validConfig: config.Config = {
     logLevel: "debug",
     logName: "application-name",
   },
+  postgres: {
+    url: new URL("postgresql://user:randompassword@localhost:5432/db"),
+  },
   redis: {
     url: new URL("http://localhost:3791"),
     keyPrefix: "oidc:",
@@ -31,6 +34,7 @@ const envs = {
   PORT: "3000",
   LOG_LEVEL: "debug",
   APPLICATION_NAME: validConfig.info.name,
+  POSTGRES_URL: "postgresql://user:randompassword@localhost:5432/db",
   REDIS_URL: "http://localhost:3791",
   REDIS_KEY_PREFIX: "oidc:",
   VERSION: validConfig.info.version,
