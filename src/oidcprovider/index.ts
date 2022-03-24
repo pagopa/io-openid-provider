@@ -62,7 +62,7 @@ const defaultConfiguration = (
       profile: ["family_name", "given_name", "name"],
     },
     extraClientMetadata: {
-      properties: ["bypass_consent"],
+      properties: ["bypass_consent", "organization"],
     },
     features,
     responseTypes: ["id_token"],

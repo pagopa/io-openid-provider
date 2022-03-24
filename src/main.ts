@@ -38,7 +38,10 @@ const main = pipe(
       fetch.timeoutFetch
     );
     const identityService = identities.makeService(ioAuthClient);
-    const clientRepository = postgres.makeClientRepository(config.postgres);
+    const clientRepository = postgres.makeClientRepository(
+      config.postgres,
+      logger
+    );
     const providerConfig = oidcprovider.defaultConfiguration(
       adapterProvider(logger, config.redis, clientRepository)
     );

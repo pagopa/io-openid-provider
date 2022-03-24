@@ -52,6 +52,8 @@
     "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "fast-check": "^2.23.2",
+    "fast-check-io-ts": "^0.5.0",
     "gulp": "^4.0.2",
     "husky": "^7.0.2",
     "jest": "^27.2.2",

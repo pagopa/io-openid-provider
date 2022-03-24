@@ -1,68 +1,46 @@
 import * as oidc from "oidc-provider";
 import { constVoid, pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "src/logger";
+import * as PR from "io-ts/PathReporter";
+import { Logger } from "../../logger";
 import { ClientRepository } from "../../core/repositories/ClientRepository";
-import { Client } from "../../core/domain";
-
-const notImplementedError = new Error("Not Implemented");
-
-const taskEitherToPromise = async <A, B>(
-  te: TE.TaskEither<A, B>
-): Promise<B> => {
-  const either = await te();
-  return pipe(
-    either,
-    E.fold(
-      (l) => Promise.reject(l),
-      (r) => Promise.resolve(r)
-    )
-  );
-};
+import { Client, DomainErrorTypes } from "../../core/domain";
+import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
 
 export const makeClientAdapter = (
   logger: Logger,
   clientRepository: ClientRepository
 ): oidc.Adapter => ({
-  consume: (_id: string) => {
-    logger.debug("consume");
-    logger.debug("_id", _id);
-    return Promise.reject(notImplementedError);
+  ...makeNotImplementedAdapter(logger),
+  // remove a client
+  destroy: (id: string) => {
+    logger.debug(`destroy, id: ${id}`);
+    return taskEitherToPromise(clientRepository.remove(id));
   },
-  destroy: (id: string) => taskEitherToPromise(clientRepository.remove(id)),
-  find: (_id: string) => {
-    logger.debug("find");
-    logger.debug("_id", _id);
-    return Promise.reject(notImplementedError);
+  // given the identifier return a client
+  find: (id: string) => {
+    logger.debug(`find, id: ${id}`);
+    return taskEitherToPromise(clientRepository.find(id));
   },
-  findByUid: (_uid: string) => {
-    logger.debug("findByUid");
-    logger.debug("_uid", _uid);
-    return Promise.reject(notImplementedError);
-  },
-  findByUserCode: (_userCode: string) => {
-    logger.debug("findByUserCode");
-    logger.debug("_userCode", _userCode);
-    return Promise.reject(notImplementedError);
-  },
-  revokeByGrantId: (_grantId: string) => {
-    logger.debug("findByUid");
-    logger.debug("_grantId", _grantId);
-    return Promise.reject(notImplementedError);
-  },
-  upsert: (_id: string, payload: oidc.AdapterPayload, _expiresIn: number) => {
-    logger.debug("upsert");
-    logger.debug("_id", _id);
-    logger.debug("payload", payload);
-    logger.debug("_expiresIn", _expiresIn);
-
+  // insert or update the client identified with the given id
+  upsert: (id: string, payload: oidc.AdapterPayload, expiresIn: number) => {
+    logger.debug(
+      `upsert, id: ${id}, _expiresIn: ${expiresIn}, payload: ${JSON.stringify(
+        payload
+      )}`
+    );
     const result = pipe(
       TE.fromEither(Client.decode(payload)),
-      TE.chainW(clientRepository.upsert),
+      TE.mapLeft((e) => ({
+        causedBy: new Error(PR.failure(e).join("\n")),
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      })),
       TE.orElseFirst((e) =>
-        TE.of(logger.error("Some error during the upsert operation: ", e))
+        TE.of(
+          logger.error("Some error during the upsert operation: ", e.causedBy)
+        )
       ),
+      TE.chain(clientRepository.upsert),
       TE.map(constVoid)
     );
     return taskEitherToPromise(result);

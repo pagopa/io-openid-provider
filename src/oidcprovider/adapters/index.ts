@@ -11,7 +11,7 @@ export const adapterProvider =
   (name: string): oidc.Adapter => {
     const redisAdapter = makeRedisAdapter(config);
     const clientAdapter = makeClientAdapter(logger, clientRepository);
-    logger.debug("adapterProvider function, parameter 'name': ", name);
+    logger.debug(`adapterProvider function, parameter 'name': ${name}`);
     // eslint-disable-next-line sonarjs/no-small-switch
     switch (name) {
       case "Client":
