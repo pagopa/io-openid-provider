@@ -64,6 +64,36 @@ export const ClientId = t.brand(
 );
 export type ClientId = t.TypeOf<typeof ClientId>;
 
+interface OrganizationIdBrand {
+  readonly OrganizationId: unique symbol;
+}
+// OrganizationId is just a string, refinement is useful to avoid
+// parameters switch
+export const OrganizationId = t.brand(
+  t.string,
+  (s): s is t.Branded<string, OrganizationIdBrand> => t.string.is(s),
+  "OrganizationId"
+);
+export type OrganizationId = t.TypeOf<typeof OrganizationId>;
+
+interface ServiceIdBrand {
+  readonly ServiceId: unique symbol;
+}
+// ServiceId is just a string, refinement is useful to avoid
+// parameters switch
+export const ServiceId = t.brand(
+  t.string,
+  (s): s is t.Branded<string, ServiceIdBrand> => t.string.is(s),
+  "ServiceId"
+);
+export type ServiceId = t.TypeOf<typeof ServiceId>;
+
+export const ClientSelector = t.type({
+  organizationId: t.union([OrganizationId, t.undefined]),
+  serviceId: t.union([ServiceId, t.undefined]),
+});
+export type ClientSelector = t.TypeOf<typeof ClientSelector>;
+
 export const Client = t.type({
   client_id: ClientId,
   redirect_uris: t.array(t.string),
@@ -91,7 +121,8 @@ export const Client = t.type({
     t.literal("self_signed_tls_client_auth"),
     t.literal("client_secret_basic"),
   ]),
-  organization: t.string,
+  organization: OrganizationId,
+  serviceId: ServiceId,
   bypass_consent: t.boolean,
 });
 export type Client = t.TypeOf<typeof Client>;

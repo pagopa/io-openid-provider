@@ -1,5 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
-import { Client, ClientId, DomainError } from "../domain";
+import { Client, ClientId, DomainError, ClientSelector } from "../domain";
 
 /**
  * This interface represents the entry point to retrieve and manage
@@ -20,4 +20,10 @@ export interface ClientRepository {
    * Delete the Client identified with the given clientId.
    */
   readonly remove: (clientId: ClientId) => TE.TaskEither<DomainError, void>;
+  /**
+   * Given a selector return a list of Client that match the selector
+   */
+  readonly list: (
+    selector: ClientSelector
+  ) => TE.TaskEither<DomainError, ReadonlyArray<Client>>;
 }

@@ -62,7 +62,7 @@ model Client {
   scope                       String
   subjectType                 SubjectType
   tokenEndpointAuthMethod     ClientAuthMethod
-
   organization                String
+  serviceId                   String
   bypassConsent               Boolean
 }

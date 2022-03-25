@@ -2,6 +2,7 @@
 import * as prisma from "@prisma/client";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { constVoid, flow, pipe } from "fp-ts/function";
+import * as A from "fp-ts/Array";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
@@ -9,8 +10,11 @@ import { Logger } from "src/logger";
 import {
   Client,
   ClientId,
+  ClientSelector,
   DomainErrorTypes,
+  OrganizationId,
   ResponseType,
+  ServiceId,
 } from "../core/domain";
 import { ClientRepository } from "../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
@@ -25,7 +29,8 @@ const fromDBClientToClient = (c: prisma.Client): Client => ({
   client_secret: c.clientSecret || undefined,
   grant_types: c.grantTypes,
   id_token_signed_response_alg: c.idTokenSignedResponseAlg,
-  organization: c.organization,
+  organization: c.organization as OrganizationId,
+  serviceId: c.serviceId as ServiceId,
   post_logout_redirect_uris: c.postLogoutRedirectUris,
   require_auth_time: c.requireAuthTime,
   // FIXME: Don't cast like that!
@@ -36,23 +41,24 @@ const fromDBClientToClient = (c: prisma.Client): Client => ({
   token_endpoint_auth_method: c.tokenEndpointAuthMethod,
 });
 
-const fromClientToDBClient = (clientDefinition: Client): prisma.Client => ({
-  applicationType: clientDefinition.application_type,
-  bypassConsent: clientDefinition.bypass_consent,
-  clientId: clientDefinition.client_id,
-  clientIdIssuedAt: new Date(clientDefinition.client_id_issued_at),
-  clientName: clientDefinition.client_name,
-  clientSecret: clientDefinition.client_secret || null,
-  grantTypes: clientDefinition.grant_types,
-  idTokenSignedResponseAlg: clientDefinition.id_token_signed_response_alg,
-  organization: clientDefinition.organization,
-  postLogoutRedirectUris: clientDefinition.post_logout_redirect_uris,
-  requireAuthTime: clientDefinition.require_auth_time,
-  responseTypes: clientDefinition.response_types,
-  redirectUris: clientDefinition.redirect_uris,
-  scope: clientDefinition.scope,
-  subjectType: clientDefinition.subject_type,
-  tokenEndpointAuthMethod: clientDefinition.token_endpoint_auth_method,
+const fromClientToDBClient = (client: Client): prisma.Client => ({
+  applicationType: client.application_type,
+  bypassConsent: client.bypass_consent,
+  clientId: client.client_id,
+  clientIdIssuedAt: new Date(client.client_id_issued_at),
+  clientName: client.client_name,
+  clientSecret: client.client_secret || null,
+  grantTypes: client.grant_types,
+  idTokenSignedResponseAlg: client.id_token_signed_response_alg,
+  organization: client.organization,
+  serviceId: client.serviceId,
+  postLogoutRedirectUris: client.post_logout_redirect_uris,
+  requireAuthTime: client.require_auth_time,
+  responseTypes: client.response_types,
+  redirectUris: client.redirect_uris,
+  scope: client.scope,
+  subjectType: client.subject_type,
+  tokenEndpointAuthMethod: client.token_endpoint_auth_method,
 });
 
 const removeClient =
@@ -121,6 +127,34 @@ const findClient =
       )
     );
 
+const listClient =
+  (logger: Logger) =>
+  <T>(client: Prisma.ClientDelegate<T>) =>
+  (selector: ClientSelector) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          client.findMany({
+            where: {
+              organization: selector.organizationId,
+              serviceId: selector.serviceId,
+            },
+          }),
+        E.toError
+      ),
+      TE.map(flow(A.map(fromDBClientToClient))),
+      TE.mapLeft((e) => ({
+        causedBy: e,
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      })),
+      TE.chainFirst((c) =>
+        TE.of(logger.debug(`listClient ${JSON.stringify(c)}`))
+      ),
+      TE.orElseFirst((e) =>
+        TE.of(logger.error(`Error on listClient ${JSON.stringify(e)}`))
+      )
+    );
+
 /**
  * Create a ClientRepository instance that uses PostgreSQL as backing store
  */
@@ -134,4 +168,5 @@ export const makeClientRepository = (
   find: findClient(logger)(client.client),
   remove: removeClient(logger)(client.client),
   upsert: upsertClient(logger)(client.client),
+  list: listClient(logger)(client.client),
 });
