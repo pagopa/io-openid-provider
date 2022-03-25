@@ -10,6 +10,7 @@ export const adapterProvider =
   (logger: Logger, config: RedisConfig, clientRepository: ClientRepository) =>
   (name: string): oidc.Adapter => {
     const redisAdapter = makeRedisAdapter(config);
+    // create the adapter from ClientRepository
     const clientAdapter = makeClientAdapter(logger, clientRepository);
     logger.debug(`adapterProvider function, parameter 'name': ${name}`);
     // eslint-disable-next-line sonarjs/no-small-switch

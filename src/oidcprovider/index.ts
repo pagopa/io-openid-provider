@@ -32,22 +32,6 @@ const findAccountAdapter =
       TE.toUnion
     )();
 
-const features = {
-  devInteractions: {
-    enabled: false,
-  },
-  registration: {
-    enabled: true,
-    issueRegistrationAccessToken: false,
-  },
-  rpInitiatedLogout: {
-    enabled: false,
-  },
-  userinfo: {
-    enabled: false,
-  },
-};
-
 const defaultConfiguration = (
   adapter: (name: string) => oidc.Adapter
 ): oidc.Configuration => {
@@ -62,9 +46,23 @@ const defaultConfiguration = (
       profile: ["family_name", "given_name", "name"],
     },
     extraClientMetadata: {
-      properties: ["bypass_consent", "organization"],
+      properties: ["bypass_consent", "organization", "serviceId"],
     },
-    features,
+    features: {
+      devInteractions: {
+        enabled: false,
+      },
+      registration: {
+        enabled: true,
+        initialAccessToken: false,
+      },
+      rpInitiatedLogout: {
+        enabled: false,
+      },
+      userinfo: {
+        enabled: false,
+      },
+    },
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",

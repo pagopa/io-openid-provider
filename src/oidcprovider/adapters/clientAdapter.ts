@@ -1,4 +1,3 @@
-import { Errors } from "io-ts";
 import * as oidc from "oidc-provider";
 import { constVoid, pipe } from "fp-ts/function";
 import * as E from "fp-ts/Either";
@@ -9,15 +8,10 @@ import { ClientRepository } from "../../core/repositories/ClientRepository";
 import {
   Client,
   ClientId,
-  DomainError,
   DomainErrorTypes,
+  makeDomainError,
 } from "../../core/domain";
 import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
-
-const makeDomainError = (e: Errors): DomainError => ({
-  causedBy: new Error(PR.failure(e).join("\n")),
-  kind: DomainErrorTypes.GENERIC_ERROR,
-});
 
 export const makeClientAdapter = (
   logger: Logger,

@@ -1,5 +1,6 @@
 /* eslint-disable sort-keys */
 import * as t from "io-ts";
+import * as PR from "io-ts/PathReporter";
 
 export enum DomainErrorTypes {
   GENERIC_ERROR,
@@ -20,6 +21,10 @@ export const DomainError = t.type({
   ]),
 });
 export type DomainError = t.TypeOf<typeof DomainError>;
+export const makeDomainError = (e: t.Errors): DomainError => ({
+  causedBy: new Error(PR.failure(e).join("\n")),
+  kind: DomainErrorTypes.GENERIC_ERROR,
+});
 
 const AsymmetricSigningAlgorithm = t.union([
   t.literal("PS256"),
