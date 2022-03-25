@@ -4,7 +4,7 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
-import * as postgres from "./postgres";
+import * as postgres from "./implementations/postgres";
 import * as redis from "./oidcprovider/dal/redis";
 import * as logger from "./logger";
 

@@ -15,8 +15,8 @@ import {
   OrganizationId,
   ResponseType,
   ServiceId,
-} from "../core/domain";
-import { ClientRepository } from "../core/repositories/ClientRepository";
+} from "../../core/domain";
+import { ClientRepository } from "../../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
 
 const fromDBClientToClient = (c: prisma.Client): Client => ({
