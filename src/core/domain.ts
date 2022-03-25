@@ -52,8 +52,20 @@ export const ResponseType = t.union([
 ]);
 export type ResponseType = t.TypeOf<typeof ResponseType>;
 
+interface ClientIdBrand {
+  readonly ClientId: unique symbol;
+}
+// ClientId is just a string, refinement is useful to avoid
+// parameters switch
+export const ClientId = t.brand(
+  t.string,
+  (s): s is t.Branded<string, ClientIdBrand> => t.string.is(s),
+  "ClientId"
+);
+export type ClientId = t.TypeOf<typeof ClientId>;
+
 export const Client = t.type({
-  client_id: t.string,
+  client_id: ClientId,
   redirect_uris: t.array(t.string),
   grant_types: t.array(t.string),
   response_types: t.array(ResponseType),

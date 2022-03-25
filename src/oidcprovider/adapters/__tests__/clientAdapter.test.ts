@@ -9,7 +9,7 @@ import { client } from "../../../core/__tests__/data";
 
 describe("makeClientAdapter", () => {
   it("should override the correct functions", async () => {
-    const id = "id";
+    const id = client.client_id;
     const loggerMock = mock.mock<Logger>();
     const clientRepositoryMock = mock.mock<ClientRepository>();
     const adapter = makeClientAdapter(loggerMock, clientRepositoryMock);

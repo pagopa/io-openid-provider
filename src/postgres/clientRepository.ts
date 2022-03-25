@@ -6,14 +6,20 @@ import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { Logger } from "src/logger";
-import { Client, DomainErrorTypes, ResponseType } from "../core/domain";
+import {
+  Client,
+  ClientId,
+  DomainErrorTypes,
+  ResponseType,
+} from "../core/domain";
 import { ClientRepository } from "../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
 
 const fromDBClientToClient = (c: prisma.Client): Client => ({
   application_type: c.applicationType,
   bypass_consent: c.bypassConsent,
-  client_id: c.clientId,
+  // FIXME: Don't cast like that!
+  client_id: c.clientId as ClientId,
   client_id_issued_at: c.clientIdIssuedAt.getTime(),
   client_name: c.clientName,
   client_secret: c.clientSecret || undefined,
@@ -52,7 +58,7 @@ const fromClientToDBClient = (clientDefinition: Client): prisma.Client => ({
 const removeClient =
   (logger: Logger) =>
   <T>(client: Prisma.ClientDelegate<T>) =>
-  (id: string) =>
+  (id: ClientId) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -96,7 +102,7 @@ const upsertClient =
 const findClient =
   (logger: Logger) =>
   <T>(client: Prisma.ClientDelegate<T>) =>
-  (id: string) =>
+  (id: ClientId) =>
     pipe(
       TE.tryCatch(
         () => client.findUnique({ where: { clientId: id } }),
@@ -120,14 +126,12 @@ const findClient =
  */
 export const makeClientRepository = (
   config: PostgresConfig,
-  logger: Logger
-): ClientRepository => {
-  const client = new PrismaClient({
+  logger: Logger,
+  client: PrismaClient = new PrismaClient({
     datasources: { db: { url: config.url.href } },
-  });
-  return {
-    find: findClient(logger)(client.client),
-    remove: removeClient(logger)(client.client),
-    upsert: upsertClient(logger)(client.client),
-  };
-};
+  })
+): ClientRepository => ({
+  find: findClient(logger)(client.client),
+  remove: removeClient(logger)(client.client),
+  upsert: upsertClient(logger)(client.client),
+});
