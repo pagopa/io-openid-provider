@@ -1,55 +1,34 @@
-import { constVoid, pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as PR from "io-ts/PathReporter";
+import { constVoid } from "fp-ts/function";
 import * as oidc from "oidc-provider";
-import {
-  DomainErrorTypes,
-  makeDomainError,
-  RegistrationAccessToken,
-  RegistrationAccessTokenId,
-} from "../../core/domain";
-import { RegistrationAccessTokenRepository } from "../../core/repositories/RegistrationAccessTokenRepository";
 import { Logger } from "../../logger";
-import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
+import { makeNotImplementedAdapter } from "./utils";
 
+/**
+ * Return an Adapter of RegistrationAccessToken entity that produce a token given
+ * a clientId. This adapter is used to allow to provide client_id as
+ * access token required to call the CRUD endpoint about Client.
+ */
 export const makeRegistrationAccessTokenAdapter = (
   logger: Logger,
-  registrationAccessTokenRepository: RegistrationAccessTokenRepository,
-  name: string = "RegistrationAccessToken"
+  name: string = "RegistrationAccessToken",
+  // just for test purpose
+  now: () => Date = () => new Date()
 ): oidc.Adapter => ({
   ...makeNotImplementedAdapter(name, logger),
   // remove a token
   destroy: (id: string) => {
     logger.debug(`${name} destroy, id: ${id}`);
-    const result = pipe(
-      pipe(
-        RegistrationAccessTokenId.decode(id),
-        E.mapLeft(makeDomainError),
-        TE.fromEither
-      ),
-      TE.chain(registrationAccessTokenRepository.remove)
-    );
-    // id paramter can be undefined ...
-    // e.g.: If the token is not generated on client registration
-    if (id) {
-      return taskEitherToPromise(result);
-    } else {
-      return Promise.resolve(constVoid());
-    }
+    return Promise.resolve(constVoid());
   },
   // given the identifier return a token
   find: (id: string) => {
     logger.debug(`${name} find, id: ${id}`);
-    const result = pipe(
-      pipe(
-        RegistrationAccessTokenId.decode(id),
-        E.mapLeft(makeDomainError),
-        TE.fromEither
-      ),
-      TE.chain(registrationAccessTokenRepository.find)
-    );
-    return taskEitherToPromise(result);
+    const registrationAccessToken: oidc.AdapterPayload = {
+      clientId: id,
+      iat: new Date(now().getDate() + 1).getTime(),
+      jti: id,
+    };
+    return Promise.resolve(registrationAccessToken);
   },
   // insert or update the client identified with the given id
   upsert: (id: string, payload: oidc.AdapterPayload, expiresIn: number) => {
@@ -58,21 +37,6 @@ export const makeRegistrationAccessTokenAdapter = (
         payload
       )}`
     );
-    const result = pipe(
-      TE.fromEither(RegistrationAccessToken.decode({ ...payload, id })),
-      TE.mapLeft((e) => ({
-        causedBy: new Error(PR.failure(e).join("\n")),
-        kind: DomainErrorTypes.GENERIC_ERROR,
-      })),
-      TE.orElseFirst((e) =>
-        TE.of(
-          logger.error("Some error during the upsert operation: ", e.causedBy)
-        )
-      ),
-      TE.chain(registrationAccessTokenRepository.upsert),
-      TE.map(constVoid),
-      TE.orElse(() => TE.right(constVoid()))
-    );
-    return taskEitherToPromise(result);
+    return Promise.resolve(constVoid());
   },
 });

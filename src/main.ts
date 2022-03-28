@@ -12,7 +12,6 @@ import * as clients from "./implementations/externalClients";
 import { Logger, makeLogger } from "./logger";
 import { parseConfig } from "./config";
 import { adapterProvider } from "./oidcprovider/adapters";
-import { makeRegistrationAccessTokenRepository } from "./implementations/static/registrationAccessTokenRepository";
 
 const start = (application: Application, log: Logger): void => {
   log.info("Starting application");
@@ -43,15 +42,8 @@ const main = pipe(
       config.postgres,
       logger
     );
-    const registrationAccessTokenRepository =
-      makeRegistrationAccessTokenRepository(logger);
     const providerConfig = oidcprovider.defaultConfiguration(
-      adapterProvider(
-        logger,
-        config.redis,
-        clientRepository,
-        registrationAccessTokenRepository
-      )
+      adapterProvider(logger, config.redis, clientRepository)
     );
     const provider = oidcprovider.makeProvider(
       config,
