@@ -207,7 +207,7 @@ definitions:
     type: object
     required:
     - redirect_uris
-    - organization
+    - organization_id
     - service_id
     properties:
       redirect_uris:
