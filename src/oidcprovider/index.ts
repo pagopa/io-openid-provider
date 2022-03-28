@@ -46,7 +46,7 @@ const defaultConfiguration = (
       profile: ["family_name", "given_name", "name"],
     },
     extraClientMetadata: {
-      properties: ["bypass_consent", "organization", "serviceId"],
+      properties: ["bypass_consent", "organization_id", "service_id"],
     },
     features: {
       devInteractions: {

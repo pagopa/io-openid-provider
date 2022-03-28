@@ -37,16 +37,7 @@ paths:
       operationId: createClients
       summary: Create a client
       parameters:
-        - name: organizationId
-          description: The client organization
-          in: query
-          required: false
-          type: string
-        - name: serviceId
-          description: The client service
-          in: query
-          required: false
-          type: string
+        - $ref: '#/parameters/bodyClientDefinition'
       responses:
         200:
           $ref: '#/responses/200ClientResponse'
@@ -205,6 +196,11 @@ parameters:
     enum:
         - fragment
         - form_post
+  bodyClientDefinition:
+    in: body
+    name: payload
+    schema:
+      $ref: '#/definitions/APIClientDefinition'
 
 definitions:
   APIClientDefinition:
@@ -242,11 +238,9 @@ definitions:
         type: string
         description: subject_type requested for responses to this Client. The subject_types_supported Discovery parameter contains a list of the supported subject_type values for this server. Valid types include pairwise and public.
       scope:
-        type: array
+        type: string
         description: String containing a space-separated list of scope values
-        items:
-          type: string
-      organization:
+      organization_id:
         type: string
         description: The organization which this client belongs to
       service_id:

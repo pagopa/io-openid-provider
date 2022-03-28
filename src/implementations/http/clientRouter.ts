@@ -23,11 +23,11 @@ const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   grant_types: input.grant_types,
   // FIXME: populate this field
   logo_uri: undefined,
-  organization: input.organization,
+  organization_id: input.organization_id,
   redirect_uris: input.redirect_uris,
   response_types: input.response_types,
-  scope: [input.scope],
-  service_id: input.serviceId,
+  scope: input.scope,
+  service_id: input.service_id,
   subject_type: input.subject_type,
 });
 

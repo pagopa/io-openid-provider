@@ -126,8 +126,8 @@ export const Client = t.type({
     t.literal("self_signed_tls_client_auth"),
     t.literal("client_secret_basic"),
   ]),
-  organization: OrganizationId,
-  serviceId: ServiceId,
-  bypass_consent: t.boolean,
+  organization_id: OrganizationId,
+  service_id: ServiceId,
+  bypass_consent: t.union([t.boolean, t.undefined]),
 });
 export type Client = t.TypeOf<typeof Client>;
