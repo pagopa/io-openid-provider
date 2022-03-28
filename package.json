@@ -15,7 +15,8 @@
     "test:coverage": "jest -i --coverage",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "patch-package"
   },
   "author": "",
   "license": "MIT",
@@ -30,6 +31,8 @@
     "ioredis": "^4.28.2",
     "node-fetch": "^2.6.1",
     "oidc-provider": "^7.10.4",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "prom-client": "^14.0.0",
     "winston": "^3.3.3"
   },
