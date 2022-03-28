@@ -131,3 +131,23 @@ export const Client = t.type({
   bypass_consent: t.boolean,
 });
 export type Client = t.TypeOf<typeof Client>;
+
+interface RegistrationAccessTokenIdBrand {
+  readonly RegistrationAccessTokenId: unique symbol;
+}
+export const RegistrationAccessTokenId = t.brand(
+  t.string,
+  (s): s is t.Branded<string, RegistrationAccessTokenIdBrand> => t.string.is(s),
+  "RegistrationAccessTokenId"
+);
+export type RegistrationAccessTokenId = t.TypeOf<
+  typeof RegistrationAccessTokenId
+>;
+
+export const RegistrationAccessToken = t.type({
+  clientId: ClientId,
+  iat: t.number,
+  id: RegistrationAccessTokenId,
+});
+/** Represents the access-token issued to the client during registration phase */
+export type RegistrationAccessToken = t.TypeOf<typeof RegistrationAccessToken>;

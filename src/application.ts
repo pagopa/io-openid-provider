@@ -4,12 +4,14 @@ import helmet from "helmet";
 import { Provider } from "oidc-provider";
 import * as cookies from "cookie-parser";
 import * as info from "./info/router";
+import * as clients from "./implementations/http/clientRouter";
 import * as oidcprovider from "./oidcprovider/router";
 import * as interactions from "./interactions/router";
 import { Config } from "./config";
 import { Logger } from "./logger";
 import { ProviderService } from "./interactions/service";
 import { IdentityService } from "./identities/service";
+import { ClientRepository } from "./core/repositories/ClientRepository";
 
 // eslint-disable-next-line extra-rules/no-commented-out-code
 // TODO: Remove in production
@@ -22,7 +24,9 @@ const makeApplication = (
   provider: Provider,
   providerService: ProviderService,
   identityService: IdentityService,
+  clientRepository: ClientRepository,
   logger: Logger
+  // eslint-disable-next-line max-params
 ): Application => {
   const application = express();
 
@@ -43,6 +47,8 @@ const makeApplication = (
   application.set("view engine", "ejs");
 
   /* Register routers */
+  // router that manage the clients endpoint
+  application.use(clients.makeRouter(logger, clientRepository));
   // router that manage the info endpoint
   application.use(info.makeRouter(config));
   // router that manage the interactions (login and consent)

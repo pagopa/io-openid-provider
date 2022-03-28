@@ -55,6 +55,11 @@ const defaultConfiguration = (
       registration: {
         enabled: true,
         initialAccessToken: false,
+        issueRegistrationAccessToken: false,
+      },
+      registrationManagement: {
+        enabled: true,
+        rotateRegistrationAccessToken: false,
       },
       rpInitiatedLogout: {
         enabled: false,
@@ -66,7 +71,7 @@ const defaultConfiguration = (
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
-      registration: "/connect/register",
+      registration: "/admin/clients",
     },
     scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],

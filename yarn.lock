@@ -1203,10 +1203,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.7.tgz#4a53d8332bb65a45470a2f9e2611f1ced637a5cb"
   integrity sha512-1QUk+WAUD4t8iR+Oj+UgI8oJa6yyxaB8a8pHaC8uqM6RrS1qbL7bf3Pwl5rHv0psm2CuDErgho6v5N+G+5fwtQ==
 
-"@types/oidc-provider@^7.8.1":
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/@types/oidc-provider/-/oidc-provider-7.8.1.tgz#70ee9ccc6c4f0af81e7614ec181b8155ea0da409"
-  integrity sha512-MsmVKYFN9i27kfJh3hqj7F6aQNue6A/1aBKVJH07I3WYMriUDqMtYU0MWtheFPI1Tm9kwa0JHheaOdNRjuxboA==
+"@types/oidc-provider@^7.8.2":
+  version "7.8.2"
+  resolved "https://registry.yarnpkg.com/@types/oidc-provider/-/oidc-provider-7.8.2.tgz#8d625fec691444b40127ca567c1b51f88059e783"
+  integrity sha512-n//6fAayvlOD3sKAUo5/LjI41tS3E4nfqRefckpcqh2nsyc4PbAEmhDVlE55PNSZonO9k4fW7mmHbsMNU28v3g==
   dependencies:
     "@types/koa" "*"
 

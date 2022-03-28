@@ -7,6 +7,7 @@ import * as authClient from "../../generated/clients/io-auth/client";
 import * as interactions from "../../interactions/service";
 import * as identities from "../../identities/service";
 import * as oidcprovider from "../../oidcprovider";
+import { ClientRepository } from "../../core/repositories/ClientRepository";
 
 /**
  * Create and return a fake application and the mocks required by the system.
@@ -18,12 +19,14 @@ const makeFakeApplication = () => {
     makeLocalProvider();
   const log = logger.makeLogger(config.logger);
   const mockProviderService = interactions.makeService(provider, log);
+  const mockClientRepository = mock.mock<ClientRepository>();
   // return an application with all mocked services
   const app = application.makeApplication(
     config,
     provider,
     mockProviderService,
     mockIdentityService,
+    mockClientRepository,
     log
   );
   return {

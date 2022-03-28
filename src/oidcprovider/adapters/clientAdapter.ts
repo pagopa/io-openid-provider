@@ -17,7 +17,7 @@ export const makeClientAdapter = (
   logger: Logger,
   clientRepository: ClientRepository
 ): oidc.Adapter => ({
-  ...makeNotImplementedAdapter(logger),
+  ...makeNotImplementedAdapter("Client", logger),
   // remove a client
   destroy: (id: string) => {
     logger.debug(`destroy, id: ${id}`);

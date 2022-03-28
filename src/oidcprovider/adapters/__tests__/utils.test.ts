@@ -26,7 +26,7 @@ describe("makeNotImplementedAdapter", () => {
   it("should implements all functions", async () => {
     const id = "id";
     const loggerMock = mock.mock<Logger>();
-    const adapter = makeNotImplementedAdapter(loggerMock);
+    const adapter = makeNotImplementedAdapter("Test", loggerMock);
 
     await expect(adapter.consume(id)).rejects.toThrowError(notImplementedError);
     await expect(adapter.destroy(id)).rejects.toThrowError(notImplementedError);

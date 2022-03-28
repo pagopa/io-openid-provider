@@ -26,34 +26,37 @@ const promiseRejected = () => Promise.reject(notImplementedError);
  * Create an Adapter that implements all methods returning a promise
  * rejected with an Error (Not Implemented Error).
  */
-export const makeNotImplementedAdapter = (logger: Logger): oidc.Adapter => ({
+export const makeNotImplementedAdapter = (
+  name: string,
+  logger: Logger
+): oidc.Adapter => ({
   consume: (id: string) => {
-    logger.error(`consume, id: ${id}`);
+    logger.error(`${name} consume, id: ${id}`);
     return promiseRejected();
   },
   destroy: (id: string) => {
-    logger.error(`destroy, id: ${id}`);
+    logger.error(`${name} destroy, id: ${id}`);
     return promiseRejected();
   },
   find: (id: string) => {
-    logger.error(`find, id: ${id}`);
+    logger.error(`${name} find, id: ${id}`);
     return promiseRejected();
   },
   findByUid: (uid: string) => {
-    logger.error(`findByUid, uid: ${uid}`);
+    logger.error(`${name} findByUid, uid: ${uid}`);
     return promiseRejected();
   },
   findByUserCode: (userCode: string) => {
-    logger.error(`findByUserCode, userCode: ${userCode}`);
+    logger.error(`${name} findByUserCode, userCode: ${userCode}`);
     return promiseRejected();
   },
   revokeByGrantId: (grantId: string) => {
-    logger.error(`revokeByGrantId, grantId: ${grantId}`);
+    logger.error(`${name} revokeByGrantId, grantId: ${grantId}`);
     return promiseRejected();
   },
   upsert: (id: string, payload: oidc.AdapterPayload, expiresIn: number) => {
     logger.error(
-      `upsert, id: ${id}, expiresIn: ${expiresIn}, payload: ${JSON.stringify(
+      `${name} upsert, id: ${id}, expiresIn: ${expiresIn}, payload: ${JSON.stringify(
         payload
       )}`
     );
