@@ -8,7 +8,7 @@ import * as fetch from "./implementations/fetch";
 import * as oidcprovider from "./oidcprovider";
 import * as interactions from "./interactions/service";
 import * as identities from "./identities/service";
-import * as clients from "./implementations/externalClients";
+import * as clients from "./implementations/httpClients";
 import { Logger, makeLogger } from "./logger";
 import { parseConfig } from "./config";
 import { adapterProvider } from "./oidcprovider/adapters";
