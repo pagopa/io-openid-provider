@@ -1,30 +1,4 @@
-/* eslint-disable sort-keys */
 import * as t from "io-ts";
-import * as PR from "io-ts/PathReporter";
-
-export enum DomainErrorTypes {
-  GENERIC_ERROR,
-  NOT_IMPLEMENTED,
-}
-
-export const DomainError = t.type({
-  causedBy: t.union([
-    t.type({
-      message: t.string,
-      name: t.string,
-    }),
-    t.undefined,
-  ]),
-  kind: t.union([
-    t.literal(DomainErrorTypes.GENERIC_ERROR),
-    t.literal(DomainErrorTypes.NOT_IMPLEMENTED),
-  ]),
-});
-export type DomainError = t.TypeOf<typeof DomainError>;
-export const makeDomainError = (e: t.Errors): DomainError => ({
-  causedBy: new Error(PR.failure(e).join("\n")),
-  kind: DomainErrorTypes.GENERIC_ERROR,
-});
 
 const AsymmetricSigningAlgorithm = t.union([
   t.literal("PS256"),
@@ -100,22 +74,25 @@ export const ClientSelector = t.type({
 export type ClientSelector = t.TypeOf<typeof ClientSelector>;
 
 export const Client = t.type({
-  client_id: ClientId,
-  redirect_uris: t.array(t.string),
-  grant_types: t.array(t.string),
-  response_types: t.array(ResponseType),
   application_type: t.union([t.literal("web"), t.literal("native")]),
+  bypass_consent: t.union([t.boolean, t.undefined]),
+  client_id: ClientId,
   client_id_issued_at: t.number,
   client_name: t.string,
   client_secret: t.union([t.string, t.undefined]),
+  grant_types: t.array(t.string),
   id_token_signed_response_alg: t.union([
     AsymmetricSigningAlgorithm,
     SymmetricSigningAlgorithm,
     NoneAlg,
   ]),
+  organization_id: OrganizationId,
   post_logout_redirect_uris: t.array(t.string),
+  redirect_uris: t.array(t.string),
   require_auth_time: t.boolean,
+  response_types: t.array(ResponseType),
   scope: t.string,
+  service_id: ServiceId,
   subject_type: t.union([t.literal("public"), t.literal("pairwise")]),
   token_endpoint_auth_method: t.union([
     t.literal("none"),
@@ -126,8 +103,5 @@ export const Client = t.type({
     t.literal("self_signed_tls_client_auth"),
     t.literal("client_secret_basic"),
   ]),
-  organization_id: OrganizationId,
-  service_id: ServiceId,
-  bypass_consent: t.union([t.boolean, t.undefined]),
 });
 export type Client = t.TypeOf<typeof Client>;

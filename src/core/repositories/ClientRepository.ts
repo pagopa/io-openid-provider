@@ -2,8 +2,7 @@ import * as TE from "fp-ts/TaskEither";
 import { Client, ClientId, DomainError, ClientSelector } from "../domain";
 
 /**
- * This interface represents the entry point to deal
- * with the storage of the Client entity
+ * Represents the only entry point that is allowed to work with the Client storage
  */
 export interface ClientRepository {
   /**
