@@ -1,5 +1,6 @@
+import { pipe } from "fp-ts/function";
+import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import * as f from "fp-ts/lib/function";
 import * as oidc from "oidc-provider";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
@@ -21,7 +22,7 @@ const userInfoToAccount =
 const findAccountAdapter =
   (identityService: IdentityService): oidc.FindAccount =>
   (_, accountId) =>
-    f.pipe(
+    pipe(
       FederationToken.decode(accountId),
       TE.fromEither,
       TE.chainW((parsed) => identityService.authenticate(parsed)),
@@ -83,6 +84,22 @@ const defaultConfiguration = (
 };
 
 /**
+ * Return an option with the value to put on authorization header.
+ */
+export const makeAuthorizationHeader = (
+  config: oidc.Configuration,
+  url: string
+): O.Option<string> =>
+  pipe(
+    O.fromNullable(config.routes),
+    O.chain((routes) => O.fromNullable(routes.registration)),
+    O.filter((route) => url.startsWith(`${route}/`)),
+    O.map((route) => url.replace(`${route}/`, "")),
+    O.filter((clientId) => clientId !== ""),
+    O.map((clientId) => `Bearer ${clientId}`)
+  );
+
+/**
  * Return an instance of oidc-provider Provider ready to be used.
  *
  * @param providerConfiguration: The configuration used to configure the provider,
@@ -99,10 +116,27 @@ const makeProvider = (
     ...providerConfiguration,
     findAccount: findAccountAdapter(identityService),
   };
-  return new oidc.Provider(
+  const provider = new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
     providerConfig
   );
+
+  // This middleware add the following authorization header on clients path
+  // `Bearer ${clientId}`
+  // This trick toghether with a fake RegistrationAccessTokenAdapter disable
+  // the authentication on clients paths.
+  provider.use((ctx, next) => {
+    pipe(
+      makeAuthorizationHeader(providerConfig, ctx.url),
+      O.map((authorization) => {
+        // eslint-disable-next-line functional/immutable-data
+        ctx.headers.authorization = authorization;
+      })
+    );
+    return next();
+  });
+
+  return provider;
 };
 
 export { makeProvider, userInfoToAccount, defaultConfiguration };

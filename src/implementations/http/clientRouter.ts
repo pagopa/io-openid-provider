@@ -69,13 +69,6 @@ export const makeRouter = (
 ): express.Router => {
   const router = express.Router();
 
-  // Add the default bearer token used by dynamic client registration
-  router.use("/admin/clients/:clientId", (req, _, next) => {
-    // eslint-disable-next-line functional/immutable-data
-    req.headers.authorization = `Bearer ${req.params.clientId}`;
-    next();
-  });
-
   router.get(
     "/admin/clients",
     wrapRequestHandler(
