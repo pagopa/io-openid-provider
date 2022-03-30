@@ -66,3 +66,12 @@ model Client {
   serviceId                   String
   bypassConsent               Boolean
 }
+
+model Grant {
+  accountId   String
+  clientId    String
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  scope       String
+}
