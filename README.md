@@ -48,13 +48,14 @@ Those are all Environment variables needed by the application:
 | IO_BACKEND_BASE_URL | The base URL of IO backend used as identity provider             | string |
 | REDIS_URL           | The URL used to connect to Redis                                 | string |
 | REDIS_KEY_PREFIX    | The prefix to use to store information in Redis                  | string |
+| POSTGRES_URL        | The URL used to connect to PostgreSQL                            | string |
 
 
 ## Example
 Start the server locally:
 
 ``` sh
-./start.sh
+make start.dev
 ```
 1. Add a new client:
 

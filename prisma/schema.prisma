@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ApplicationType {
+  web
+  native
+}
+
+enum SigningAlgorithm {
+  // Asymmetric
+  PS256
+  PS384
+  PS512
+  ES256
+  ES256K
+  ES384
+  ES512
+  EdDSA
+  RS256
+  RS384
+  RS512
+  // Symmetric
+  HS256
+  HS384
+  HS512
+  none
+}
+
+enum ClientAuthMethod {
+  client_secret_basic
+  client_secret_post
+  client_secret_jwt
+  private_key_jwt
+  tls_client_auth
+  self_signed_tls_client_auth
+  none
+}
+
+enum SubjectType {
+  public
+  pairwise
+}
+
+model Client {
+  clientId                    String @id
+  redirectUris                String[]
+  grantTypes                  String[]
+  responseTypes               String[]
+  applicationType             ApplicationType
+  clientIdIssuedAt            DateTime
+  clientName                  String
+  clientSecret                String?
+  idTokenSignedResponseAlg    SigningAlgorithm
+  postLogoutRedirectUris      String[]
+  requireAuthTime             Boolean
+  scope                       String
+  subjectType                 SubjectType
+  tokenEndpointAuthMethod     ClientAuthMethod
+  organization                String
+  serviceId                   String
+  bypassConsent               Boolean
+}

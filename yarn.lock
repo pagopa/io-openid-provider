@@ -892,6 +892,23 @@
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
+"@prisma/client@^3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@prisma/client/-/client-3.11.0.tgz#6aa05165b641578c74816aaa15b389e0062318ee"
+  integrity sha512-d42o/tlalaWMmNOR4r5BiR6YYTYEV82eZ2lNKOm5ht3WyYwI9e+zy2MyZnNO4Fx5e08RAhW+GRVcEgKl5faUaQ==
+  dependencies:
+    "@prisma/engines-version" "3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b"
+
+"@prisma/engines-version@3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b":
+  version "3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b"
+  resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b.tgz#808ab9636184e4a0b2bf79016d6ed72c4a1ed54f"
+  integrity sha512-bhMW1XybXZyqCf+9QqjP7Oi7xgVHcISVyOZNMm51qeZsy12M1RtHaCcXUFeMMV0JOCZZuPFVr3+0KVpQqK35CQ==
+
+"@prisma/engines@3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b":
+  version "3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b"
+  resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b.tgz#4c1093f7b24c433a9cef2e60f13f57f7c89b5cfa"
+  integrity sha512-m9iZd5F5vP6A2IvKWfHpOO/qK8OOO9nbsV/pdyEkF/1WNe0E8SIWFBKb+HcMLkG9OFbDDBy8QItXmp/mIULuwQ==
+
 "@sendgrid/client@^6.5.5":
   version "6.5.5"
   resolved "https://registry.yarnpkg.com/@sendgrid/client/-/client-6.5.5.tgz#66cf569445d98a795998a894bb432a9939ead7c3"
@@ -1186,10 +1203,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.7.tgz#4a53d8332bb65a45470a2f9e2611f1ced637a5cb"
   integrity sha512-1QUk+WAUD4t8iR+Oj+UgI8oJa6yyxaB8a8pHaC8uqM6RrS1qbL7bf3Pwl5rHv0psm2CuDErgho6v5N+G+5fwtQ==
 
-"@types/oidc-provider@^7.8.1":
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/@types/oidc-provider/-/oidc-provider-7.8.1.tgz#70ee9ccc6c4f0af81e7614ec181b8155ea0da409"
-  integrity sha512-MsmVKYFN9i27kfJh3hqj7F6aQNue6A/1aBKVJH07I3WYMriUDqMtYU0MWtheFPI1Tm9kwa0JHheaOdNRjuxboA==
+"@types/oidc-provider@^7.8.2":
+  version "7.8.2"
+  resolved "https://registry.yarnpkg.com/@types/oidc-provider/-/oidc-provider-7.8.2.tgz#8d625fec691444b40127ca567c1b51f88059e783"
+  integrity sha512-n//6fAayvlOD3sKAUo5/LjI41tS3E4nfqRefckpcqh2nsyc4PbAEmhDVlE55PNSZonO9k4fW7mmHbsMNU28v3g==
   dependencies:
     "@types/koa" "*"
 
@@ -3631,6 +3648,18 @@ fancy-log@^1.3.2:
     color-support "^1.1.3"
     parse-node-version "^1.0.0"
     time-stamp "^1.0.0"
+
+fast-check-io-ts@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/fast-check-io-ts/-/fast-check-io-ts-0.5.0.tgz#b584a2483c37a2f42ed33bdf9ac4e95a01eabe0f"
+  integrity sha512-z+jV8N2S+YY+2kvHLQmNBJGdjg+2W++F0jq4ga2kC2PI7jaX0MmpX77JNqNfSL0sOzzmTuR3eEB1BbXoH26wnw==
+
+fast-check@^2.23.2:
+  version "2.23.2"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-2.23.2.tgz#375c01827a9d58916c8a0ad463d1f17fe8e6ae4b"
+  integrity sha512-ECYuSlp6NLpvOj8eScKsqoz1ihtCpSDuEC2ofdGvgsEu1obHYEGqreJ/iPzkJFy73yoU0kCFea7PHUQDNM0VNg==
+  dependencies:
+    pure-rand "^5.0.1"
 
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
@@ -7303,6 +7332,13 @@ priorityqueuejs@^1.0.0:
   resolved "https://registry.yarnpkg.com/priorityqueuejs/-/priorityqueuejs-1.0.0.tgz#2ee4f23c2560913e08c07ce5ccdd6de3df2c5af8"
   integrity sha1-LuTyPCVgkT4IwHzlzN1t498sWvg=
 
+prisma@^3.11.0:
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/prisma/-/prisma-3.11.0.tgz#0e384e9d36785711b579fda60117a2d41f79c72c"
+  integrity sha512-8SdsLPhKR3mOfoo2o73h9mNn3v5kA/RqGA26Sv6qDS78Eh2uepPqt5e8/nwj5EOblYm5HEGuitaXQrOCLb6uTw==
+  dependencies:
+    "@prisma/engines" "3.11.0-48.b371888aaf8f51357c7457d836b86d12da91658b"
+
 process-nextick-args@^2.0.0, process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
@@ -7389,6 +7425,11 @@ punycode@^2.1.0, punycode@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
+
+pure-rand@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-5.0.1.tgz#97a287b4b4960b2a3448c0932bf28f2405cac51d"
+  integrity sha512-ksWccjmXOHU2gJBnH0cK1lSYdvSZ0zLoCMSz/nTGh6hDvCSgcRxDyIcOBD6KNxFz3xhMPm/T267Tbe2JRymKEQ==
 
 qs@6.7.0:
   version "6.7.0"

@@ -2,14 +2,16 @@ import * as http from "http";
 import * as E from "fp-ts/Either";
 import { Application } from "express";
 import { pipe } from "fp-ts/function";
+import * as postgres from "./implementations/postgres";
 import { makeApplication } from "./application";
-import * as fetch from "./utils/fetch";
+import * as fetch from "./implementations/fetch";
 import * as oidcprovider from "./oidcprovider";
 import * as interactions from "./interactions/service";
 import * as identities from "./identities/service";
-import * as clients from "./clients";
+import * as clients from "./implementations/httpClients";
 import { Logger, makeLogger } from "./logger";
 import { parseConfig } from "./config";
+import { adapterProvider } from "./oidcprovider/adapters";
 
 const start = (application: Application, log: Logger): void => {
   log.info("Starting application");
@@ -36,13 +38,25 @@ const main = pipe(
       fetch.timeoutFetch
     );
     const identityService = identities.makeService(ioAuthClient);
-    const provider = oidcprovider.makeProvider(config, identityService);
+    const clientRepository = postgres.makeClientRepository(
+      config.postgres,
+      logger
+    );
+    const providerConfig = oidcprovider.defaultConfiguration(
+      adapterProvider(logger, config.redis, clientRepository)
+    );
+    const provider = oidcprovider.makeProvider(
+      config,
+      identityService,
+      providerConfig
+    );
     const providerService = interactions.makeService(provider, logger);
     const application = makeApplication(
       config,
       provider,
       providerService,
       identityService,
+      clientRepository,
       logger
     );
     start(application, logger);

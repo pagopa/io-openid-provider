@@ -1,10 +1,10 @@
+import { pipe } from "fp-ts/function";
+import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import * as f from "fp-ts/lib/function";
 import * as oidc from "oidc-provider";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
 import { Config } from "../config";
-import * as redis from "./dal/redis";
 
 const userInfoToAccount =
   (federationToken: string) =>
@@ -22,7 +22,7 @@ const userInfoToAccount =
 const findAccountAdapter =
   (identityService: IdentityService): oidc.FindAccount =>
   (_, accountId) =>
-    f.pipe(
+    pipe(
       FederationToken.decode(accountId),
       TE.fromEither,
       TE.chainW((parsed) => identityService.authenticate(parsed)),
@@ -33,40 +33,46 @@ const findAccountAdapter =
       TE.toUnion
     )();
 
-const features = {
-  devInteractions: {
-    enabled: false,
-  },
-  registration: {
-    enabled: true,
-    issueRegistrationAccessToken: false,
-  },
-  rpInitiatedLogout: {
-    enabled: false,
-  },
-  userinfo: {
-    enabled: false,
-  },
-};
-
-const defaultConfiguration = (config: Config): oidc.Configuration => {
+const defaultConfiguration = (
+  adapter: (name: string) => oidc.Adapter
+): oidc.Configuration => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
-  function adapter(str: string) {
-    return redis.makeRedisAdapter(config.redis)(str);
+  // :D
+  function adaptTheAdapterFun(str: string) {
+    return adapter(str);
   }
   return {
-    ...{ adapter },
+    ...{ adapter: adaptTheAdapterFun },
     claims: {
       profile: ["family_name", "given_name", "name"],
     },
     extraClientMetadata: {
-      properties: ["bypass_consent"],
+      properties: ["bypass_consent", "organization_id", "service_id"],
     },
-    features,
+    features: {
+      devInteractions: {
+        enabled: false,
+      },
+      registration: {
+        enabled: true,
+        initialAccessToken: false,
+        issueRegistrationAccessToken: false,
+      },
+      registrationManagement: {
+        enabled: true,
+        rotateRegistrationAccessToken: false,
+      },
+      rpInitiatedLogout: {
+        enabled: false,
+      },
+      userinfo: {
+        enabled: false,
+      },
+    },
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
-      registration: "/connect/register",
+      registration: "/admin/clients",
     },
     scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],
@@ -76,6 +82,22 @@ const defaultConfiguration = (config: Config): oidc.Configuration => {
     },
   };
 };
+
+/**
+ * Return an option with the value to put on authorization header.
+ */
+export const makeAuthorizationHeader = (
+  config: oidc.Configuration,
+  url: string
+): O.Option<string> =>
+  pipe(
+    O.fromNullable(config.routes),
+    O.chain((routes) => O.fromNullable(routes.registration)),
+    O.filter((route) => url.startsWith(`${route}/`)),
+    O.map((route) => url.replace(`${route}/`, "")),
+    O.filter((clientId) => clientId !== ""),
+    O.map((clientId) => `Bearer ${clientId}`)
+  );
 
 /**
  * Return an instance of oidc-provider Provider ready to be used.
@@ -88,18 +110,33 @@ const defaultConfiguration = (config: Config): oidc.Configuration => {
 const makeProvider = (
   config: Config,
   identityService: IdentityService,
-  // this parameter is used to override configuration on tests
-  // for production use the default one!
-  providerConfiguration: oidc.Configuration = defaultConfiguration(config)
+  providerConfiguration: oidc.Configuration
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
     ...providerConfiguration,
     findAccount: findAccountAdapter(identityService),
   };
-  return new oidc.Provider(
+  const provider = new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
     providerConfig
   );
+
+  // This middleware add the following authorization header on clients path
+  // `Bearer ${clientId}`
+  // This trick toghether with a fake RegistrationAccessTokenAdapter disable
+  // the authentication on clients paths.
+  provider.use((ctx, next) => {
+    pipe(
+      makeAuthorizationHeader(providerConfig, ctx.url),
+      O.map((authorization) => {
+        // eslint-disable-next-line functional/immutable-data
+        ctx.headers.authorization = authorization;
+      })
+    );
+    return next();
+  });
+
+  return provider;
 };
 
 export { makeProvider, userInfoToAccount, defaultConfiguration };

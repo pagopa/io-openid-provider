@@ -11,7 +11,10 @@ module.exports = {
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
-  "modulePathIgnorePatterns": ["__tests__/utils/"],
+  "modulePathIgnorePatterns": [
+    "__tests__/utils/",
+    "./__tests__/data.ts"
+  ],
   "coveragePathIgnorePatterns": [
     "<rootDir>/src/generated/",
     "<rootDir>/src/oidcprovider/dal/badredis.ts",
