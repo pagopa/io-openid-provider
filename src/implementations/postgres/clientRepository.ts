@@ -19,7 +19,7 @@ import {
 import { ClientRepository } from "../../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
 
-const fromDBClientToClient = (c: prisma.Client): Client => ({
+const fromRecord = (c: prisma.Client): Client => ({
   application_type: c.applicationType,
   bypass_consent: c.bypassConsent,
   // FIXME: Don't cast like that!
@@ -41,7 +41,7 @@ const fromDBClientToClient = (c: prisma.Client): Client => ({
   token_endpoint_auth_method: c.tokenEndpointAuthMethod,
 });
 
-const fromClientToDBClient = (client: Client): prisma.Client => ({
+const toRecord = (client: Client): prisma.Client => ({
   applicationType: client.application_type,
   bypassConsent: client.bypass_consent || false,
   clientId: client.client_id,
@@ -84,7 +84,7 @@ const upsertClient =
   (logger: Logger) =>
   <T>(client: Prisma.ClientDelegate<T>) =>
   (clientDefinition: Client) => {
-    const obj = fromClientToDBClient(clientDefinition);
+    const obj = toRecord(clientDefinition);
     return pipe(
       TE.tryCatch(
         () =>
@@ -96,7 +96,7 @@ const upsertClient =
         E.toError
       ),
       TE.orElseFirst((e) =>
-        TE.of(logger.error(`Error on removeClient ${JSON.stringify(e)}`))
+        TE.of(logger.error(`Error on upsertGrant ${JSON.stringify(e)}`, e))
       ),
       TE.bimap(
         (e) => ({ causedBy: e, kind: DomainErrorTypes.GENERIC_ERROR }),
@@ -114,7 +114,7 @@ const findClient =
         () => client.findUnique({ where: { clientId: id } }),
         E.toError
       ),
-      TE.map(flow(O.fromNullable, O.map(fromDBClientToClient))),
+      TE.map(flow(O.fromNullable, O.map(fromRecord))),
       TE.bimap(
         (e) => ({ causedBy: e, kind: DomainErrorTypes.GENERIC_ERROR }),
         O.toUndefined
@@ -142,7 +142,7 @@ const listClient =
           }),
         E.toError
       ),
-      TE.map(flow(A.map(fromDBClientToClient))),
+      TE.map(flow(A.map(fromRecord))),
       TE.mapLeft((e) => ({
         causedBy: e,
         kind: DomainErrorTypes.GENERIC_ERROR,

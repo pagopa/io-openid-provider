@@ -20,7 +20,7 @@ export const makeClientAdapter = (
   ...makeNotImplementedAdapter("Client", logger),
   // remove a client
   destroy: (id: string) => {
-    logger.debug(`destroy, id: ${id}`);
+    logger.debug(`Client destroy, id: ${id}`);
     const result = pipe(
       pipe(ClientId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
       TE.chain(clientRepository.remove)
@@ -29,7 +29,7 @@ export const makeClientAdapter = (
   },
   // given the identifier return a client
   find: (id: string) => {
-    logger.debug(`find, id: ${id}`);
+    logger.debug(`Client find, id: ${id}`);
     const result = pipe(
       pipe(ClientId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
       TE.chain(clientRepository.find)
@@ -39,7 +39,7 @@ export const makeClientAdapter = (
   // insert or update the client identified with the given id
   upsert: (id: string, payload: oidc.AdapterPayload, expiresIn: number) => {
     logger.debug(
-      `upsert, id: ${id}, _expiresIn: ${expiresIn}, payload: ${JSON.stringify(
+      `Client upsert, id: ${id}, _expiresIn: ${expiresIn}, payload: ${JSON.stringify(
         payload
       )}`
     );
