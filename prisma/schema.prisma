@@ -75,3 +75,17 @@ model Grant {
   issuedAt    DateTime
   scope       String
 }
+
+model InteractionRequest {
+  clientId    String
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  params      Json
+  prompt      Json
+  result      Json?
+  returnTo    String
+  accountId   String?
+  cookieId    String?
+  uid         String?
+}

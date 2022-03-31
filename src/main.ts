@@ -46,8 +46,18 @@ const main = pipe(
       config.postgres,
       logger
     );
+    const loginRequestRepository = postgres.makeInteractionRequestRepository(
+      config.postgres,
+      logger
+    );
     const providerConfig = oidcprovider.defaultConfiguration(
-      adapterProvider(logger, config.redis, clientRepository, grantRepository)
+      adapterProvider(
+        logger,
+        config.redis,
+        clientRepository,
+        grantRepository,
+        loginRequestRepository
+      )
     );
     const provider = oidcprovider.makeProvider(
       config,
