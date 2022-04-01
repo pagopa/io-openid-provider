@@ -17,7 +17,6 @@ module.exports = {
   ],
   "coveragePathIgnorePatterns": [
     "<rootDir>/src/generated/",
-    "<rootDir>/src/oidcprovider/dal/badredis.ts",
   ],
   "coverageThreshold": {
     "global": {

@@ -4,7 +4,6 @@ import { GrantRepository } from "src/core/repositories/GrantRepository";
 import { InteractionRequestRepository } from "src/core/repositories/InteractionRequestRepository";
 import { SessionRepository } from "src/core/repositories/SessionRepository";
 import { Logger } from "src/logger";
-import { makeRedisAdapter, RedisConfig } from "../dal/redis";
 import { makeClientAdapter } from "./clientAdapter";
 import { makeGrantAdapter } from "./grantAdapter";
 import { makeInteractionAdapter } from "./interactionAdapter";
@@ -19,7 +18,6 @@ export type AdapterProvider = (
 export const adapterProvider =
   (
     logger: Logger,
-    config: RedisConfig,
     clientRepository: ClientRepository,
     grantRepository: GrantRepository,
     interactionRequestRepository: InteractionRequestRepository,
@@ -27,7 +25,6 @@ export const adapterProvider =
     // eslint-disable-next-line max-params
   ) =>
   (name: string): oidc.Adapter => {
-    const redisAdapter = makeRedisAdapter(config);
     // create the adapter from ClientRepository
     const clientAdapter = makeClientAdapter(logger, clientRepository);
     // create the adapter from GrantRepository
@@ -42,7 +39,7 @@ export const adapterProvider =
     // create the adapter for RegistrationAccessToken entity
     const registrationAccessTokenAdapter =
       makeRegistrationAccessTokenAdapter(logger);
-    logger.debug(`adapterProvider function, parameter 'name': ${name}`);
+    logger.error(`adapterProvider function, parameter 'name': ${name}`);
     switch (name) {
       case "Client":
         return clientAdapter;

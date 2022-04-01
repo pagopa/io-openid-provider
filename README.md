@@ -46,8 +46,6 @@ Those are all Environment variables needed by the application:
 | APPLICATION_NAME    | The name of the application, used as prefix for the logger       | string |
 | VERSION             | The version of the service, it should be populated automatically | string |
 | IO_BACKEND_BASE_URL | The base URL of IO backend used as identity provider             | string |
-| REDIS_URL           | The URL used to connect to Redis                                 | string |
-| REDIS_KEY_PREFIX    | The prefix to use to store information in Redis                  | string |
 | POSTGRES_URL        | The URL used to connect to PostgreSQL                            | string |
 
 

@@ -57,7 +57,6 @@ const main = pipe(
     const providerConfig = oidcprovider.defaultConfiguration(
       adapterProvider(
         logger,
-        config.redis,
         clientRepository,
         grantRepository,
         loginRequestRepository,
