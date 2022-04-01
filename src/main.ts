@@ -50,13 +50,18 @@ const main = pipe(
       config.postgres,
       logger
     );
+    const sessionRepository = postgres.makeSessionRepository(
+      config.postgres,
+      logger
+    );
     const providerConfig = oidcprovider.defaultConfiguration(
       adapterProvider(
         logger,
         config.redis,
         clientRepository,
         grantRepository,
-        loginRequestRepository
+        loginRequestRepository,
+        sessionRepository
       )
     );
     const provider = oidcprovider.makeProvider(

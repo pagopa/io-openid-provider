@@ -5,6 +5,16 @@ import { GrantPayload } from "../grantAdapter";
 export const grantPayloadArbitrary = getArbitrary(GrantPayload);
 export const grantPayload = fc.sample(grantPayloadArbitrary, 1)[0];
 
+export const sessionPayload = {
+  iat: 1648822805,
+  exp: 1648822969,
+  accountId: "1234",
+  loginTs: 1648822805,
+  uid: "V0kJS3teGmL7YrdW8SRaJ",
+  kind: "Session",
+  jti: "OaqbTetDQVPglPcgP6vZz",
+};
+
 export const interactionPayload = {
   iat: 1648736314,
   exp: 1648736614,

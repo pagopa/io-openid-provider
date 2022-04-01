@@ -46,9 +46,10 @@ export const Prompt = t.type({
   reasons: t.array(t.string),
 });
 
-export const Session = t.type({
+const SessionInfo = t.type({
   accountId: AccountId,
   cookieId: t.string,
+  // TODO: Check if this uid could be collapsed to sessionId
   uid: t.string,
 });
 
@@ -63,6 +64,6 @@ export const InteractionRequest = t.type({
   prompt: Prompt,
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),
   returnTo: t.string,
-  session: t.union([t.undefined, Session]),
+  session: t.union([t.undefined, SessionInfo]),
 });
 export type InteractionRequest = t.TypeOf<typeof InteractionRequest>;

@@ -89,3 +89,11 @@ model InteractionRequest {
   cookieId    String?
   uid         String?
 }
+
+model Session {
+  accountId   String?
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  uid         String
+}
