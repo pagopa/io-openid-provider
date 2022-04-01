@@ -7,23 +7,23 @@ import {
 } from "../domain";
 
 /**
- * Represents the only entry point that is allowed to work with the LoginRequest storage
+ * Represents the only entry point that is allowed to work with the InteractionRequest storage
  */
 export interface InteractionRequestRepository {
   /**
-   * Given a grant create or update it.
+   * Given an interaction create or update it.
    */
   readonly upsert: (
     grant: InteractionRequest
   ) => TE.TaskEither<DomainError, InteractionRequest>;
   /**
-   * Delete the LoginRequest identified with the given id.
+   * Delete the InteractionRequest identified with the given id.
    */
   readonly remove: (
     id: InteractionRequestId
   ) => TE.TaskEither<DomainError, void>;
   /**
-   * Return the login request identfied with the given id.
+   * Return the interaction identfied with the given id.
    */
   readonly find: (
     id: InteractionRequestId

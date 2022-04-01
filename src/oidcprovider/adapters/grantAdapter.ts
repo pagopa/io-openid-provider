@@ -29,7 +29,7 @@ export const toAdapterPayload = (input: Grant): oidc.AdapterPayload => ({
   openid: { scope: input.scope },
 });
 
-export const fromPayloadAdapter = (
+export const fromAdapterPayload = (
   input: oidc.AdapterPayload
 ): t.Validation<Grant> =>
   pipe(
@@ -69,7 +69,7 @@ export const makeGrantAdapter = (
       )}`
     );
     const result = pipe(
-      TE.fromEither(fromPayloadAdapter(payload)),
+      TE.fromEither(fromAdapterPayload(payload)),
       TE.mapLeft(makeDomainError),
       TE.orElseFirst((e) =>
         TE.of(

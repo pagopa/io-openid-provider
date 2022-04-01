@@ -3,7 +3,7 @@ import { constUndefined, constVoid, pipe } from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { fromPayloadAdapter, makeGrantAdapter } from "../grantAdapter";
+import { fromAdapterPayload, makeGrantAdapter } from "../grantAdapter";
 import { Logger } from "../../../logger";
 import { GrantRepository } from "../../../core/repositories/GrantRepository";
 import { notImplementedError } from "../utils";
@@ -45,7 +45,7 @@ describe("makeGrantAdapter", () => {
       const { grantRepositoryMock, adapter } = makeAdapterForTest();
 
       const grant = pipe(
-        fromPayloadAdapter(grantPayload),
+        fromAdapterPayload(grantPayload),
         E.fold(constUndefined, (_) => _)
       ) as Grant;
 
@@ -63,7 +63,7 @@ describe("makeGrantAdapter", () => {
   describe("find", () => {
     it("should call the find function of the given repository", async () => {
       const grant = pipe(
-        fromPayloadAdapter(grantPayload),
+        fromAdapterPayload(grantPayload),
         E.fold(constUndefined, (_) => _)
       ) as Grant;
 

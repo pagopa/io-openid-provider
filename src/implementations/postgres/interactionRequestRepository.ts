@@ -52,7 +52,7 @@ const fromRecord = (
         : undefined,
   } as InteractionRequest);
 
-const removeLoginRequest =
+const removeInteractionRequest =
   (logger: Logger) =>
   <T>(client: Prisma.InteractionRequestDelegate<T>) =>
   (id: InteractionRequestId) =>
@@ -65,7 +65,7 @@ const removeLoginRequest =
         E.toError
       ),
       TE.orElseFirst((e) =>
-        TE.of(logger.error(`Error on removeLoginRequest`, e))
+        TE.of(logger.error(`Error on removeInteractionRequest`, e))
       ),
       TE.bimap(
         (e) => ({ causedBy: e, kind: DomainErrorTypes.GENERIC_ERROR }),
@@ -73,7 +73,7 @@ const removeLoginRequest =
       )
     );
 
-const upsertLoginRequest =
+const upsertInteractionRequest =
   (logger: Logger) =>
   <T>(client: Prisma.InteractionRequestDelegate<T>) =>
   (grant: InteractionRequest) =>
@@ -99,7 +99,10 @@ const upsertLoginRequest =
       ),
       TE.orElseFirst((e) =>
         TE.of(
-          logger.error(`Error on upsertLoginRequest ${JSON.stringify(e)}`, e)
+          logger.error(
+            `Error on upsertInteractionRequest ${JSON.stringify(e)}`,
+            e
+          )
         )
       ),
       TE.bimap(
@@ -108,7 +111,7 @@ const upsertLoginRequest =
       )
     );
 
-const findLoginRequest =
+const findInteractionRequest =
   (logger: Logger) =>
   <T>(client: Prisma.InteractionRequestDelegate<T>) =>
   (id: InteractionRequestId) =>
@@ -129,10 +132,12 @@ const findLoginRequest =
       })),
       TE.flatten,
       TE.chainFirst((c) =>
-        TE.of(logger.debug(`findLoginRequest ${JSON.stringify(c)}`))
+        TE.of(logger.debug(`findInteractionRequest ${JSON.stringify(c)}`))
       ),
       TE.orElseFirst((e) =>
-        TE.of(logger.error(`Error on findLoginRequest ${JSON.stringify(e)}`))
+        TE.of(
+          logger.error(`Error on findInteractionRequest ${JSON.stringify(e)}`)
+        )
       )
     );
 
@@ -143,7 +148,7 @@ export const makeInteractionRequestRepository = (
     datasources: { db: { url: config.url.href } },
   })
 ): InteractionRequestRepository => ({
-  find: findLoginRequest(logger)(client.interactionRequest),
-  remove: removeLoginRequest(logger)(client.interactionRequest),
-  upsert: upsertLoginRequest(logger)(client.interactionRequest),
+  find: findInteractionRequest(logger)(client.interactionRequest),
+  remove: removeInteractionRequest(logger)(client.interactionRequest),
+  upsert: upsertInteractionRequest(logger)(client.interactionRequest),
 });
