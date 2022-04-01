@@ -11,7 +11,7 @@ export interface GrantRepository {
    */
   readonly upsert: (grant: Grant) => TE.TaskEither<DomainError, Grant>;
   /**
-   * Given the grant identifier with the given id.
+   * Return the grant identfied with the given id.
    */
   readonly find: (id: GrantId) => TE.TaskEither<DomainError, Option<Grant>>;
 }
