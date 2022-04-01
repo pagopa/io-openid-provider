@@ -25,7 +25,7 @@ export const toAdapterPayload = (input: Grant): oidc.AdapterPayload => ({
   clientId: input.clientId,
   exp: input.expireAt,
   iat: input.issuedAt,
-  jit: input.id,
+  jti: input.id,
   openid: { scope: input.scope },
 });
 
