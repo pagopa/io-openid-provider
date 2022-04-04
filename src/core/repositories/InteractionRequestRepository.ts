@@ -1,5 +1,5 @@
 import { Option } from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
+import { TaskEither } from "fp-ts/TaskEither";
 import {
   DomainError,
   InteractionRequest,
@@ -15,17 +15,15 @@ export interface InteractionRequestRepository {
    */
   readonly upsert: (
     grant: InteractionRequest
-  ) => TE.TaskEither<DomainError, InteractionRequest>;
+  ) => TaskEither<DomainError, InteractionRequest>;
   /**
    * Delete the InteractionRequest identified with the given id.
    */
-  readonly remove: (
-    id: InteractionRequestId
-  ) => TE.TaskEither<DomainError, void>;
+  readonly remove: (id: InteractionRequestId) => TaskEither<DomainError, void>;
   /**
-   * Return the interaction identfied with the given id.
+   * Return the interaction identified with the given id.
    */
   readonly find: (
     id: InteractionRequestId
-  ) => TE.TaskEither<DomainError, Option<InteractionRequest>>;
+  ) => TaskEither<DomainError, Option<InteractionRequest>>;
 }
