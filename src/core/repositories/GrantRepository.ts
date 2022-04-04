@@ -1,5 +1,5 @@
 import { Option } from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
+import { TaskEither } from "fp-ts/TaskEither";
 import { DomainError, Grant, GrantId } from "../domain";
 
 /**
@@ -9,9 +9,9 @@ export interface GrantRepository {
   /**
    * Given a grant create or update it.
    */
-  readonly upsert: (grant: Grant) => TE.TaskEither<DomainError, Grant>;
+  readonly upsert: (grant: Grant) => TaskEither<DomainError, Grant>;
   /**
-   * Return the grant identfied with the given id.
+   * Return the grant identified with the given id.
    */
-  readonly find: (id: GrantId) => TE.TaskEither<DomainError, Option<Grant>>;
+  readonly find: (id: GrantId) => TaskEither<DomainError, Option<Grant>>;
 }
