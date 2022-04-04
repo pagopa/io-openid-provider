@@ -1,7 +1,7 @@
 import * as oidc from "oidc-provider";
 import { ClientRepository } from "src/core/repositories/ClientRepository";
 import { GrantRepository } from "src/core/repositories/GrantRepository";
-import { InteractionRequestRepository } from "src/core/repositories/InteractionRequestRepository";
+import { InteractionRepository } from "src/core/repositories/InteractionRepository";
 import { SessionRepository } from "src/core/repositories/SessionRepository";
 import { Logger } from "src/logger";
 import { makeClientAdapter } from "./clientAdapter";
@@ -20,7 +20,7 @@ export const adapterProvider =
     logger: Logger,
     clientRepository: ClientRepository,
     grantRepository: GrantRepository,
-    interactionRequestRepository: InteractionRequestRepository,
+    interactionRequestRepository: InteractionRepository,
     sessionRepository: SessionRepository
     // eslint-disable-next-line max-params
   ) =>

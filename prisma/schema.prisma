@@ -76,7 +76,7 @@ model Grant {
   scope       String
 }
 
-model InteractionRequest {
+model Interaction {
   clientId    String
   expireAt    DateTime
   id          String @id

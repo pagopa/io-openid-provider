@@ -46,7 +46,7 @@ const main = pipe(
       config.postgres,
       logger
     );
-    const loginRequestRepository = postgres.makeInteractionRequestRepository(
+    const loginRequestRepository = postgres.makeInteractionRepository(
       config.postgres,
       logger
     );

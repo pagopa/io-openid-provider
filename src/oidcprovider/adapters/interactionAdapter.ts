@@ -7,11 +7,11 @@ import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../logger";
 import {
   ClientId,
-  InteractionRequest,
-  InteractionRequestId,
+  Interaction,
+  InteractionId,
   makeDomainError,
 } from "../../core/domain";
-import { InteractionRequestRepository } from "../../core/repositories/InteractionRequestRepository";
+import { InteractionRepository } from "../../core/repositories/InteractionRepository";
 import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
 
 export const InteractionPayload = t.type({
@@ -80,9 +80,7 @@ export const InteractionPayload = t.type({
 type InteractionPayload = t.TypeOf<typeof InteractionPayload>;
 
 // FIXME: Improve this mapping
-export const toAdapterPayload = (
-  item: InteractionRequest
-): InteractionPayload => ({
+export const toAdapterPayload = (item: Interaction): InteractionPayload => ({
   exp: item.expireAt,
   iat: item.issuedAt,
   jti: item.id,
@@ -116,15 +114,15 @@ export const toAdapterPayload = (
 // FIXME: Improve this mapping
 export const fromAdapterPayload = (
   input: oidc.AdapterPayload
-): t.Validation<InteractionRequest> =>
+): t.Validation<Interaction> =>
   pipe(
     InteractionPayload.decode(input),
     E.chain((payload) =>
-      InteractionRequest.decode({
+      Interaction.decode({
         ...payload,
         clientId: payload.params.client_id as ClientId,
         expireAt: payload.exp,
-        id: payload.jti as InteractionRequestId,
+        id: payload.jti as InteractionId,
         issuedAt: payload.iat,
         prompt: payload.prompt,
         result: payload.result,
@@ -135,25 +133,21 @@ export const fromAdapterPayload = (
               uid: payload.session.uid,
             }
           : undefined,
-      } as InteractionRequest)
+      } as Interaction)
     )
   );
 
 export const makeInteractionAdapter = (
   logger: Logger,
-  interactionRequestRepository: InteractionRequestRepository
+  interactionRepository: InteractionRepository
 ) => ({
   ...makeNotImplementedAdapter("Interaction", logger),
   // remove an Interaction
   destroy: (id: string) => {
     logger.debug(`Interaction destroy, id: ${id}`);
     const result = pipe(
-      pipe(
-        InteractionRequestId.decode(id),
-        E.mapLeft(makeDomainError),
-        TE.fromEither
-      ),
-      TE.chain(interactionRequestRepository.remove)
+      pipe(InteractionId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
+      TE.chain(interactionRepository.remove)
     );
     return taskEitherToPromise(result);
   },
@@ -161,12 +155,8 @@ export const makeInteractionAdapter = (
   find: (id: string) => {
     logger.debug(`Interaction find, id: ${id}`);
     const result = pipe(
-      pipe(
-        InteractionRequestId.decode(id),
-        E.mapLeft(makeDomainError),
-        TE.fromEither
-      ),
-      TE.chain(interactionRequestRepository.find),
+      pipe(InteractionId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
+      TE.chain(interactionRepository.find),
       TE.map(O.map(toAdapterPayload)),
       TE.map(O.toUndefined)
     );
@@ -192,7 +182,7 @@ export const makeInteractionAdapter = (
           )
         )
       ),
-      TE.chain(interactionRequestRepository.upsert),
+      TE.chain(interactionRepository.upsert),
       TE.map(constVoid)
     );
     return taskEitherToPromise(result);

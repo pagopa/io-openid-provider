@@ -8,14 +8,14 @@ import {
   fromAdapterPayload,
 } from "../interactionAdapter";
 import { Logger } from "../../../logger";
-import { InteractionRequestRepository } from "../../../core/repositories/InteractionRequestRepository";
+import { InteractionRepository } from "../../../core/repositories/InteractionRepository";
 import { notImplementedError } from "../utils";
 import { interactionPayload } from "./data";
-import { InteractionRequest } from "../../../core/domain";
+import { Interaction } from "../../../core/domain";
 
 const makeAdapterForTest = () => {
   const loggerMock = mock.mock<Logger>();
-  const interactionRepositoryMock = mock.mock<InteractionRequestRepository>();
+  const interactionRepositoryMock = mock.mock<InteractionRepository>();
   const adapter = makeInteractionAdapter(loggerMock, interactionRepositoryMock);
   return { loggerMock, interactionRepositoryMock, adapter };
 };
@@ -49,7 +49,7 @@ describe("makeInteractionAdapter", () => {
       const interaction = pipe(
         fromAdapterPayload(interactionPayload),
         E.fold(constUndefined, (_) => _)
-      ) as InteractionRequest;
+      ) as Interaction;
 
       const recorder = interactionRepositoryMock.upsert.mockReturnValueOnce(
         TE.right(interaction)
@@ -67,7 +67,7 @@ describe("makeInteractionAdapter", () => {
       const interaction = pipe(
         fromAdapterPayload(interactionPayload),
         E.fold(constUndefined, (_) => _)
-      ) as InteractionRequest;
+      ) as Interaction;
 
       const id = interaction.id;
       const { interactionRepositoryMock, adapter } = makeAdapterForTest();
@@ -85,7 +85,7 @@ describe("makeInteractionAdapter", () => {
       const interaction = pipe(
         fromAdapterPayload(interactionPayload),
         E.fold(constUndefined, (_) => _)
-      ) as InteractionRequest;
+      ) as Interaction;
 
       const id = interaction.id;
       const { interactionRepositoryMock, adapter } = makeAdapterForTest();

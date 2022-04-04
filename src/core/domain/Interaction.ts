@@ -2,16 +2,16 @@ import * as t from "io-ts";
 import { ClientId } from "./Client";
 import { AccountId, GrantId } from "./Grant";
 
-interface InteractionRequestIdBrand {
-  readonly InteractionRequestId: unique symbol;
+interface InteractionIdBrand {
+  readonly InteractionId: unique symbol;
 }
-// InteractionRequestId is just a string
-export const InteractionRequestId = t.brand(
+// InteractionId is just a string
+export const InteractionId = t.brand(
   t.string,
-  (s): s is t.Branded<string, InteractionRequestIdBrand> => t.string.is(s),
-  "InteractionRequestId"
+  (s): s is t.Branded<string, InteractionIdBrand> => t.string.is(s),
+  "InteractionId"
 );
-export type InteractionRequestId = t.TypeOf<typeof InteractionRequestId>;
+export type InteractionId = t.TypeOf<typeof InteractionId>;
 
 export const ErrorResult = t.type({
   error: t.string,
@@ -53,11 +53,11 @@ const SessionInfo = t.type({
   uid: t.string,
 });
 
-export const InteractionRequest = t.type({
+export const Interaction = t.type({
   clientId: ClientId,
   // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
   expireAt: t.number,
-  id: InteractionRequestId,
+  id: InteractionId,
   // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
   issuedAt: t.number,
   params: Params,
@@ -66,4 +66,4 @@ export const InteractionRequest = t.type({
   returnTo: t.string,
   session: t.union([t.undefined, SessionInfo]),
 });
-export type InteractionRequest = t.TypeOf<typeof InteractionRequest>;
+export type Interaction = t.TypeOf<typeof Interaction>;

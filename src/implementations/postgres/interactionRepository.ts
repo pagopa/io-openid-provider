@@ -6,16 +6,16 @@ import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../logger";
-import { InteractionRequestRepository } from "../../core/repositories/InteractionRequestRepository";
+import { InteractionRepository } from "../../core/repositories/InteractionRepository";
 import {
   DomainErrorTypes,
-  InteractionRequest,
-  InteractionRequestId,
+  Interaction,
+  InteractionId,
   makeDomainError,
 } from "../../core/domain";
 import { PostgresConfig } from "./domain";
 
-const toRecord = (input: InteractionRequest): prisma.InteractionRequest => ({
+const toRecord = (input: Interaction): prisma.Interaction => ({
   accountId: input.session ? input.session.accountId : null,
   clientId: input.clientId,
   cookieId: input.session ? input.session.cookieId : null,
@@ -30,10 +30,8 @@ const toRecord = (input: InteractionRequest): prisma.InteractionRequest => ({
 });
 
 // FIXME: The "as *"" casts are not very elegant solution, find a better one
-const fromRecord = (
-  record: prisma.InteractionRequest
-): t.Validation<InteractionRequest> =>
-  InteractionRequest.decode({
+const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
+  Interaction.decode({
     clientId: record.clientId,
     expireAt: record.expireAt.getTime(),
     id: record.id,
@@ -50,12 +48,12 @@ const fromRecord = (
             uid: record.uid,
           }
         : undefined,
-  } as InteractionRequest);
+  } as Interaction);
 
-const removeInteractionRequest =
+const removeInteraction =
   (logger: Logger) =>
-  <T>(client: Prisma.InteractionRequestDelegate<T>) =>
-  (id: InteractionRequestId) =>
+  <T>(client: Prisma.InteractionDelegate<T>) =>
+  (id: InteractionId) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -65,7 +63,7 @@ const removeInteractionRequest =
         E.toError
       ),
       TE.orElseFirst((e) =>
-        TE.of(logger.error(`Error on removeInteractionRequest`, e))
+        TE.of(logger.error(`Error on removeInteraction`, e))
       ),
       TE.bimap(
         (e) => ({ causedBy: e, kind: DomainErrorTypes.GENERIC_ERROR }),
@@ -73,10 +71,10 @@ const removeInteractionRequest =
       )
     );
 
-const upsertInteractionRequest =
+const upsertInteraction =
   (logger: Logger) =>
-  <T>(client: Prisma.InteractionRequestDelegate<T>) =>
-  (grant: InteractionRequest) =>
+  <T>(client: Prisma.InteractionDelegate<T>) =>
+  (grant: Interaction) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -99,10 +97,7 @@ const upsertInteractionRequest =
       ),
       TE.orElseFirst((e) =>
         TE.of(
-          logger.error(
-            `Error on upsertInteractionRequest ${JSON.stringify(e)}`,
-            e
-          )
+          logger.error(`Error on upsertInteraction ${JSON.stringify(e)}`, e)
         )
       ),
       TE.bimap(
@@ -111,10 +106,10 @@ const upsertInteractionRequest =
       )
     );
 
-const findInteractionRequest =
+const findInteraction =
   (logger: Logger) =>
-  <T>(client: Prisma.InteractionRequestDelegate<T>) =>
-  (id: InteractionRequestId) =>
+  <T>(client: Prisma.InteractionDelegate<T>) =>
+  (id: InteractionId) =>
     pipe(
       TE.tryCatch(() => client.findUnique({ where: { id } }), E.toError),
       TE.map(
@@ -132,23 +127,21 @@ const findInteractionRequest =
       })),
       TE.flatten,
       TE.chainFirst((c) =>
-        TE.of(logger.debug(`findInteractionRequest ${JSON.stringify(c)}`))
+        TE.of(logger.debug(`findInteraction ${JSON.stringify(c)}`))
       ),
       TE.orElseFirst((e) =>
-        TE.of(
-          logger.error(`Error on findInteractionRequest ${JSON.stringify(e)}`)
-        )
+        TE.of(logger.error(`Error on findInteraction ${JSON.stringify(e)}`))
       )
     );
 
-export const makeInteractionRequestRepository = (
+export const makeInteractionRepository = (
   config: PostgresConfig,
   logger: Logger,
   client: PrismaClient = new PrismaClient({
     datasources: { db: { url: config.url.href } },
   })
-): InteractionRequestRepository => ({
-  find: findInteractionRequest(logger)(client.interactionRequest),
-  remove: removeInteractionRequest(logger)(client.interactionRequest),
-  upsert: upsertInteractionRequest(logger)(client.interactionRequest),
+): InteractionRepository => ({
+  find: findInteraction(logger)(client.interaction),
+  remove: removeInteraction(logger)(client.interaction),
+  upsert: upsertInteraction(logger)(client.interaction),
 });
