@@ -5,7 +5,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
 import * as postgres from "./implementations/postgres";
-import * as redis from "./oidcprovider/dal/redis";
 import * as logger from "./logger";
 
 interface ServerConfig {
@@ -27,7 +26,6 @@ interface Config {
   readonly IOBackend: IOBackend;
   readonly server: ServerConfig;
   readonly logger: logger.LogConfig;
-  readonly redis: redis.RedisConfig;
   readonly postgres: postgres.PostgresConfig;
 }
 
@@ -47,8 +45,6 @@ const envDecoder = t.type({
   }),
   PORT: t.string,
   POSTGRES_URL: UrlFromString,
-  REDIS_KEY_PREFIX: t.string,
-  REDIS_URL: UrlFromString,
   SERVER_HOSTNAME: t.string,
   VERSION: NonEmptyString,
 });
@@ -69,10 +65,6 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
   },
   postgres: {
     url: new URL(str.POSTGRES_URL.href),
-  },
-  redis: {
-    keyPrefix: str.REDIS_KEY_PREFIX,
-    url: new URL(str.REDIS_URL.href),
   },
   server: {
     hostname: str.SERVER_HOSTNAME,

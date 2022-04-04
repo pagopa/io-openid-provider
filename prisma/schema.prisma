@@ -66,3 +66,34 @@ model Client {
   serviceId                   String
   bypassConsent               Boolean
 }
+
+model Grant {
+  accountId   String
+  clientId    String
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  scope       String
+}
+
+model Interaction {
+  clientId    String
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  params      Json
+  prompt      Json
+  result      Json?
+  returnTo    String
+  accountId   String?
+  cookieId    String?
+  uid         String?
+}
+
+model Session {
+  accountId   String?
+  expireAt    DateTime
+  id          String @id
+  issuedAt    DateTime
+  uid         String
+}
