@@ -1,5 +1,5 @@
 import { Option } from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
+import { TaskEither } from "fp-ts/TaskEither";
 import { DomainError, Session, SessionId } from "../domain";
 
 /**
@@ -9,20 +9,17 @@ export interface SessionRepository {
   /**
    * Given a session create or update it.
    */
-  readonly upsert: (entity: Session) => TE.TaskEither<DomainError, Session>;
+  readonly upsert: (entity: Session) => TaskEither<DomainError, Session>;
   /**
    * Delete the session identified with the given id.
    */
-  readonly remove: (id: SessionId) => TE.TaskEither<DomainError, void>;
+  readonly remove: (id: SessionId) => TaskEither<DomainError, void>;
   /**
-   * Return the session identfied with the given id.
+   * Return the session identified with the given id.
    */
-  readonly find: (id: SessionId) => TE.TaskEither<DomainError, Option<Session>>;
-
+  readonly find: (id: SessionId) => TaskEither<DomainError, Option<Session>>;
   /**
-   * Return the session identfied with the given uid.
+   * Return the session identified with the given uid.
    */
-  readonly findByUid: (
-    id: string
-  ) => TE.TaskEither<DomainError, Option<Session>>;
+  readonly findByUid: (id: string) => TaskEither<DomainError, Option<Session>>;
 }
