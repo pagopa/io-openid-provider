@@ -29,7 +29,6 @@
     "fp-ts": "^2.11.4",
     "helmet": "^4.6.0",
     "io-ts": "^2.2.16",
-    "ioredis": "^4.28.2",
     "node-fetch": "^2.6.1",
     "oidc-provider": "^7.10.4",
     "patch-package": "^6.4.7",
