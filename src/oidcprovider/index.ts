@@ -5,30 +5,38 @@ import * as oidc from "oidc-provider";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
 import { Config } from "../config";
+import { Logger } from "../logger";
 
-const userInfoToAccount =
-  (federationToken: string) =>
-  (identity: Identity): oidc.Account => ({
-    accountId: federationToken,
-    // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#findaccount
-    claims: (_use, _scope, _claims, _rejected) => ({
-      family_name: identity.familyName,
-      given_name: identity.givenName,
-      name: `${identity.givenName} ${identity.familyName}`,
-      sub: identity.fiscalCode,
-    }),
-  });
+const userInfoToAccount = (identity: Identity): oidc.Account => ({
+  accountId: identity.fiscalCode,
+  // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#findaccount
+  claims: (_use, _scope, _claims, _rejected) => ({
+    family_name: identity.familyName,
+    given_name: identity.givenName,
+    name: `${identity.givenName} ${identity.familyName}`,
+    sub: identity.fiscalCode,
+  }),
+});
 
 const findAccountAdapter =
+  (authenticationCookieKey: string) =>
+  (logger: Logger) =>
   (identityService: IdentityService): oidc.FindAccount =>
-  (_, accountId) =>
+  (ctx, _sub, _token) =>
     pipe(
-      FederationToken.decode(accountId),
+      FederationToken.decode(ctx.cookies.get(authenticationCookieKey)),
       TE.fromEither,
+      TE.orElseFirst((_) =>
+        TE.of(
+          logger.info(
+            `Cookie not found or invalid on key ${authenticationCookieKey}`
+          )
+        )
+      ),
       TE.chainW((parsed) => identityService.authenticate(parsed)),
       TE.bimap(
         (_error) => undefined,
-        (identity) => userInfoToAccount(accountId)(identity)
+        (identity) => userInfoToAccount(identity)
       ),
       TE.toUnion
     )();
@@ -109,12 +117,15 @@ export const makeAuthorizationHeader = (
  */
 const makeProvider = (
   config: Config,
+  logger: Logger,
   identityService: IdentityService,
   providerConfiguration: oidc.Configuration
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
     ...providerConfiguration,
-    findAccount: findAccountAdapter(identityService),
+    findAccount: findAccountAdapter(config.server.authenticationCookieKey)(
+      logger
+    )(identityService),
   };
   const provider = new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,

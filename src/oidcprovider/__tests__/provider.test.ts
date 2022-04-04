@@ -4,13 +4,12 @@ import * as records from "../../__tests__/utils/records";
 
 describe("userInfoToAccount", () => {
   it("should map properties", async () => {
-    const token = "token-value";
     const user = records.validIdentity;
     const expected = user;
-    const actual = index.userInfoToAccount(token)(user);
+    const actual = index.userInfoToAccount(user);
     const actualClaims = await actual.claims("id_token", "profile", {}, []);
 
-    expect(actual.accountId).toStrictEqual(token);
+    expect(actual.accountId).toStrictEqual(expected.fiscalCode);
     expect(actualClaims.sub).toStrictEqual(expected.fiscalCode);
     expect(actualClaims.family_name).toStrictEqual(expected.familyName);
     expect(actualClaims.given_name).toStrictEqual(expected.givenName);

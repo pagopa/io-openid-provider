@@ -7,7 +7,7 @@ type FederationToken = t.TypeOf<typeof FederationToken>;
 
 const Identity = t.type({
   familyName: t.string,
-  fiscalCode: t.string,
+  fiscalCode: strings.NonEmptyString,
   givenName: t.string,
 });
 type Identity = t.TypeOf<typeof Identity>;
@@ -21,7 +21,7 @@ enum IdentityServiceErrorType {
 
 const makeIdentity = (user: UserIdentity): Identity => ({
   familyName: user.family_name,
-  fiscalCode: user.fiscal_code,
+  fiscalCode: user.fiscal_code as unknown as strings.NonEmptyString,
   givenName: user.name,
 });
 

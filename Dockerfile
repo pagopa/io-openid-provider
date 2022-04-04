@@ -20,6 +20,7 @@ ENV SERVER_HOSTNAME=0.0.0.0
 ENV APPLICATION_NAME=openid-provider
 # TODO: Review version node -p "require('./app/package.json').version"
 ENV VERSION=0.0.0
+ENV AUTHENTICATION_COOKIE_KEY="X-IO-Federation-Token"
 
 RUN yarn --frozen-lockfile && yarn cache clean --force
 

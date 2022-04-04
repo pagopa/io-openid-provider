@@ -38,15 +38,16 @@ yarn run lint
 
 Those are all Environment variables needed by the application:
 
-| Variable name       | Description                                                      | type   |
-|---------------------|------------------------------------------------------------------|--------|
-| SERVER_HOSTNAME     | The HOSTNAME the Express server is listening to                  | string |
-| PORT                | The HTTP port the Express server is listening to                 | string |
-| LOG_LEVEL           | The level of the logger                                          | string |
-| APPLICATION_NAME    | The name of the application, used as prefix for the logger       | string |
-| VERSION             | The version of the service, it should be populated automatically | string |
-| IO_BACKEND_BASE_URL | The base URL of IO backend used as identity provider             | string |
-| POSTGRES_URL        | The URL used to connect to PostgreSQL                            | string |
+| Variable name             | Description                                                      | type   |
+|---------------------------|------------------------------------------------------------------|--------|
+| SERVER_HOSTNAME           | The HOSTNAME the Express server is listening to                  | string |
+| PORT                      | The HTTP port the Express server is listening to                 | string |
+| LOG_LEVEL                 | The level of the logger                                          | string |
+| APPLICATION_NAME          | The name of the application, used as prefix for the logger       | string |
+| VERSION                   | The version of the service, it should be populated automatically | string |
+| IO_BACKEND_BASE_URL       | The base URL of IO backend used as identity provider             | string |
+| POSTGRES_URL              | The URL used to connect to PostgreSQL                            | string |
+| AUTHENTICATION_COOKIE_KEY | The cookie key where the authentication token is expected        | string |
 
 
 ## Example

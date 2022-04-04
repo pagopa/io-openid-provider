@@ -3,6 +3,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as T from "fp-ts/Task";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
+import { Config } from "../config";
 import { FederationToken, IdentityService } from "../identities/service";
 import { Logger } from "../logger";
 import { ErrorType, ProviderService } from "./service";
@@ -56,20 +57,18 @@ const interactionGetHandler =
               TE.chain((federationToken) =>
                 pipe(
                   identityService.authenticate(federationToken),
-                  TE.bimap(
-                    (_error) =>
-                      makeCustomInteractionError(ErrorType.accessDenied),
-                    (identity) => ({ federationToken, identity })
+                  TE.mapLeft((_error) =>
+                    makeCustomInteractionError(ErrorType.accessDenied)
                   )
                 )
               ),
               TE.fold(
                 (error) => providerService.finishInteraction(req, res, error),
-                ({ federationToken }) =>
+                (identity) =>
                   providerService.finishInteraction(req, res, {
                     // we can't use the tax code as accountId because we
                     // can't use it to retrieve the user information in the consent phase.
-                    login: { accountId: federationToken },
+                    login: { accountId: identity.fiscalCode },
                   })
               )
             );
@@ -144,6 +143,7 @@ const abortGetHandler =
  * @returns An instance of express Router.
  */
 const makeRouter = (
+  config: Config,
   providerService: ProviderService,
   identityService: IdentityService,
   logger: Logger
@@ -153,8 +153,7 @@ const makeRouter = (
   router.get(
     "/interaction/:uid",
     interactionGetHandler(
-      // TODO: Take this value from configuration
-      "X-IO-Federation-Token",
+      config.server.authenticationCookieKey,
       providerService,
       identityService,
       logger

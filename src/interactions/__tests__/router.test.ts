@@ -46,7 +46,7 @@ describe("Router", () => {
     jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  it("should generate an id_token given an client with skip consent", async () => {
+  it("should generate an id_token given a client with skip consent", async () => {
     const { clientSkipConsent, mockIdentityService, app } =
       phonies.makeFakeApplication();
     const authenticationCookie = "X-IO-Federation-Token=12345667";
@@ -74,6 +74,7 @@ describe("Router", () => {
     );
     const authorizeRedirectResponseCookies = [
       ...Array.from<string>(authorizeRedirectResponse.headers["set-cookie"]),
+      authenticationCookie,
     ];
     // follow the redirect of authorizeRedirectResponse
     const consentResponse = await followRedirect(
@@ -94,6 +95,58 @@ describe("Router", () => {
     );
     // TODO: Check why it is called 3 times!
     expect(authenticateFn).toBeCalledTimes(3);
+  });
+
+  it("should create a session with the correct accountId", async () => {
+    const { client, mockIdentityService, provider, app } =
+      phonies.makeFakeApplication();
+    const authenticationCookie = "X-IO-Federation-Token=12345667";
+    mockIdentityService.authenticate.mockReturnValue(
+      TE.right(records.validIdentity)
+    );
+
+    // initialize the implicit flow
+    const authorizeResponse = await doAuthorizeRequest(app, client);
+    const authorizeResponseCookies = [
+      ...Array.from<string>(authorizeResponse.headers["set-cookie"]),
+      authenticationCookie,
+    ];
+    // follow the redirect and perform the login
+    const loginResponse = await followRedirect(
+      app,
+      authorizeResponse,
+      authorizeResponseCookies
+    );
+    // follow the redirect of loginResponse (the flow land you to /oauth/authorize/:interaction-id)
+    const authorizeRedirectResponse = await followRedirect(
+      app,
+      loginResponse,
+      authorizeResponseCookies
+    );
+    const authorizeRedirectResponseCookies = [
+      ...Array.from<string>(authorizeRedirectResponse.headers["set-cookie"]),
+    ];
+    // follow the redirect of authorizeRedirectResponse
+    const consentResponse = await followRedirect(
+      app,
+      authorizeRedirectResponse,
+      authorizeRedirectResponseCookies
+    );
+
+    // very nasty ... but works
+    const sessionPrefix = "_session=";
+    const sessionId = authorizeRedirectResponseCookies
+      .flatMap((value) => value.split("; "))
+      .filter((value) => value.startsWith(sessionPrefix))
+      .map((value) => value.replace(sessionPrefix, ""))
+      .join("");
+
+    const session = await provider.Session.find(sessionId);
+
+    expect(session).toMatchObject({
+      accountId: records.validIdentity.fiscalCode,
+    });
+    expect(consentResponse.statusCode).toBe(200);
   });
 
   it("should render the consent page", async () => {
@@ -165,6 +218,7 @@ describe("Router", () => {
       authorizeResponse,
       authorizeResponseCookies
     );
+
     // follow the redirect of loginResponse (the flow land you to /oauth/authorize/:interaction-id)
     const authorizeRedirectResponse = await followRedirect(
       app,

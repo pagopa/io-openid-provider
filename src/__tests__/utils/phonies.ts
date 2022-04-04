@@ -34,6 +34,7 @@ const makeFakeApplication = () => {
     clientSkipConsent,
     mockProviderService,
     mockIdentityService,
+    provider,
     app,
   };
 };
@@ -63,6 +64,7 @@ const makeLocalProvider = () => {
   };
   const provider = oidcprovider.makeProvider(
     records.validConfig,
+    logger.makeLogger(records.validConfig.logger),
     mockIdentityService,
     overridenConfiguration
   );

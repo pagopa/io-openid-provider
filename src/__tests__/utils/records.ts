@@ -12,6 +12,7 @@ const validConfig: config.Config = {
     version: "v0.0.0" as NonEmptyString,
   },
   server: {
+    authenticationCookieKey: "X-IO-Federation-Token",
     hostname: "0.0.0.0",
     port: "3000",
   },
@@ -25,6 +26,7 @@ const validConfig: config.Config = {
 };
 
 const envs = {
+  AUTHENTICATION_COOKIE_KEY: "X-IO-Federation-Token",
   IO_BACKEND_BASE_URL: "https://iobackend.it",
   SERVER_HOSTNAME: "0.0.0.0",
   PORT: "3000",
@@ -103,7 +105,7 @@ const validUserIdentity: UserIdentity = {
 };
 const validIdentity: Identity = {
   familyName: validUserIdentity.family_name,
-  fiscalCode: validUserIdentity.fiscal_code,
+  fiscalCode: validUserIdentity.fiscal_code as unknown as NonEmptyString,
   givenName: validUserIdentity.name,
 };
 
