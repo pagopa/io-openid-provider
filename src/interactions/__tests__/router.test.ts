@@ -126,12 +126,6 @@ describe("Router", () => {
     const authorizeRedirectResponseCookies = [
       ...Array.from<string>(authorizeRedirectResponse.headers["set-cookie"]),
     ];
-    // follow the redirect of authorizeRedirectResponse
-    const consentResponse = await followRedirect(
-      app,
-      authorizeRedirectResponse,
-      authorizeRedirectResponseCookies
-    );
 
     // very nasty ... but works
     const sessionPrefix = "_session=";
@@ -146,7 +140,6 @@ describe("Router", () => {
     expect(session).toMatchObject({
       accountId: records.validIdentity.fiscalCode,
     });
-    expect(consentResponse.statusCode).toBe(200);
   });
 
   it("should render the consent page", async () => {
