@@ -5,9 +5,20 @@ import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { GrantRepository } from "../../core/repositories/GrantRepository";
-import { Grant, GrantId, makeDomainError } from "../../core/domain";
+import {
+  AccountId,
+  ClientId,
+  Grant,
+  GrantId,
+  makeDomainError,
+} from "../../core/domain";
 import { Logger } from "../../logger";
-import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
+import {
+  fromNumericDate,
+  makeNotImplementedAdapter,
+  taskEitherToPromise,
+  toNumericDate,
+} from "./utils";
 
 export const GrantPayload = t.type({
   accountId: t.string,
@@ -19,31 +30,45 @@ export const GrantPayload = t.type({
     scope: t.string,
   }),
 });
+type GrantPayload = t.TypeOf<typeof GrantPayload>;
 
 export const toAdapterPayload = (input: Grant): oidc.AdapterPayload => ({
   accountId: input.accountId,
   clientId: input.clientId,
-  exp: input.expireAt,
-  iat: input.issuedAt,
+  exp: toNumericDate(input.expireAt),
+  iat: toNumericDate(input.issuedAt),
   jti: input.id,
   openid: { scope: input.scope },
 });
 
 export const fromAdapterPayload = (
   input: oidc.AdapterPayload
-): t.Validation<Grant> =>
-  pipe(
+): t.Validation<Grant> => {
+  const makeGrant =
+    (id: GrantId) =>
+    (accountId: AccountId) =>
+    (clientId: ClientId) =>
+    (payload: GrantPayload): Grant => ({
+      accountId,
+      clientId,
+      expireAt: fromNumericDate(payload.exp),
+      id,
+      issuedAt: fromNumericDate(payload.iat),
+      scope: payload.openid.scope,
+    });
+  return pipe(
     GrantPayload.decode(input),
     E.chain((grantPayload) =>
-      Grant.decode({
-        ...grantPayload,
-        expireAt: grantPayload.exp,
-        id: grantPayload.jti,
-        issuedAt: grantPayload.iat,
-        scope: grantPayload.openid.scope,
-      })
+      pipe(
+        E.of(makeGrant),
+        E.ap(GrantId.decode(grantPayload.jti)),
+        E.ap(AccountId.decode(grantPayload.accountId)),
+        E.ap(ClientId.decode(grantPayload.clientId)),
+        E.ap(E.of(grantPayload))
+      )
     )
   );
+};
 
 export const makeGrantAdapter = (
   logger: Logger,

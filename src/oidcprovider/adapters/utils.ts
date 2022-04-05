@@ -63,3 +63,23 @@ export const makeNotImplementedAdapter = (
     return promiseRejected();
   },
 });
+
+/**
+ * Given a date return the number of seconds from 1970-01-01T00:00:00Z UTC
+ * until the specified UTC date/time, ignoring leap seconds.
+ */
+export const toNumericDate = (date: Date): number => date.getTime() / 1000;
+/**
+ * Given a NumericDate returns a Date.
+ * NumericDate is a numberic value representing the number of seconds from
+ * 1970-01-01T00:00:00Z UTC until the specified UTC date/time,
+ * ignoring leap seconds. This is equivalent to the IEEE Std 1003.1,
+ * 2013 Edition [POSIX.1] definition "Seconds Since the Epoch", in
+ * which each day is accounted for by exactly 86400 seconds, other
+ * than that non-integer values can be represented.
+ */
+export const fromNumericDate = (numericDate: number): Date => {
+  const date = new Date(0);
+  date.setUTCSeconds(numericDate);
+  return date;
+};

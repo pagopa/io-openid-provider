@@ -1,9 +1,13 @@
-import * as fc from "fast-check";
-import { getArbitrary } from "fast-check-io-ts";
-import { GrantPayload } from "../grantAdapter";
-
-export const grantPayloadArbitrary = getArbitrary(GrantPayload);
-export const grantPayload = fc.sample(grantPayloadArbitrary, 1)[0];
+export const grantPayload = {
+  accountId: "t-a]bZ",
+  clientId: '} X"',
+  exp: 1649169289,
+  iat: 1649169489,
+  jti: "y,STEj=!pi",
+  openid: {
+    scope: "z|h^v",
+  },
+};
 
 export const sessionPayload = {
   iat: 1648822805,
