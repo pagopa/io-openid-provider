@@ -53,7 +53,7 @@ const makeApplication = (
   application.use(info.makeRouter(config));
   // router that manage the interactions (login and consent)
   application.use(
-    interactions.makeRouter(providerService, identityService, logger)
+    interactions.makeRouter(config, providerService, identityService, logger)
   );
   // router that manage the openid-connect endpoints
   application.use(oidcprovider.makeRouter(provider));

@@ -65,6 +65,7 @@ const main = pipe(
     );
     const provider = oidcprovider.makeProvider(
       config,
+      logger,
       identityService,
       providerConfig
     );

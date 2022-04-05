@@ -10,6 +10,7 @@ import * as logger from "./logger";
 interface ServerConfig {
   readonly hostname: string;
   readonly port: string;
+  readonly authenticationCookieKey: string;
 }
 
 interface IOBackend {
@@ -33,6 +34,7 @@ type ConfEnv = NodeJS.ProcessEnv;
 
 const envDecoder = t.type({
   APPLICATION_NAME: NonEmptyString,
+  AUTHENTICATION_COOKIE_KEY: NonEmptyString,
   IO_BACKEND_BASE_URL: UrlFromString,
   LOG_LEVEL: t.keyof({
     debug: null,
@@ -67,6 +69,7 @@ const makeConfigFromStr = (str: EnvStruct): Config => ({
     url: new URL(str.POSTGRES_URL.href),
   },
   server: {
+    authenticationCookieKey: str.AUTHENTICATION_COOKIE_KEY,
     hostname: str.SERVER_HOSTNAME,
     port: str.PORT,
   },
