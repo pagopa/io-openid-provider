@@ -16,18 +16,18 @@ import { PostgresConfig } from "./domain";
 
 const fromRecord = (record: prisma.Session): Session => ({
   accountId: record.accountId as AccountId,
-  expireAt: record.expireAt.getTime(),
+  expireAt: record.expireAt,
   id: record.id as SessionId,
-  issuedAt: record.issuedAt.getTime(),
+  issuedAt: record.issuedAt,
   kind: "Session",
   uid: record.uid,
 });
 
 const toRecord = (data: Session): prisma.Session => ({
   accountId: data.accountId || null,
-  expireAt: new Date(data.expireAt),
+  expireAt: data.expireAt,
   id: data.id,
-  issuedAt: new Date(data.issuedAt),
+  issuedAt: data.issuedAt,
   uid: data.uid,
 });
 

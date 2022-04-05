@@ -12,29 +12,35 @@ import {
 } from "../../core/domain";
 import { SessionRepository } from "../../core/repositories/SessionRepository";
 import { Logger } from "../../logger";
-import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
+import {
+  makeNotImplementedAdapter,
+  taskEitherToPromise,
+  toNumericDate,
+  fromNumericDate,
+} from "./utils";
 
 export const toAdapterPayload = (entity: Session): oidc.AdapterPayload => ({
   accountId: entity.accountId,
-  exp: entity.expireAt,
-  iat: entity.issuedAt,
+  exp: toNumericDate(entity.expireAt),
+  iat: toNumericDate(entity.issuedAt),
   jti: entity.id,
   kind: "Session",
-  loginTs: entity.issuedAt,
+  loginTs: toNumericDate(entity.issuedAt),
   uid: entity.uid,
 });
 
 export const fromAdapterPayload = (
   payload: oidc.AdapterPayload
 ): t.Validation<Session> =>
+  // TODO: change to decode (creating SessionPayload) and then remove the cast
   Session.decode({
     accountId: payload.accountId as AccountId,
-    expireAt: payload.exp,
+    expireAt: fromNumericDate(payload.exp || 0),
     id: payload.jti,
-    issuedAt: payload.iat,
+    issuedAt: fromNumericDate(payload.iat || 0),
     kind: "Session",
     uid: payload.uid,
-  });
+  } as Session);
 
 export const makeSessionAdapter = (
   logger: Logger,

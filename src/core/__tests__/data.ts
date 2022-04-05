@@ -12,5 +12,4 @@ export const grant: Grant = {
   id: "grant-id" as GrantId,
   issuedAt: new Date(),
   scope: "openid profile",
-
-}
+};
