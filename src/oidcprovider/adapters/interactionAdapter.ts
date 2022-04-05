@@ -12,7 +12,7 @@ import {
   makeDomainError,
 } from "../../core/domain";
 import { InteractionRepository } from "../../core/repositories/InteractionRepository";
-import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
+import { fromNumericDate, makeNotImplementedAdapter, taskEitherToPromise, toNumericDate } from "./utils";
 
 export const InteractionPayload = t.type({
   exp: t.number,
@@ -81,8 +81,8 @@ type InteractionPayload = t.TypeOf<typeof InteractionPayload>;
 
 // FIXME: Improve this mapping
 export const toAdapterPayload = (item: Interaction): InteractionPayload => ({
-  exp: item.expireAt,
-  iat: item.issuedAt,
+  exp: toNumericDate(item.expireAt),
+  iat: toNumericDate(item.issuedAt),
   jti: item.id,
   kind: "Interaction",
   lastSubmission: item.session
@@ -121,9 +121,9 @@ export const fromAdapterPayload = (
       Interaction.decode({
         ...payload,
         clientId: payload.params.client_id as ClientId,
-        expireAt: payload.exp,
+        expireAt: fromNumericDate(payload.exp),
         id: payload.jti as InteractionId,
-        issuedAt: payload.iat,
+        issuedAt: fromNumericDate(payload.iat),
         prompt: payload.prompt,
         result: payload.result,
         session: payload.session
