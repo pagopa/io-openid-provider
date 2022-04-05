@@ -1,9 +1,24 @@
-import * as fc from "fast-check";
-import { getArbitrary } from "fast-check-io-ts";
-import { AccountId, Client, ClientId, Grant, GrantId } from "../domain";
+import { AccountId, Client, ClientId, Grant, GrantId, OrganizationId, ServiceId } from "../domain";
 
-export const clientArbitrary = getArbitrary(Client);
-export const client: Client = fc.sample(clientArbitrary, 1)[0];
+export const client: Client = {
+  applicationType: "web",
+  bypassConsent: false,
+  clientId: "client-id" as ClientId,
+  grantTypes: ["implicit"],
+  idTokenSignedResponseAlg: "ES384",
+  issuedAt: new Date(),
+  name: "Client casual name",
+  organizationId: "organization-id" as OrganizationId,
+  postLogoutRedirectUris: [],
+  redirectUris: ["https://callback.io/callback"],
+  requireAuthTime: false,
+  responseTypes: ["id_token"],
+  scope: "openid profile",
+  secret: undefined,
+  serviceId: "service-id" as ServiceId,
+  subjectType: "public",
+  tokenEndpointAuthMethod: "none",
+};
 
 export const grant: Grant = {
   accountId: "account-id" as AccountId,

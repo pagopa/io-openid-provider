@@ -19,46 +19,35 @@ import {
 import { ClientRepository } from "../../core/repositories/ClientRepository";
 import { PostgresConfig } from "./domain";
 
-const fromRecord = (c: prisma.Client): Client => ({
-  application_type: c.applicationType,
-  bypass_consent: c.bypassConsent,
+const fromRecord = (record: prisma.Client): Client => ({
+  ...record,
+  organizationId: record.organization as OrganizationId,
+  clientId: record.clientId as ClientId,
+  serviceId: record.serviceId as ServiceId,
+  name: record.clientName,
+  secret: record.clientSecret || undefined,
   // FIXME: Don't cast like that!
-  client_id: c.clientId as ClientId,
-  client_id_issued_at: c.clientIdIssuedAt.getTime(),
-  client_name: c.clientName,
-  client_secret: c.clientSecret || undefined,
-  grant_types: c.grantTypes,
-  id_token_signed_response_alg: c.idTokenSignedResponseAlg,
-  organization_id: c.organization as OrganizationId,
-  service_id: c.serviceId as ServiceId,
-  post_logout_redirect_uris: c.postLogoutRedirectUris,
-  require_auth_time: c.requireAuthTime,
-  // FIXME: Don't cast like that!
-  response_types: c.responseTypes.map((_) => _ as ResponseType),
-  redirect_uris: c.redirectUris,
-  scope: c.scope,
-  subject_type: c.subjectType,
-  token_endpoint_auth_method: c.tokenEndpointAuthMethod,
+  responseTypes: record.responseTypes.map((_) => _ as ResponseType),
 });
 
 const toRecord = (client: Client): prisma.Client => ({
-  applicationType: client.application_type,
-  bypassConsent: client.bypass_consent || false,
-  clientId: client.client_id,
-  clientIdIssuedAt: new Date(client.client_id_issued_at),
-  clientName: client.client_name,
-  clientSecret: client.client_secret || null,
-  grantTypes: client.grant_types,
-  idTokenSignedResponseAlg: client.id_token_signed_response_alg,
-  organization: client.organization_id,
-  serviceId: client.service_id,
-  postLogoutRedirectUris: client.post_logout_redirect_uris,
-  requireAuthTime: client.require_auth_time,
-  responseTypes: client.response_types,
-  redirectUris: client.redirect_uris,
+  clientId: client.clientId,
+  redirectUris: client.redirectUris,
+  grantTypes: client.grantTypes,
+  responseTypes: client.responseTypes,
+  applicationType: client.applicationType,
+  issuedAt: client.issuedAt,
+  clientName: client.name,
+  clientSecret: client.secret || null,
+  idTokenSignedResponseAlg: client.idTokenSignedResponseAlg,
+  postLogoutRedirectUris: client.postLogoutRedirectUris,
+  requireAuthTime: client.requireAuthTime,
   scope: client.scope,
-  subjectType: client.subject_type,
-  tokenEndpointAuthMethod: client.token_endpoint_auth_method,
+  subjectType: client.subjectType,
+  tokenEndpointAuthMethod: client.tokenEndpointAuthMethod,
+  organization: client.organizationId,
+  serviceId: client.serviceId,
+  bypassConsent: client.bypassConsent,
 });
 
 const removeClient =
@@ -91,7 +80,7 @@ const upsertClient =
           client.upsert({
             create: obj,
             update: obj,
-            where: { clientId: clientDefinition.client_id },
+            where: { clientId: clientDefinition.clientId },
           }),
         E.toError
       ),
@@ -115,10 +104,10 @@ const findClient =
         E.toError
       ),
       TE.map(flow(O.fromNullable, O.map(fromRecord))),
-      TE.bimap(
-        (e) => ({ causedBy: e, kind: DomainErrorTypes.GENERIC_ERROR }),
-        O.toUndefined
-      ),
+      TE.mapLeft((e) => ({
+        causedBy: e,
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      })),
       TE.chainFirst((c) =>
         TE.of(logger.debug(`findClient ${JSON.stringify(c)}`))
       ),

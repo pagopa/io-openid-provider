@@ -1,3 +1,14 @@
+import * as fc from "fast-check";
+import { getArbitrary } from "fast-check-io-ts";
+import { ClientPayload } from "../clientAdapter";
+
+export const clientPayloadArbitrary = getArbitrary(ClientPayload);
+export const clientPayload: ClientPayload = ({
+  ...fc.sample(clientPayloadArbitrary, 1)[0],
+  bypass_consent: false,
+  client_id_issued_at: 1648822969,
+});
+
 export const grantPayload = {
   accountId: "t-a]bZ",
   clientId: '} X"',
