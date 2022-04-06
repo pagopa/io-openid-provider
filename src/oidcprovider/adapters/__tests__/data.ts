@@ -1,13 +1,24 @@
-import * as fc from "fast-check";
-import { getArbitrary } from "fast-check-io-ts";
-import { ClientPayload } from "../clientAdapter";
+import * as oidc from "oidc-provider";
 
-export const clientPayloadArbitrary = getArbitrary(ClientPayload);
-export const clientPayload: ClientPayload = ({
-  ...fc.sample(clientPayloadArbitrary, 1)[0],
+export const clientPayload = {
+  application_type: "web" as "web",
+  grant_types: ["implicit"],
+  id_token_signed_response_alg: "RS256" as oidc.AsymmetricSigningAlgorithm,
+  post_logout_redirect_uris: [],
+  require_auth_time: false,
+  response_types: ["id_token" as oidc.ResponseType],
+  subject_type: "public" as oidc.SubjectTypes,
+  token_endpoint_auth_method: "none" as oidc.ClientAuthMethod,
+  client_id_issued_at: 1649177205,
+  client_id: "lVbSPt9cAghS_zBbLqcgZ",
+  client_name: "This is the name of this client",
+  redirect_uris: ["https://callback.io/callback"],
+  scope: "profile openid",
+  organization_id: "my-org",
+  service_id: "my-service",
   bypass_consent: false,
-  client_id_issued_at: 1648822969,
-});
+  client_secret: undefined,
+};
 
 export const grantPayload = {
   accountId: "t-a]bZ",

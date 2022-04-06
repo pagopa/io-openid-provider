@@ -1,4 +1,12 @@
-import { AccountId, Client, ClientId, Grant, GrantId, OrganizationId, ServiceId } from "../domain";
+import {
+  AccountId,
+  Client,
+  ClientId,
+  Grant,
+  GrantId,
+  OrganizationId,
+  ServiceId,
+} from "../domain";
 
 export const client: Client = {
   applicationType: "web",

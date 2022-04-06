@@ -1,6 +1,6 @@
 import * as oidc from "oidc-provider";
-import * as t from "io-ts";
 import { constVoid, pipe } from "fp-ts/function";
+import * as t from "io-ts";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
@@ -15,32 +15,44 @@ import { Logger } from "../../logger";
 import {
   makeNotImplementedAdapter,
   taskEitherToPromise,
-  toNumericDate,
-  fromNumericDate,
+  DateFromNumericDate,
 } from "./utils";
 
-export const toAdapterPayload = (entity: Session): oidc.AdapterPayload => ({
-  accountId: entity.accountId,
-  exp: toNumericDate(entity.expireAt),
-  iat: toNumericDate(entity.issuedAt),
-  jti: entity.id,
-  kind: "Session",
-  loginTs: toNumericDate(entity.issuedAt),
-  uid: entity.uid,
+export const SessionPayload = t.type({
+  accountId: t.union([AccountId, t.undefined]),
+  exp: DateFromNumericDate,
+  iat: DateFromNumericDate,
+  jti: SessionId,
+  kind: t.literal("Session"),
+  loginTs: DateFromNumericDate,
+  uid: t.string,
 });
+
+export const toAdapterPayload = (entity: Session): oidc.AdapterPayload =>
+  SessionPayload.encode({
+    accountId: entity.accountId,
+    exp: entity.expireAt,
+    iat: entity.issuedAt,
+    jti: entity.id,
+    kind: "Session",
+    loginTs: entity.issuedAt,
+    uid: entity.uid,
+  });
 
 export const fromAdapterPayload = (
   payload: oidc.AdapterPayload
 ): t.Validation<Session> =>
-  // TODO: change to decode (creating SessionPayload) and then remove the cast
-  Session.decode({
-    accountId: payload.accountId as AccountId,
-    expireAt: fromNumericDate(payload.exp || 0),
-    id: payload.jti,
-    issuedAt: fromNumericDate(payload.iat || 0),
-    kind: "Session",
-    uid: payload.uid,
-  } as Session);
+  pipe(
+    SessionPayload.decode(payload),
+    E.map((sessionPayload) => ({
+      accountId: sessionPayload.accountId,
+      expireAt: sessionPayload.exp,
+      id: sessionPayload.jti,
+      issuedAt: sessionPayload.iat,
+      kind: sessionPayload.kind,
+      uid: sessionPayload.uid,
+    }))
+  );
 
 export const makeSessionAdapter = (
   logger: Logger,

@@ -49,12 +49,13 @@ describe("makeClientAdapter", () => {
         E.fold(constUndefined, (_) => _)
       ) as Client;
 
-      const recorder = clientRepositoryMock.upsert
-        .mockReturnValueOnce(TE.right(client));
-
-      await expect(adapter.upsert(id, clientPayload, 123)).resolves.toStrictEqual(
-        constVoid()
+      const recorder = clientRepositoryMock.upsert.mockReturnValueOnce(
+        TE.right(client)
       );
+
+      await expect(
+        adapter.upsert(id, clientPayload, 123)
+      ).resolves.toStrictEqual(constVoid());
       expect(recorder).toBeCalledWith(client);
       expect(recorder).toBeCalledTimes(1);
     });

@@ -14,17 +14,16 @@ import {
 } from "../../core/domain";
 import { Logger } from "../../logger";
 import {
-  fromNumericDate,
+  DateFromNumericDate,
   makeNotImplementedAdapter,
   taskEitherToPromise,
-  toNumericDate,
 } from "./utils";
 
 export const GrantPayload = t.type({
   accountId: t.string,
   clientId: t.string,
-  exp: t.number,
-  iat: t.number,
+  exp: DateFromNumericDate,
+  iat: DateFromNumericDate,
   jti: t.string,
   openid: t.type({
     scope: t.string,
@@ -32,14 +31,15 @@ export const GrantPayload = t.type({
 });
 type GrantPayload = t.TypeOf<typeof GrantPayload>;
 
-export const toAdapterPayload = (input: Grant): oidc.AdapterPayload => ({
-  accountId: input.accountId,
-  clientId: input.clientId,
-  exp: toNumericDate(input.expireAt),
-  iat: toNumericDate(input.issuedAt),
-  jti: input.id,
-  openid: { scope: input.scope },
-});
+export const toAdapterPayload = (input: Grant): oidc.AdapterPayload =>
+  GrantPayload.encode({
+    accountId: input.accountId,
+    clientId: input.clientId,
+    exp: input.expireAt,
+    iat: input.issuedAt,
+    jti: input.id,
+    openid: { scope: input.scope },
+  });
 
 export const fromAdapterPayload = (
   input: oidc.AdapterPayload
@@ -51,9 +51,9 @@ export const fromAdapterPayload = (
     (payload: GrantPayload): Grant => ({
       accountId,
       clientId,
-      expireAt: fromNumericDate(payload.exp),
+      expireAt: payload.exp,
       id,
-      issuedAt: fromNumericDate(payload.iat),
+      issuedAt: payload.iat,
       scope: payload.openid.scope,
     });
   return pipe(

@@ -1,4 +1,5 @@
 import * as oidc from "oidc-provider";
+import * as t from "io-ts";
 import { pipe } from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
@@ -65,11 +66,10 @@ export const makeNotImplementedAdapter = (
 });
 
 /**
+ * Accepts a NumericDate.
  * Given a date return the number of seconds from 1970-01-01T00:00:00Z UTC
  * until the specified UTC date/time, ignoring leap seconds.
- */
-export const toNumericDate = (date: Date): number => date.getTime() / 1000;
-/**
+ *
  * Given a NumericDate returns a Date.
  * NumericDate is a numberic value representing the number of seconds from
  * 1970-01-01T00:00:00Z UTC until the specified UTC date/time,
@@ -78,8 +78,16 @@ export const toNumericDate = (date: Date): number => date.getTime() / 1000;
  * which each day is accounted for by exactly 86400 seconds, other
  * than that non-integer values can be represented.
  */
-export const fromNumericDate = (numericDate: number): Date => {
-  const date = new Date(0);
-  date.setUTCSeconds(numericDate);
-  return date;
-};
+export const DateFromNumericDate = new t.Type<Date, number>(
+  "DateFromNumericDate",
+  (v): v is Date => v instanceof Date,
+  (v, c) =>
+    pipe(
+      t.number.validate(v, c),
+      E.chain((n) => {
+        const date = new Date(n * 1000);
+        return isNaN(date.getTime()) ? t.failure(n, c) : t.success(date);
+      })
+    ),
+  (date) => date.getTime() / 1000
+);

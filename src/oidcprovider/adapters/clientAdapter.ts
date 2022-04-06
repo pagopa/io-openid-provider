@@ -18,8 +18,7 @@ import {
   SymmetricSigningAlgorithm,
 } from "../../core/domain";
 import {
-  fromNumericDate,
-  toNumericDate,
+  DateFromNumericDate,
   makeNotImplementedAdapter,
   taskEitherToPromise,
 } from "./utils";
@@ -28,7 +27,7 @@ export const ClientPayload = t.type({
   application_type: t.union([t.literal("web"), t.literal("native")]),
   bypass_consent: t.union([t.boolean, t.undefined]),
   client_id: t.string,
-  client_id_issued_at: t.number,
+  client_id_issued_at: DateFromNumericDate,
   client_name: t.string,
   client_secret: t.union([t.string, t.undefined]),
   grant_types: t.array(t.string),
@@ -57,25 +56,26 @@ export const ClientPayload = t.type({
 });
 export type ClientPayload = t.TypeOf<typeof ClientPayload>;
 
-export const toAdapterPayload = (item: Client): ClientPayload => ({
-  application_type: item.applicationType,
-  bypass_consent: item.bypassConsent,
-  client_id: item.clientId,
-  client_id_issued_at: toNumericDate(item.issuedAt),
-  client_name: item.name,
-  client_secret: item.secret,
-  grant_types: item.grantTypes,
-  id_token_signed_response_alg: item.idTokenSignedResponseAlg,
-  organization_id: item.organizationId,
-  post_logout_redirect_uris: item.postLogoutRedirectUris,
-  redirect_uris: item.redirectUris,
-  require_auth_time: item.requireAuthTime,
-  response_types: item.responseTypes,
-  scope: item.scope,
-  service_id: item.serviceId,
-  subject_type: item.subjectType,
-  token_endpoint_auth_method: item.tokenEndpointAuthMethod,
-});
+export const toAdapterPayload = (item: Client): oidc.AdapterPayload =>
+  ClientPayload.encode({
+    application_type: item.applicationType,
+    bypass_consent: item.bypassConsent,
+    client_id: item.clientId,
+    client_id_issued_at: item.issuedAt,
+    client_name: item.name,
+    client_secret: item.secret,
+    grant_types: item.grantTypes,
+    id_token_signed_response_alg: item.idTokenSignedResponseAlg,
+    organization_id: item.organizationId,
+    post_logout_redirect_uris: item.postLogoutRedirectUris,
+    redirect_uris: item.redirectUris,
+    require_auth_time: item.requireAuthTime,
+    response_types: item.responseTypes,
+    scope: item.scope,
+    service_id: item.serviceId,
+    subject_type: item.subjectType,
+    token_endpoint_auth_method: item.tokenEndpointAuthMethod,
+  });
 
 export const fromAdapterPayload = (
   item: oidc.AdapterPayload
@@ -88,7 +88,7 @@ export const fromAdapterPayload = (
       clientId: clientPayload.client_id as ClientId,
       grantTypes: clientPayload.grant_types,
       idTokenSignedResponseAlg: clientPayload.id_token_signed_response_alg,
-      issuedAt: fromNumericDate(clientPayload.client_id_issued_at),
+      issuedAt: clientPayload.client_id_issued_at,
       name: clientPayload.client_name,
       organizationId: clientPayload.organization_id as OrganizationId,
       postLogoutRedirectUris: clientPayload.post_logout_redirect_uris,
