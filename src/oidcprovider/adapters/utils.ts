@@ -71,7 +71,7 @@ export const makeNotImplementedAdapter = (
  * until the specified UTC date/time, ignoring leap seconds.
  *
  * Given a NumericDate returns a Date.
- * NumericDate is a numberic value representing the number of seconds from
+ * NumericDate is a numeric value representing the number of seconds from
  * 1970-01-01T00:00:00Z UTC until the specified UTC date/time,
  * ignoring leap seconds. This is equivalent to the IEEE Std 1003.1,
  * 2013 Edition [POSIX.1] definition "Seconds Since the Epoch", in
