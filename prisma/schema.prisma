@@ -53,7 +53,7 @@ model Client {
   grantTypes                  String[]
   responseTypes               String[]
   applicationType             ApplicationType
-  clientIdIssuedAt            DateTime
+  issuedAt                    DateTime
   clientName                  String
   clientSecret                String?
   idTokenSignedResponseAlg    SigningAlgorithm

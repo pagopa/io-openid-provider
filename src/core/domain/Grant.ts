@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import { ClientId } from "./Client";
 
 interface AccountIdBrand {
@@ -28,11 +29,9 @@ export type GrantId = t.TypeOf<typeof GrantId>;
 export const Grant = t.type({
   accountId: AccountId,
   clientId: ClientId,
-  // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
-  expireAt: t.number,
+  expireAt: tt.date,
   id: GrantId,
-  // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
-  issuedAt: t.number,
+  issuedAt: tt.date,
   scope: t.string,
 });
 export type Grant = t.TypeOf<typeof Grant>;

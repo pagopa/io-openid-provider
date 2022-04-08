@@ -18,9 +18,9 @@ import { PostgresConfig } from "./domain";
 const toRecord = (input: Grant): prisma.Grant => ({
   accountId: input.accountId,
   clientId: input.clientId,
-  expireAt: new Date(input.expireAt),
+  expireAt: input.expireAt,
   id: input.id,
-  issuedAt: new Date(input.issuedAt),
+  issuedAt: input.issuedAt,
   scope: input.scope,
 });
 
@@ -28,9 +28,9 @@ const toRecord = (input: Grant): prisma.Grant => ({
 const fromRecord = (record: prisma.Grant): Grant => ({
   accountId: record.accountId as AccountId,
   clientId: record.clientId as ClientId,
-  expireAt: record.expireAt.getTime(),
+  expireAt: record.expireAt,
   id: record.id as GrantId,
-  issuedAt: record.issuedAt.getTime(),
+  issuedAt: record.issuedAt,
   scope: record.scope,
 });
 

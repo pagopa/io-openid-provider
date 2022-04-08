@@ -1,7 +1,10 @@
+import * as fc from "fast-check";
 import * as mock from "jest-mock-extended";
+import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../../logger";
 import {
+  DateFromNumericDate,
   makeNotImplementedAdapter,
   notImplementedError,
   taskEitherToPromise,
@@ -42,6 +45,25 @@ describe("makeNotImplementedAdapter", () => {
     );
     await expect(adapter.upsert(id, {}, 123)).rejects.toThrowError(
       notImplementedError
+    );
+  });
+});
+
+describe("DateFromNumericDate", () => {
+  it("should work as expected", () => {
+    fc.assert(
+      fc.property(fc.date(), (date) => {
+        date.setMilliseconds(0);
+        const numericDate = date.getTime() / 1000;
+
+        const decoded = DateFromNumericDate.decode(numericDate);
+        const expectedDecoded = E.right(date);
+        expect(decoded).toStrictEqual(expectedDecoded);
+
+        const encoded = DateFromNumericDate.encode(date);
+        const expectedEncoded = numericDate;
+        expect(encoded).toStrictEqual(expectedEncoded);
+      })
     );
   });
 });

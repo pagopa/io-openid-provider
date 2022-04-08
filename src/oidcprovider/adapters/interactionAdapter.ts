@@ -6,18 +6,24 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../logger";
 import {
+  AccountId,
   ClientId,
+  GrantId,
   Interaction,
   InteractionId,
   makeDomainError,
 } from "../../core/domain";
 import { InteractionRepository } from "../../core/repositories/InteractionRepository";
-import { makeNotImplementedAdapter, taskEitherToPromise } from "./utils";
+import {
+  DateFromNumericDate,
+  makeNotImplementedAdapter,
+  taskEitherToPromise,
+} from "./utils";
 
 export const InteractionPayload = t.type({
-  exp: t.number,
-  iat: t.number,
-  jti: t.string,
+  exp: DateFromNumericDate,
+  iat: DateFromNumericDate,
+  jti: InteractionId,
   kind: t.literal("Interaction"),
   // lastSubmission exists only if consent
   lastSubmission: t.union([
@@ -38,12 +44,9 @@ export const InteractionPayload = t.type({
   }),
   prompt: t.type({
     details: t.union([
-      t.UnknownRecord,
-      t.intersection([
-        t.UnknownRecord,
-        // missingOIDCScope exists only if consent
-        t.type({ missingOIDCScope: t.array(t.string) }),
-      ]),
+      t.record(t.string, t.string),
+      // missingOIDCScope exists only if consent
+      t.type({ missingOIDCScope: t.array(t.string) }),
     ]),
     name: t.union([t.literal("login"), t.literal("consent")]),
     reasons: t.array(t.string),
@@ -56,13 +59,13 @@ export const InteractionPayload = t.type({
     }),
     t.type({
       login: t.type({
-        accountId: t.string,
+        accountId: AccountId,
       }),
     }),
     // consent exists only if consent
     t.type({
       consent: t.type({
-        grantId: t.string,
+        grantId: GrantId,
       }),
     }),
   ]),
@@ -71,7 +74,7 @@ export const InteractionPayload = t.type({
   session: t.union([
     t.undefined,
     t.type({
-      accountId: t.string,
+      accountId: AccountId,
       cookie: t.string,
       uid: t.string,
     }),
@@ -80,36 +83,37 @@ export const InteractionPayload = t.type({
 type InteractionPayload = t.TypeOf<typeof InteractionPayload>;
 
 // FIXME: Improve this mapping
-export const toAdapterPayload = (item: Interaction): InteractionPayload => ({
-  exp: item.expireAt,
-  iat: item.issuedAt,
-  jti: item.id,
-  kind: "Interaction",
-  lastSubmission: item.session
-    ? { login: { accountId: item.session.accountId } }
-    : undefined,
-  params: {
-    client_id: item.params.client_id,
-    nonce: item.params.nonce,
-    redirect_uri: item.params.redirect_uri,
-    response_type: item.params.response_type,
-    scope: item.params.scope,
-    state: item.params.state,
-  },
-  prompt: {
-    ...item.prompt,
-    name: item.session ? "consent" : "login",
-  },
-  result: item.result,
-  returnTo: item.returnTo,
-  session: item.session
-    ? {
-        accountId: item.session.accountId,
-        cookie: item.session.cookieId,
-        uid: item.session.uid,
-      }
-    : undefined,
-});
+export const toAdapterPayload = (item: Interaction): oidc.AdapterPayload =>
+  InteractionPayload.encode({
+    exp: item.expireAt,
+    iat: item.issuedAt,
+    jti: item.id,
+    kind: "Interaction",
+    lastSubmission: item.session
+      ? { login: { accountId: item.session.accountId } }
+      : undefined,
+    params: {
+      client_id: item.params.client_id,
+      nonce: item.params.nonce,
+      redirect_uri: item.params.redirect_uri,
+      response_type: item.params.response_type,
+      scope: item.params.scope,
+      state: item.params.state,
+    },
+    prompt: {
+      ...item.prompt,
+      name: item.session ? "consent" : "login",
+    },
+    result: item.result,
+    returnTo: item.returnTo,
+    session: item.session
+      ? {
+          accountId: item.session.accountId,
+          cookie: item.session.cookieId,
+          uid: item.session.uid,
+        }
+      : undefined,
+  });
 
 // FIXME: Improve this mapping
 export const fromAdapterPayload = (
@@ -117,24 +121,27 @@ export const fromAdapterPayload = (
 ): t.Validation<Interaction> =>
   pipe(
     InteractionPayload.decode(input),
-    E.chain((payload) =>
-      Interaction.decode({
-        ...payload,
-        clientId: payload.params.client_id as ClientId,
-        expireAt: payload.exp,
-        id: payload.jti as InteractionId,
-        issuedAt: payload.iat,
-        prompt: payload.prompt,
-        result: payload.result,
-        session: payload.session
-          ? {
-              accountId: payload.session.accountId,
-              cookieId: payload.session.cookie,
-              uid: payload.session.uid,
-            }
-          : undefined,
-      } as Interaction)
-    )
+    E.map((payload) => ({
+      ...payload,
+      clientId: payload.params.client_id as ClientId,
+      expireAt: payload.exp,
+      id: payload.jti,
+      issuedAt: payload.iat,
+      prompt: {
+        ...payload.prompt,
+        details: payload.prompt.details.missingOIDCScope
+          ? payload.prompt.details
+          : {},
+      },
+      result: payload.result,
+      session: payload.session
+        ? {
+            accountId: payload.session.accountId,
+            cookieId: payload.session.cookie,
+            uid: payload.session.uid,
+          }
+        : undefined,
+    }))
   );
 
 export const makeInteractionAdapter = (

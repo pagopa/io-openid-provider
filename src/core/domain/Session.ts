@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import { AccountId } from "./Grant";
 
 interface SessionIdBrand {
@@ -14,9 +15,9 @@ export type SessionId = t.TypeOf<typeof SessionId>;
 
 export const Session = t.type({
   accountId: t.union([t.undefined, AccountId]),
-  expireAt: t.number,
+  expireAt: tt.date,
   id: SessionId,
-  issuedAt: t.number,
+  issuedAt: tt.date,
   kind: t.literal("Session"),
   // TODO: Check if this uid could be collapsed to id
   uid: t.string,

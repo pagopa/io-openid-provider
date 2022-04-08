@@ -1,4 +1,5 @@
-import * as TE from "fp-ts/TaskEither";
+import { Option } from "fp-ts/Option";
+import { TaskEither } from "fp-ts/TaskEither";
 import { Client, ClientId, DomainError, ClientSelector } from "../domain";
 
 /**
@@ -10,19 +11,19 @@ export interface ClientRepository {
    */
   readonly find: (
     clientId: ClientId
-  ) => TE.TaskEither<DomainError, Client | undefined>;
+  ) => TaskEither<DomainError, Option<Client>>;
   /**
    * Given a Client create or update it.
    */
-  readonly upsert: (client: Client) => TE.TaskEither<DomainError, Client>;
+  readonly upsert: (client: Client) => TaskEither<DomainError, Client>;
   /**
    * Delete the Client identified with the given clientId.
    */
-  readonly remove: (clientId: ClientId) => TE.TaskEither<DomainError, void>;
+  readonly remove: (clientId: ClientId) => TaskEither<DomainError, void>;
   /**
    * Given a selector return a list of Client that match the selector
    */
   readonly list: (
     selector: ClientSelector
-  ) => TE.TaskEither<DomainError, ReadonlyArray<Client>>;
+  ) => TaskEither<DomainError, ReadonlyArray<Client>>;
 }

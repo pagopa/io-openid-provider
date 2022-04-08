@@ -1,6 +1,7 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 
-const AsymmetricSigningAlgorithm = t.union([
+export const AsymmetricSigningAlgorithm = t.union([
   t.literal("PS256"),
   t.literal("PS384"),
   t.literal("PS512"),
@@ -13,12 +14,19 @@ const AsymmetricSigningAlgorithm = t.union([
   t.literal("RS384"),
   t.literal("RS512"),
 ]);
-const SymmetricSigningAlgorithm = t.union([
+export type AsymmetricSigningAlgorithm = t.TypeOf<
+  typeof AsymmetricSigningAlgorithm
+>;
+export const SymmetricSigningAlgorithm = t.union([
   t.literal("HS256"),
   t.literal("HS384"),
   t.literal("HS512"),
 ]);
-const NoneAlg = t.literal("none");
+export type SymmetricSigningAlgorithm = t.TypeOf<
+  typeof SymmetricSigningAlgorithm
+>;
+export const NoneAlg = t.literal("none");
+export type NoneAlg = t.TypeOf<typeof NoneAlg>;
 
 export const ResponseType = t.union([
   t.literal("code"),
@@ -74,27 +82,27 @@ export const ClientSelector = t.type({
 export type ClientSelector = t.TypeOf<typeof ClientSelector>;
 
 export const Client = t.type({
-  application_type: t.union([t.literal("web"), t.literal("native")]),
-  bypass_consent: t.union([t.boolean, t.undefined]),
-  client_id: ClientId,
-  client_id_issued_at: t.number,
-  client_name: t.string,
-  client_secret: t.union([t.string, t.undefined]),
-  grant_types: t.array(t.string),
-  id_token_signed_response_alg: t.union([
+  applicationType: t.union([t.literal("web"), t.literal("native")]),
+  bypassConsent: t.boolean,
+  clientId: ClientId,
+  grantTypes: t.array(t.string),
+  idTokenSignedResponseAlg: t.union([
     AsymmetricSigningAlgorithm,
     SymmetricSigningAlgorithm,
     NoneAlg,
   ]),
-  organization_id: OrganizationId,
-  post_logout_redirect_uris: t.array(t.string),
-  redirect_uris: t.array(t.string),
-  require_auth_time: t.boolean,
-  response_types: t.array(ResponseType),
+  issuedAt: tt.date,
+  name: t.string,
+  organizationId: OrganizationId,
+  postLogoutRedirectUris: t.array(t.string),
+  redirectUris: t.array(t.string),
+  requireAuthTime: t.boolean,
+  responseTypes: t.array(ResponseType),
   scope: t.string,
-  service_id: ServiceId,
-  subject_type: t.union([t.literal("public"), t.literal("pairwise")]),
-  token_endpoint_auth_method: t.union([
+  secret: t.union([t.string, t.undefined]),
+  serviceId: ServiceId,
+  subjectType: t.union([t.literal("public"), t.literal("pairwise")]),
+  tokenEndpointAuthMethod: t.union([
     t.literal("none"),
     t.literal("client_secret_post"),
     t.literal("client_secret_jwt"),

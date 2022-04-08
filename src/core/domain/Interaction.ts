@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import { ClientId } from "./Client";
 import { AccountId, GrantId } from "./Grant";
 
@@ -55,11 +56,9 @@ const SessionInfo = t.type({
 
 export const Interaction = t.type({
   clientId: ClientId,
-  // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
-  expireAt: t.number,
+  expireAt: tt.date,
   id: InteractionId,
-  // number of second since epoch (aka NumericDate) https://stackoverflow.com/a/39926886
-  issuedAt: t.number,
+  issuedAt: tt.date,
   params: Params,
   prompt: Prompt,
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),

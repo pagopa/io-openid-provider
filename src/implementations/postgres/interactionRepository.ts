@@ -19,9 +19,9 @@ const toRecord = (input: Interaction): prisma.Interaction => ({
   accountId: input.session ? input.session.accountId : null,
   clientId: input.clientId,
   cookieId: input.session ? input.session.cookieId : null,
-  expireAt: new Date(input.expireAt),
+  expireAt: input.expireAt,
   id: input.id,
-  issuedAt: new Date(input.issuedAt),
+  issuedAt: input.issuedAt,
   params: input.params,
   prompt: input.prompt,
   result: input.result || null,
@@ -33,9 +33,9 @@ const toRecord = (input: Interaction): prisma.Interaction => ({
 const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
   Interaction.decode({
     clientId: record.clientId,
-    expireAt: record.expireAt.getTime(),
+    expireAt: record.expireAt,
     id: record.id,
-    issuedAt: record.issuedAt.getTime(),
+    issuedAt: record.issuedAt,
     params: record.params,
     prompt: record.prompt,
     result: record.result || undefined,

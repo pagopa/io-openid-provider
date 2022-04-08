@@ -16,19 +16,19 @@ import { Logger } from "../../logger";
 import { Client, OrganizationId, ServiceId } from "../../core/domain";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
-  application_type: input.application_type,
-  client_id: input.client_id,
-  client_id_issued_at: input.client_id_issued_at.toString(),
-  client_name: input.client_name,
-  grant_types: input.grant_types,
+  application_type: input.applicationType,
+  client_id: input.clientId,
+  client_id_issued_at: input.issuedAt.toString(),
+  client_name: input.name,
+  grant_types: input.grantTypes,
   // FIXME: populate this field
   logo_uri: undefined,
-  organization_id: input.organization_id,
-  redirect_uris: input.redirect_uris,
-  response_types: input.response_types,
+  organization_id: input.organizationId,
+  redirect_uris: input.redirectUris,
+  response_types: input.responseTypes,
   scope: input.scope,
-  service_id: input.service_id,
-  subject_type: input.subject_type,
+  service_id: input.serviceId,
+  subject_type: input.subjectType,
 });
 
 const makeAPIClientList = (input: ReadonlyArray<Client>): APIClientList => ({
