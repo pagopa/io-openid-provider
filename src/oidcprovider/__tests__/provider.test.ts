@@ -2,17 +2,15 @@ import * as O from "fp-ts/Option";
 import * as index from "../.";
 import * as records from "../../__tests__/utils/records";
 
-describe("userInfoToAccount", () => {
+describe("makeAccountClaims", () => {
   it("should map properties", async () => {
     const user = records.validIdentity;
     const expected = user;
-    const actual = index.userInfoToAccount(user);
-    const actualClaims = await actual.claims("id_token", "profile", {}, []);
+    const actual = index.makeAccountClaims(user);
 
-    expect(actual.accountId).toStrictEqual(expected.fiscalCode);
-    expect(actualClaims.sub).toStrictEqual(expected.fiscalCode);
-    expect(actualClaims.family_name).toStrictEqual(expected.familyName);
-    expect(actualClaims.given_name).toStrictEqual(expected.givenName);
+    expect(actual.sub).toStrictEqual(expected.fiscalCode);
+    expect(actual.family_name).toStrictEqual(expected.familyName);
+    expect(actual.given_name).toStrictEqual(expected.givenName);
   });
 });
 

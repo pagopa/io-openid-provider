@@ -7,41 +7,45 @@ import { IdentityService } from "../identities/service";
 import { Config } from "../config";
 import { Logger } from "../logger";
 
-const userInfoToAccount = (identity: Identity): oidc.Account => ({
-  accountId: identity.fiscalCode,
-  // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#findaccount
-  claims: (_use, _scope, _claims, _rejected) => ({
-    family_name: identity.familyName,
-    given_name: identity.givenName,
-    name: `${identity.givenName} ${identity.familyName}`,
-    sub: identity.fiscalCode,
-  }),
+export const makeAccountClaims = (identity: Identity): oidc.AccountClaims => ({
+  family_name: identity.familyName,
+  given_name: identity.givenName,
+  name: `${identity.givenName} ${identity.familyName}`,
+  sub: identity.fiscalCode,
 });
 
 const findAccountAdapter =
-  (authenticationCookieKey: string) =>
-  (logger: Logger) =>
-  (identityService: IdentityService): oidc.FindAccount =>
-  (ctx, _sub, _token) =>
-    pipe(
-      FederationToken.decode(ctx.cookies.get(authenticationCookieKey)),
-      TE.fromEither,
-      TE.orElseFirst((_) =>
-        TE.of(
-          logger.info(
-            `Cookie not found or invalid on key ${authenticationCookieKey}`
-          )
-        )
-      ),
-      TE.chainW((parsed) => identityService.authenticate(parsed)),
-      TE.bimap(
-        (_error) => undefined,
-        (identity) => userInfoToAccount(identity)
-      ),
-      TE.toUnion
-    )();
+  (
+    authenticationCookieKey: string,
+    logger: Logger,
+    identityService: IdentityService
+  ): oidc.FindAccount =>
+  (ctx, _sub, _token) => {
+    const accountId = ctx.oidc.session?.accountId;
+    const federationToken = ctx.cookies.get(authenticationCookieKey);
+    if (accountId && federationToken) {
+      return {
+        accountId,
+        claims: (_use, _scope, _claims, _rejected) =>
+          pipe(
+            TE.fromEither(FederationToken.decode(federationToken)),
+            TE.chainW(identityService.authenticate),
+            TE.map(makeAccountClaims),
+            TE.fold(
+              (_) => () => Promise.reject(_),
+              (claims) => () => Promise.resolve(claims)
+            )
+          )(),
+      };
+    } else {
+      logger.debug(
+        `findAccountAdapter: cookie (${authenticationCookieKey}) or account not found`
+      );
+      return undefined;
+    }
+  };
 
-const defaultConfiguration = (
+export const defaultConfiguration = (
   adapter: (name: string) => oidc.Adapter
 ): oidc.Configuration => {
   // use a named function because of https://github.com/panva/node-oidc-provider/issues/799
@@ -99,8 +103,7 @@ export const makeAuthorizationHeader = (
   url: string
 ): O.Option<string> =>
   pipe(
-    O.fromNullable(config.routes),
-    O.chain((routes) => O.fromNullable(routes.registration)),
+    O.fromNullable(config.routes?.registration),
     O.filter((route) => url.startsWith(`${route}/`)),
     O.map((route) => url.replace(`${route}/`, "")),
     O.filter((clientId) => clientId !== ""),
@@ -115,7 +118,7 @@ export const makeAuthorizationHeader = (
  * @param identityService: The IdentityService used to authenticate the user.
  * @returns An instance of oidc-provider Provider.
  */
-const makeProvider = (
+export const makeProvider = (
   config: Config,
   logger: Logger,
   identityService: IdentityService,
@@ -123,9 +126,11 @@ const makeProvider = (
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
     ...providerConfiguration,
-    findAccount: findAccountAdapter(config.server.authenticationCookieKey)(
-      logger
-    )(identityService),
+    findAccount: findAccountAdapter(
+      config.server.authenticationCookieKey,
+      logger,
+      identityService
+    ),
   };
   const provider = new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,
@@ -149,5 +154,3 @@ const makeProvider = (
 
   return provider;
 };
-
-export { makeProvider, userInfoToAccount, defaultConfiguration };

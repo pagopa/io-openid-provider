@@ -93,8 +93,7 @@ describe("Router", () => {
     expect(consentFollowRedirect.text).toContain(
       '<input type="hidden" name="id_token"'
     );
-    // TODO: Check why it is called 3 times!
-    expect(authenticateFn).toBeCalledTimes(3);
+    expect(authenticateFn).toBeCalledTimes(2);
   });
 
   it("should create a session with the correct accountId", async () => {
@@ -189,7 +188,7 @@ describe("Router", () => {
     expect(consentResponse.text).toContain(
       `"/interaction/${interactionId}/abort"`
     );
-    expect(authenticateFn).toBeCalledTimes(2);
+    expect(authenticateFn).toBeCalledTimes(1);
   });
 
   it("should return error when authorize return error", async () => {
