@@ -57,6 +57,7 @@ describe("Router", () => {
     mockGrantRepository.findRemember.mockReturnValue(
       TE.right(O.none)
     );
+    mockGrantRepository.upsert.mockImplementationOnce((grant) => TE.right(grant));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, clientSkipConsent);

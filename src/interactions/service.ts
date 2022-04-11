@@ -8,6 +8,8 @@ import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Logger } from "../logger";
+import { GrantRepository } from "../core/repositories/GrantRepository";
+import { AccountId, ClientId, Grant, GrantId } from "../core/domain";
 import {
   CustomInteraction,
   CustomInteractionResult,
@@ -77,8 +79,11 @@ const finishInteraction =
 
 // Create a Grant given an Interaction
 const createGrant =
-  (provider: oidc.Provider, logger: Logger) =>
-  (interaction: CustomInteraction): T.Task<CustomInteractionResult> => {
+  (provider: oidc.Provider, grantRepository: GrantRepository, logger: Logger) =>
+  (
+    interaction: CustomInteraction,
+    rememberGrantForNextRequests: boolean
+  ): T.Task<CustomInteractionResult> => {
     // create the grant and add the missing scope if any
     const maybeGrant = pipe(
       O.fromNullable(interaction.session),
@@ -91,7 +96,16 @@ const createGrant =
         newGrant.addOIDCScope(missingScope.join(" "));
         // eslint-disable-next-line functional/immutable-data
         newGrant.jti = interaction.grantId || newGrant.jti;
-        return newGrant;
+        const newDomainGrant: Grant = {
+          accountId: session.accountId as AccountId,
+          clientId: interaction.params.client_id as ClientId,
+          expireAt: new Date(),
+          id: (interaction.grantId || newGrant.jti) as GrantId,
+          issuedAt: new Date(),
+          remember: rememberGrantForNextRequests,
+          scope: newGrant.openid?.scope || "",
+        };
+        return { domainGrant: newDomainGrant, oidcGrant: newGrant };
       })
     );
     // Persist and return the grant
@@ -99,7 +113,15 @@ const createGrant =
       TE.fromOption(() => makeCustomInteractionError(ErrorType.accessDenied))(
         maybeGrant
       ),
-      TE.chain((grant) => tryCatchWithLogTE(() => grant.save(), logger)),
+      TE.chainFirst(({ domainGrant }) =>
+        pipe(
+          grantRepository.upsert(domainGrant),
+          TE.mapLeft((_) => ({ error: ErrorType.internalError }))
+        )
+      ),
+      TE.chain(({ oidcGrant }) =>
+        tryCatchWithLogTE(() => oidcGrant.save(), logger)
+      ),
       TE.bimap(
         (_) => makeCustomInteractionError(ErrorType.internalError),
         (grantId) => ({
@@ -145,13 +167,17 @@ type ProviderService = ReturnType<typeof makeService>;
  * @param logger An instance of the Logger.
  * @returns An instance of ProviderService.
  */
-const makeService = (provider: oidc.Provider, logger: Logger) => ({
+const makeService = (
+  provider: oidc.Provider,
+  grantRepository: GrantRepository,
+  logger: Logger
+) => ({
   /**
    * Create and persist a Grant given an interaction.
    *
    * @param interaction: Given a CustomInteraction return a CustomInteractionResult
    */
-  createGrant: createGrant(provider, logger),
+  createGrant: createGrant(provider, grantRepository, logger),
 
   /**
    * Finish an interaction with the given result.

@@ -25,13 +25,15 @@ const toRecord = (input: Grant): prisma.Grant => ({
 });
 
 // FIXME: The "as *"" casts are not very elegant solution, find a better one
-const fromRecord = (record: prisma.Grant): Grant => ({
+const fromRecord = (
+  record: prisma.Grant & { readonly toRemember: prisma.GrantToRemember | null }
+): Grant => ({
   accountId: record.accountId as AccountId,
   clientId: record.clientId as ClientId,
   expireAt: record.expireAt,
   id: record.id as GrantId,
   issuedAt: record.issuedAt,
-  remember: false,
+  remember: record.toRemember !== null,
   scope: record.scope,
 });
 
@@ -45,12 +47,14 @@ const upsertGrant =
           client.upsert({
             create: {
               ...toRecord(grant),
-              toRemember: {
-                create: {
-                  accountId: grant.accountId,
-                  clientId: grant.clientId,
-                },
-              },
+              toRemember: grant.remember
+                ? {
+                    create: {
+                      accountId: grant.accountId,
+                      clientId: grant.clientId,
+                    },
+                  }
+                : undefined,
             },
             update: toRecord(grant),
             where: { id: grant.id },
@@ -71,7 +75,11 @@ const findGrant =
   <T>(client: Prisma.GrantDelegate<T>) =>
   (id: GrantId) =>
     pipe(
-      TE.tryCatch(() => client.findUnique({ where: { id } }), E.toError),
+      TE.tryCatch(
+        () =>
+          client.findUnique({ include: { toRemember: true }, where: { id } }),
+        E.toError
+      ),
       TE.map(flow(O.fromNullable, O.map(fromRecord))),
       TE.mapLeft((e) => ({
         causedBy: e,
@@ -101,7 +109,7 @@ const findRememberGrant =
       TE.map(
         flow(
           O.fromNullable,
-          O.map(({ grant }) => fromRecord(grant))
+          O.map((grant) => fromRecord({ ...grant.grant, toRemember: grant }))
         )
       ),
       TE.mapLeft((e) => ({

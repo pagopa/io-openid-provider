@@ -19,7 +19,7 @@ const makeFakeApplication = () => {
   const { client, clientSkipConsent, provider, mockIdentityService, mockGrantRepository } =
     makeLocalProvider();
   const log = logger.makeLogger(config.logger);
-  const mockProviderService = interactions.makeService(provider, log);
+  const mockProviderService = interactions.makeService(provider, mockGrantRepository, log);
   const mockClientRepository = mock.mock<ClientRepository>();
   // return an application with all mocked services
   const app = application.makeApplication(
@@ -38,6 +38,7 @@ const makeFakeApplication = () => {
     mockGrantRepository,
     provider,
     app,
+    logger: log,
   };
 };
 

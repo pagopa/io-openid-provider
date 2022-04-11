@@ -17,7 +17,12 @@ const confirmPostHandler =
       providerService.getInteraction(req, res),
       // create the grant given the interaction
       TE.chain((interaction) =>
-        TE.fromTask(providerService.createGrant(interaction))
+        TE.fromTask(
+          providerService.createGrant(
+            interaction,
+            req.body.to_remember === "on"
+          )
+        )
       ),
       // both left and right are InteractionResult
       TE.toUnion,

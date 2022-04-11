@@ -6,7 +6,6 @@ import * as E from "fp-ts/Either";
 import * as interactions from "../service";
 import * as phonies from "../../__tests__/utils/phonies";
 import * as records from "../../__tests__/utils/records";
-import { makeLogger } from "../../logger";
 import { ErrorType } from "../domain";
 
 describe("ProviderService", () => {
@@ -19,10 +18,11 @@ describe("ProviderService", () => {
 
   describe("getClient", () => {
     it("should return the client", async () => {
-      const { provider, client } = phonies.makeLocalProvider();
+      const { provider, client, logger, mockGrantRepository } = phonies.makeFakeApplication();
       const service = interactions.makeService(
         provider,
-        makeLogger(records.validConfig.logger)
+        mockGrantRepository,
+        logger
       );
 
       const actual = await service.getClient(client.client_id)();
@@ -31,10 +31,11 @@ describe("ProviderService", () => {
       expect(actual).toMatchObject(expected);
     });
     it("should return client not found", async () => {
-      const { provider } = phonies.makeLocalProvider();
+      const { provider, logger, mockGrantRepository } = phonies.makeFakeApplication();
       const service = interactions.makeService(
         provider,
-        makeLogger(records.validConfig.logger)
+        mockGrantRepository,
+        logger
       );
 
       const actual = await service.getClient("doesnt-exist")();
@@ -69,10 +70,12 @@ describe("ProviderService", () => {
       each(entries).it(
         "should return the interaction",
         async ({ input, mocks, expected }) => {
+          const { logger, mockGrantRepository } = phonies.makeFakeApplication();
           const mockProvider = mock.mock<oidc.Provider>();
           const service = interactions.makeService(
             mockProvider,
-            makeLogger(records.validConfig.logger)
+            mockGrantRepository,
+            logger
           );
 
           // mocks behaviour
