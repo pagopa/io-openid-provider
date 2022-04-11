@@ -75,8 +75,7 @@ export const makeSessionAdapter = (
       pipe(SessionId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
       TE.chain(sessionRepository.find),
       TE.map(O.map(toAdapterPayload)),
-      TE.map(O.toUndefined),
-      TE.chainFirst((_) => TE.of(logger.error(_)))
+      TE.map(O.toUndefined)
     );
     return taskEitherToPromise(result);
   },
