@@ -32,6 +32,7 @@ export const Grant = t.type({
   expireAt: tt.date,
   id: GrantId,
   issuedAt: tt.date,
+  remember: t.boolean,
   scope: t.string,
 });
 export type Grant = t.TypeOf<typeof Grant>;

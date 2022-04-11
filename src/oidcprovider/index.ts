@@ -2,10 +2,13 @@ import { pipe } from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
+import { GrantRepository } from "src/core/repositories/GrantRepository";
 import { FederationToken, Identity } from "../identities/domain";
 import { IdentityService } from "../identities/service";
 import { Config } from "../config";
 import { Logger } from "../logger";
+import { AccountId, ClientId } from "../core/domain";
+import { taskEitherToPromise } from "./adapters/utils";
 
 const userInfoToAccount = (identity: Identity): oidc.Account => ({
   accountId: identity.fiscalCode,
@@ -119,6 +122,7 @@ const makeProvider = (
   config: Config,
   logger: Logger,
   identityService: IdentityService,
+  grantRepository: GrantRepository,
   providerConfiguration: oidc.Configuration
 ): oidc.Provider => {
   const providerConfig: oidc.Configuration = {
@@ -126,6 +130,36 @@ const makeProvider = (
     findAccount: findAccountAdapter(config.server.authenticationCookieKey)(
       logger
     )(identityService),
+    loadExistingGrant: (ctx) => {
+      const grantId = ctx.oidc.result?.consent?.grantId;
+      const clientId = ctx.oidc.client?.clientId as ClientId;
+      const accountId = ctx.oidc.account?.accountId as AccountId;
+      // ctx.oidc.session?.grantIdFor(ctx.oidc.client?.clientId as string);
+      if (grantId) {
+        // load using the grantId
+        return ctx.oidc.provider.Grant.find(grantId);
+      } else if (clientId && accountId) {
+        // load using clientId & accountId
+        const result = pipe(
+          grantRepository.findRemember(clientId, accountId),
+          TE.map(
+            O.map((grant) => {
+              const newGrant = new ctx.oidc.provider.Grant({
+                accountId: grant.accountId,
+                clientId: grant.clientId,
+              });
+              // eslint-disable-next-line functional/immutable-data
+              newGrant.jti = grant.id;
+              return newGrant;
+            })
+          ),
+          TE.map(O.toUndefined)
+        );
+        return taskEitherToPromise(result);
+      } else {
+        return undefined;
+      }
+    },
   };
   const provider = new oidc.Provider(
     `https://${config.server.hostname}:${config.server.port}`,

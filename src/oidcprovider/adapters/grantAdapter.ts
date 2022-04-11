@@ -54,6 +54,7 @@ export const fromAdapterPayload = (
       expireAt: payload.exp,
       id,
       issuedAt: payload.iat,
+      remember: false,
       scope: payload.openid.scope,
     });
   return pipe(

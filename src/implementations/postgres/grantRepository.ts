@@ -31,6 +31,7 @@ const fromRecord = (record: prisma.Grant): Grant => ({
   expireAt: record.expireAt,
   id: record.id as GrantId,
   issuedAt: record.issuedAt,
+  remember: false,
   scope: record.scope,
 });
 
@@ -42,7 +43,15 @@ const upsertGrant =
       TE.tryCatch(
         () =>
           client.upsert({
-            create: toRecord(grant),
+            create: {
+              ...toRecord(grant),
+              toRemember: {
+                create: {
+                  accountId: grant.accountId,
+                  clientId: grant.clientId,
+                },
+              },
+            },
             update: toRecord(grant),
             where: { id: grant.id },
           }),
@@ -69,10 +78,41 @@ const findGrant =
         kind: DomainErrorTypes.GENERIC_ERROR,
       })),
       TE.chainFirst((c) =>
-        TE.of(logger.debug(`findClient ${JSON.stringify(c)}`))
+        TE.of(logger.debug(`findGrant ${JSON.stringify(c)}`))
       ),
       TE.orElseFirst((e) =>
-        TE.of(logger.error(`Error on findClient ${JSON.stringify(e)}`))
+        TE.of(logger.error(`Error on findGrant ${JSON.stringify(e)}`))
+      )
+    );
+
+const findRememberGrant =
+  (logger: Logger) =>
+  <T>(grantTable: Prisma.GrantToRememberDelegate<T>) =>
+  (clientId: ClientId, accountId: AccountId) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          grantTable.findUnique({
+            include: { grant: true },
+            where: { accountId_clientId: { accountId, clientId } },
+          }),
+        E.toError
+      ),
+      TE.map(
+        flow(
+          O.fromNullable,
+          O.map(({ grant }) => fromRecord(grant))
+        )
+      ),
+      TE.mapLeft((e) => ({
+        causedBy: e,
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      })),
+      TE.chainFirst((c) =>
+        TE.of(logger.debug(`findGrant ${JSON.stringify(c)}`))
+      ),
+      TE.orElseFirst((e) =>
+        TE.of(logger.error(`Error on findGrant ${JSON.stringify(e)}`))
       )
     );
 
@@ -84,5 +124,6 @@ export const makeGrantRepository = (
   })
 ): GrantRepository => ({
   find: findGrant(logger)(client.grant),
+  findRemember: findRememberGrant(logger)(client.grantToRemember),
   upsert: upsertGrant(logger)(client.grant),
 });

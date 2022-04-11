@@ -74,6 +74,15 @@ model Grant {
   id          String @id
   issuedAt    DateTime
   scope       String
+  toRemember  GrantToRemember?
+}
+
+model GrantToRemember {
+  accountId   String
+  clientId    String
+  grantId     String
+  grant       Grant @relation(fields: [grantId], references: [id])
+  @@unique([accountId, clientId])
 }
 
 model Interaction {
@@ -86,6 +95,7 @@ model Interaction {
   result      Json?
   returnTo    String
   accountId   String?
+  grantId     String?
   cookieId    String?
   uid         String?
 }

@@ -38,7 +38,9 @@ const getInteraction =
     pipe(
       TE.tryCatch(() => provider.interactionDetails(req, res), E.toError),
       TE.chainFirst((interaction) =>
-        TE.of(logger.debug(`interaction ${JSON.stringify(interaction)}`))
+        TE.of(
+          logger.info(`getInteraction ${JSON.stringify(interaction, null, 2)}`)
+        )
       ),
       TE.chain(
         flow(CustomInteraction.decode, TE.fromEither, TE.mapLeft(errorsToError))
@@ -87,6 +89,8 @@ const createGrant =
         });
         const missingScope = interaction.prompt.details.missingOIDCScope || [];
         newGrant.addOIDCScope(missingScope.join(" "));
+        // eslint-disable-next-line functional/immutable-data
+        newGrant.jti = interaction.grantId || newGrant.jti;
         return newGrant;
       })
     );

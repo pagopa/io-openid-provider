@@ -67,6 +67,7 @@ const main = pipe(
       config,
       logger,
       identityService,
+      grantRepository,
       providerConfig
     );
     const providerService = interactions.makeService(provider, logger);

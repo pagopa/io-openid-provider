@@ -57,6 +57,7 @@ const SessionInfo = t.type({
 export const Interaction = t.type({
   clientId: ClientId,
   expireAt: tt.date,
+  grantId: t.union([t.undefined, GrantId]),
   id: InteractionId,
   issuedAt: tt.date,
   params: Params,

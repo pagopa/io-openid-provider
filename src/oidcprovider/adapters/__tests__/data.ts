@@ -44,6 +44,7 @@ export const sessionPayload = {
 export const interactionPayload = {
   iat: 1648736314,
   exp: 1648736614,
+  grantId: undefined,
   returnTo: "http://localhost:3001/oauth/authorize/4xOhQpnqmwqwU_PZOgz4c",
   prompt: {
     name: "consent",

@@ -20,6 +20,7 @@ const toRecord = (input: Interaction): prisma.Interaction => ({
   clientId: input.clientId,
   cookieId: input.session ? input.session.cookieId : null,
   expireAt: input.expireAt,
+  grantId: input.grantId || null,
   id: input.id,
   issuedAt: input.issuedAt,
   params: input.params,
@@ -34,6 +35,7 @@ const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
   Interaction.decode({
     clientId: record.clientId,
     expireAt: record.expireAt,
+    grantId: record.grantId || undefined,
     id: record.id,
     issuedAt: record.issuedAt,
     params: record.params,
