@@ -70,6 +70,36 @@ const upsertGrant =
       )
     );
 
+const addToRememberGrant =
+  (logger: Logger) =>
+  <T>(grantTable: Prisma.GrantToRememberDelegate<T>) =>
+  (grantId: GrantId, clientId: ClientId, accountId: AccountId) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          grantTable.create({
+            data: {
+              accountId,
+              clientId,
+              grant: { connect: { id: grantId } },
+            },
+            include: { grant: true },
+          }),
+        E.toError
+      ),
+      TE.map((grant) => fromRecord({ ...grant.grant, toRemember: grant })),
+      TE.mapLeft((e) => ({
+        causedBy: e,
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      })),
+      TE.chainFirst((c) =>
+        TE.of(logger.debug(`addToRememberGrant ${JSON.stringify(c)}`))
+      ),
+      TE.orElseFirst((e) =>
+        TE.of(logger.error(`Error on addToRememberGrant ${JSON.stringify(e)}`))
+      )
+    );
+
 const findGrant =
   (logger: Logger) =>
   <T>(client: Prisma.GrantDelegate<T>) =>
@@ -131,6 +161,7 @@ export const makeGrantRepository = (
     datasources: { db: { url: config.url.href } },
   })
 ): GrantRepository => ({
+  addToRemember: addToRememberGrant(logger)(client.grantToRemember),
   find: findGrant(logger)(client.grant),
   findRemember: findRememberGrant(logger)(client.grantToRemember),
   upsert: upsertGrant(logger)(client.grant),

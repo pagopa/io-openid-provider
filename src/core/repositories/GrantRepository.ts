@@ -22,4 +22,13 @@ export interface GrantRepository {
     clientId: ClientId,
     accountId: AccountId
   ) => TaskEither<DomainError, Option<Grant>>;
+
+  /**
+   * The given grantId became a grant to remember for the given clientId and accountId
+   */
+  readonly addToRemember: (
+    grantId: GrantId,
+    clientId: ClientId,
+    accountId: AccountId
+  ) => TaskEither<DomainError, Grant>;
 }
