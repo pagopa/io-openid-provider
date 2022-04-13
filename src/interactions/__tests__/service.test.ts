@@ -18,7 +18,8 @@ describe("ProviderService", () => {
 
   describe("getClient", () => {
     it("should return the client", async () => {
-      const { provider, client, logger, mockGrantRepository } = phonies.makeFakeApplication();
+      const { provider, client, logger, mockGrantRepository } =
+        phonies.makeFakeApplication();
       const service = interactions.makeService(
         provider,
         mockGrantRepository,
@@ -31,7 +32,8 @@ describe("ProviderService", () => {
       expect(actual).toMatchObject(expected);
     });
     it("should return client not found", async () => {
-      const { provider, logger, mockGrantRepository } = phonies.makeFakeApplication();
+      const { provider, logger, mockGrantRepository } =
+        phonies.makeFakeApplication();
       const service = interactions.makeService(
         provider,
         mockGrantRepository,

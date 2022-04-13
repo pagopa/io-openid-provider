@@ -16,10 +16,19 @@ import { GrantRepository } from "../../core/repositories/GrantRepository";
  */
 const makeFakeApplication = () => {
   const config = records.validConfig;
-  const { client, clientSkipConsent, provider, mockIdentityService, mockGrantRepository } =
-    makeLocalProvider();
+  const {
+    client,
+    clientSkipConsent,
+    provider,
+    mockIdentityService,
+    mockGrantRepository,
+  } = makeLocalProvider();
   const log = logger.makeLogger(config.logger);
-  const mockProviderService = interactions.makeService(provider, mockGrantRepository, log);
+  const mockProviderService = interactions.makeService(
+    provider,
+    mockGrantRepository,
+    log
+  );
   const mockClientRepository = mock.mock<ClientRepository>();
   // return an application with all mocked services
   const app = application.makeApplication(
@@ -73,7 +82,13 @@ const makeLocalProvider = () => {
     mockGrantRepository,
     overridenConfiguration
   );
-  return { provider, client, clientSkipConsent, mockIdentityService, mockGrantRepository };
+  return {
+    provider,
+    client,
+    clientSkipConsent,
+    mockIdentityService,
+    mockGrantRepository,
+  };
 };
 
 /**

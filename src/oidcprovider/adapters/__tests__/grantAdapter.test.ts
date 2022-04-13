@@ -70,8 +70,9 @@ describe("makeGrantAdapter", () => {
       const id = grant.id;
       const { grantRepositoryMock, adapter } = makeAdapterForTest();
 
-      const recorder = grantRepositoryMock.find
-        .mockReturnValueOnce(TE.right(O.some(grant)));
+      const recorder = grantRepositoryMock.find.mockReturnValueOnce(
+        TE.right(O.some(grant))
+      );
 
       await expect(adapter.find(id)).resolves.toStrictEqual(grantPayload);
       expect(recorder).toBeCalledWith(id);

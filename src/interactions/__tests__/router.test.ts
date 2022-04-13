@@ -54,9 +54,7 @@ describe("Router", () => {
     const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
-    mockGrantRepository.findRemember.mockReturnValue(
-      TE.right(O.none)
-    );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, clientSkipConsent);
@@ -108,9 +106,7 @@ describe("Router", () => {
     mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
-    mockGrantRepository.findRemember.mockReturnValue(
-      TE.right(O.none)
-    );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, client);
@@ -150,14 +146,13 @@ describe("Router", () => {
   });
 
   it("should render the consent page", async () => {
-    const { client, mockIdentityService, mockGrantRepository, app } = phonies.makeFakeApplication();
+    const { client, mockIdentityService, mockGrantRepository, app } =
+      phonies.makeFakeApplication();
     const authenticationCookie = "X-IO-Federation-Token=12345667";
     const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
-    mockGrantRepository.findRemember.mockReturnValue(
-      TE.right(O.none)
-    );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, client);
