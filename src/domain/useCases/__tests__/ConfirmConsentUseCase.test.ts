@@ -13,7 +13,7 @@ import {
 } from "../../interactions/__tests__/data";
 import { grant } from "../../grants/__tests__/data";
 
-const makeConfirmUseCaseTest = () => {
+const makeConfirmConsentUseCaseTest = () => {
   const logger = mock.mock<Logger>();
   const interactionServiceMock = mock.mock<InteractionService>();
   const grantServiceMock = mock.mock<GrantService>();
@@ -27,7 +27,7 @@ const makeConfirmUseCaseTest = () => {
 
 describe("ConfirmConsentUseCase", () => {
   it("should return an error if the interaction doesn't exists", async () => {
-    const { useCase, interactionServiceMock } = makeConfirmUseCaseTest();
+    const { useCase, interactionServiceMock } = makeConfirmConsentUseCaseTest();
 
     const actual0 = await useCase(undefined, false)();
     expect(actual0).toStrictEqual(E.left(DomainErrorTypes.GENERIC_ERROR));
@@ -41,7 +41,7 @@ describe("ConfirmConsentUseCase", () => {
   });
   it("should return a new Grant", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmUseCaseTest();
+      makeConfirmConsentUseCaseTest();
 
     interactionServiceMock.find.mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
@@ -54,7 +54,7 @@ describe("ConfirmConsentUseCase", () => {
   });
   it("should return the grant referenced by the given interaction", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmUseCaseTest();
+      makeConfirmConsentUseCaseTest();
 
     interactionServiceMock.find.mockReturnValueOnce(
       TE.right(O.some(afterConsentInteraction))
