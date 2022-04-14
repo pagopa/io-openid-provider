@@ -5,12 +5,9 @@ import * as TE from "fp-ts/TaskEither";
 import { IdentityId } from "src/domain/identities/types";
 import { IdentityService } from "src/domain/identities/IdentityService";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ConsentRequest, LoginRequest } from "../../domain/requests/types";
-import { LoginRequestService } from "../../domain/requests/LoginRequestService";
 import { Client } from "../../domain/clients/types";
 import { ClientService } from "../../domain/clients/ClientService";
 import { DomainError } from "../../domain/types";
-import { ConsentRequestService } from "../../domain/requests/ConsentRequestService";
 import { Interaction } from "../../domain/interactions/types";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { Session } from "../../domain/sessions/types";
@@ -113,32 +110,6 @@ export const makeSessionService = (
   return {
     find: findByIdTE(store),
     findByUid: (uid) => findByTE(store)((s) => s.uid === uid),
-    remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.id),
-  };
-};
-
-export const makeLoginRequestService = (
-  snapshot: ReadonlyArray<LoginRequest> = []
-): LoginRequestService => {
-  const store = new Map(
-    snapshot.map((loginRequest) => [loginRequest.id, loginRequest])
-  );
-  return {
-    find: findByIdTE(store),
-    remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.id),
-  };
-};
-
-export const makeConsentRequestService = (
-  snapshot: ReadonlyArray<ConsentRequest> = []
-): ConsentRequestService => {
-  const store = new Map(
-    snapshot.map((consentRequest) => [consentRequest.id, consentRequest])
-  );
-  return {
-    find: findByIdTE(store),
     remove: removeByIdTE(store),
     upsert: upsertEntityTE(store)((_) => _.id),
   };
