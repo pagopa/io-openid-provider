@@ -3,11 +3,11 @@ services:
   service:
     build: .
     environment:
-      - REDIS_KEY_PREFIX="oidc:"
-      - REDIS_URL=redis://db:6379
+      - PORT=3001
+      - POSTGRES_URL=postgresql://user:randompassword@postgres:5432/db
       - IO_BACKEND_BASE_URL=https://app-backend.io.italia.it
     ports:
-      - "3000:3000"
+      - "3001:3001"
   postgres:
     image: postgres:13-alpine
     restart: always
@@ -17,7 +17,3 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: randompassword
       POSTGRES_DB: db
-  db:
-    image: "redis:6.2.6-alpine"
-    ports:
-      - "6379:6379"

@@ -2,12 +2,9 @@
 
 start.dev:
 	echo "Starting docker images"
-	docker-compose up -d db
 	docker-compose up -d postgres
+	docker-compose up service
 	echo "Docker images started"
-
-	echo "Run application"
-	yarn run start
 
 build.image:
 	docker build --tag fim-oidc-provider .
