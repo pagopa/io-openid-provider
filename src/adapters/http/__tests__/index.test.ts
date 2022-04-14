@@ -18,6 +18,22 @@ const initImplicitFlow = (app: express.Application, client: Client) => {
     });
 };
 
+// confirm the consent
+const confirmConsent = (
+  app: express.Application,
+  interactionId: string,
+  cookies: ReadonlyArray<string>
+) => {
+  return request(app)
+    .post(`/interaction/${interactionId}/confirm`)
+    .set("Cookie", cookies.concat())
+    .type("form")
+    .send({
+      prompt: "consent",
+      to_remember: "false",
+    });
+};
+
 // follow redirect given a request with location header
 const followRedirect = (
   app: express.Application,
@@ -34,7 +50,7 @@ const followRedirect = (
 describe("Application", () => {
   it("should implement the implicit flow", async () => {
     const { app, client } = makeInMemoryApplication();
-    const authenticationCookie = "X-IO-Federation-Token=12345667";
+    const authenticationCookie = "X-IO-Federation-Token=1234567";
 
     // start the implicit flow
     const authorizeResponse = await initImplicitFlow(app, client);
@@ -67,21 +83,31 @@ describe("Application", () => {
       authorizeRedirectResponseCookies
     );
 
-    const consentFollowRedirect = await followRedirect(
+    const interactionId = authorizeRedirectResponse.headers["location"].replace(
+      "/interaction/",
+      ""
+    );
+
+    const confirmConsentResponse = await confirmConsent(
       app,
-      consentResponse,
+      interactionId,
+      authorizeRedirectResponseCookies
+    );
+
+    const confirmConsentFollowRedirect = await followRedirect(
+      app,
+      confirmConsentResponse,
       authorizeRedirectResponseCookies
     );
 
     expect(authorizeResponse.statusCode).toBe(303);
     expect(loginResponse.statusCode).toBe(303);
     expect(authorizeRedirectResponse.statusCode).toBe(303);
-    expect(consentResponse.statusCode).toBe(303);
-    expect(consentFollowRedirect.statusCode).toBe(200);
-    expect(consentFollowRedirect.text).toContain(
+    expect(consentResponse.statusCode).toBe(200);
+    expect(confirmConsentResponse.statusCode).toBe(303);
+    expect(consentResponse.statusCode).toBe(200);
+    expect(confirmConsentFollowRedirect.text).toContain(
       '<input type="hidden" name="id_token"'
     );
-    // TODO: Check why it is called 3 times!
-    //expect(authenticateFn).toBeCalledTimes(2);
   });
 });
