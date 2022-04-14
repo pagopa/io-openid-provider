@@ -12,7 +12,7 @@
     "prebuild": "shx rm -rf dist && yarn generate && yarn copy-assets",
     "build": "tsc",
     "test": "DOTENV_CONFIG_PATH=./.env.default jest --setupFiles dotenv/config -i",
-    "test:coverage": "jest -i --coverage",
+    "test:coverage": "DOTENV_CONFIG_PATH=./.env.default jest --setupFiles dotenv/config -i --coverage",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
     "prepare": "husky install",

@@ -4,12 +4,12 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
-import * as postgres from "./implementations/postgres";
-import * as logger from "./logger";
+import { LogConfig } from "./adapters/winston";
 
 interface ServerConfig {
   readonly hostname: string;
   readonly port: string;
+  readonly enableHelmet: boolean;
   readonly authenticationCookieKey: string;
 }
 
@@ -22,17 +22,9 @@ interface Info {
   readonly version: NonEmptyString;
 }
 
-interface Config {
-  readonly info: Info;
-  readonly IOBackend: IOBackend;
-  readonly server: ServerConfig;
-  readonly logger: logger.LogConfig;
-  readonly postgres: postgres.PostgresConfig;
-}
+type Envs = NodeJS.ProcessEnv;
 
-type ConfEnv = NodeJS.ProcessEnv;
-
-const envDecoder = t.type({
+const EnvType = t.type({
   APPLICATION_NAME: NonEmptyString,
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
   IO_BACKEND_BASE_URL: UrlFromString,
@@ -50,38 +42,47 @@ const envDecoder = t.type({
   SERVER_HOSTNAME: t.string,
   VERSION: NonEmptyString,
 });
-type EnvStruct = t.TypeOf<typeof envDecoder>;
+type EnvType = t.TypeOf<typeof EnvType>;
 
-const makeConfigFromStr = (str: EnvStruct): Config => ({
-  // TODO: Improve the fetch of info
+const makeConfig = (envs: EnvType): Config => ({
   IOBackend: {
-    baseURL: new URL(str.IO_BACKEND_BASE_URL.href),
+    baseURL: new URL(envs.IO_BACKEND_BASE_URL.href),
   },
   info: {
-    name: str.APPLICATION_NAME,
-    version: str.VERSION,
+    name: envs.APPLICATION_NAME,
+    version: envs.VERSION,
   },
   logger: {
-    logLevel: str.LOG_LEVEL,
-    logName: str.APPLICATION_NAME,
-  },
-  postgres: {
-    url: new URL(str.POSTGRES_URL.href),
+    logLevel: envs.LOG_LEVEL,
+    logName: envs.APPLICATION_NAME,
   },
   server: {
-    authenticationCookieKey: str.AUTHENTICATION_COOKIE_KEY,
-    hostname: str.SERVER_HOSTNAME,
-    port: str.PORT,
+    authenticationCookieKey: envs.AUTHENTICATION_COOKIE_KEY,
+    enableHelmet: false,
+    hostname: envs.SERVER_HOSTNAME,
+    port: envs.PORT,
   },
 });
 
-const parseConfig = (processEnv: ConfEnv): E.Either<string, Config> =>
+/**
+ * Represent the configurations of the application
+ */
+export interface Config {
+  readonly info: Info;
+  readonly IOBackend: IOBackend;
+  readonly logger: LogConfig;
+  readonly server: ServerConfig;
+}
+
+/**
+ * Given a dictionary of strings return the configuration or a
+ * string containing a human readable error
+ */
+export const parseConfig = (envs: Envs): E.Either<string, Config> =>
   pipe(
-    envDecoder.decode({ ...processEnv }),
+    EnvType.decode(envs),
     E.bimap(
       (errors) => PR.failure(errors).join("\n"),
-      (parsedEnvs) => makeConfigFromStr(parsedEnvs)
+      (parsedEnvs) => makeConfig(parsedEnvs)
     )
   );
-
-export { Config, parseConfig };

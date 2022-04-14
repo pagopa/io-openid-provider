@@ -1,85 +1,46 @@
-import * as http from "http";
+/** This is the main application entry point, the initialization of the adapters are done here */
+import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
-import { Application } from "express";
-import { pipe } from "fp-ts/function";
-import * as postgres from "./implementations/postgres";
-import { makeApplication } from "./application";
-import * as fetch from "./implementations/fetch";
-import * as oidcprovider from "./oidcprovider";
-import * as interactions from "./interactions/service";
-import * as identities from "./identities/service";
-import * as clients from "./implementations/httpClients";
-import { Logger, makeLogger } from "./logger";
+import * as inMemory from "./adapters/inMemory";
+import * as ioBackend from "./adapters/ioBackend";
 import { parseConfig } from "./config";
-import { adapterProvider } from "./oidcprovider/adapters";
+import { makeLogger } from "./adapters/winston";
+import { makeApplication, startApplication } from "./adapters/http";
 
-const start = (application: Application, log: Logger): void => {
-  log.info("Starting application");
-  const server = http.createServer(application);
-  const port = application.get("port");
-  server.listen(port, application.get("hostname"), () => {
-    log.info(`Server is listening on port ${port}`);
-  });
-};
-
+/** Log the given string and exit with status 1 */
 const exit = (error: string): void => {
-  const log = makeLogger({ logLevel: "error", logName: "main" });
-  log.error(`Shutting down application ${error}`);
+  const logger = makeLogger({ logLevel: "error", logName: "main" });
+  logger.error(`Shutting down application ${error}`);
   process.exit(1);
 };
 
-// TODO: add graceful shutdown
-const main = pipe(
+/** The entry-point */
+pipe(
   parseConfig(process.env),
   E.map((config) => {
     const logger = makeLogger(config.logger);
-    const { ioAuthClient } = clients.makeIOClients(
-      config.IOBackend.baseURL,
-      fetch.timeoutFetch
-    );
-    const identityService = identities.makeService(ioAuthClient);
-    const clientRepository = postgres.makeClientRepository(
-      config.postgres,
-      logger
-    );
-    const grantRepository = postgres.makeGrantRepository(
-      config.postgres,
-      logger
-    );
-    const loginRequestRepository = postgres.makeInteractionRepository(
-      config.postgres,
-      logger
-    );
-    const sessionRepository = postgres.makeSessionRepository(
-      config.postgres,
-      logger
-    );
-    const providerConfig = oidcprovider.defaultConfiguration(
-      adapterProvider(
-        logger,
-        clientRepository,
-        grantRepository,
-        loginRequestRepository,
-        sessionRepository
-      )
-    );
-    const provider = oidcprovider.makeProvider(
-      config,
-      logger,
-      identityService,
-      providerConfig
-    );
-    const providerService = interactions.makeService(provider, logger);
-    const application = makeApplication(
-      config,
-      provider,
-      providerService,
-      identityService,
-      clientRepository,
-      logger
-    );
-    start(application, logger);
-  })
-);
 
-E.getOrElse(exit)(main);
+    const { ioAuthClient } = ioBackend.makeIOClients(
+      config.IOBackend.baseURL,
+      ioBackend.timeoutFetch
+    );
+    const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);
+
+    const clientService = inMemory.makeClientService();
+    const interactionService = inMemory.makeInteractionService();
+    const sessionService = inMemory.makeSessionService();
+    const grantService = inMemory.makeGrantService();
+
+    const application = makeApplication({
+      clientService,
+      config,
+      grantService,
+      identityService,
+      interactionService,
+      logger,
+      sessionService,
+    });
+    startApplication(application, logger);
+  }),
+  E.mapLeft(exit)
+);
