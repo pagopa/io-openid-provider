@@ -33,13 +33,10 @@ describe("LoginUseCase", () => {
   it("should return the identity if the token is valid", async () => {
     const { useCase, identityServiceMock } = makeLoginUseCaseTest();
 
-    const actual0 = await useCase(undefined)();
-    expect(actual0).toStrictEqual(E.left("Unauthorized"));
-
     const identityAuthenticate =
       identityServiceMock.authenticate.mockReturnValue(TE.right(identity));
-    const actual1 = await useCase("valid")();
-    expect(actual1).toStrictEqual(E.right(identity));
+    const actual = await useCase("valid")();
+    expect(actual).toStrictEqual(E.right(identity));
     expect(identityAuthenticate).toBeCalledTimes(1);
   });
 });
