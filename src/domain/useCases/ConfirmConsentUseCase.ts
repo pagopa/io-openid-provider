@@ -3,7 +3,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { GrantService } from "../grants/GrantService";
-import { GrantId } from "../grants/types";
+import { Grant, GrantId } from "../grants/types";
 import { InteractionService } from "../interactions/InteractionService";
 import {
   ConsentResult,
@@ -12,14 +12,17 @@ import {
   LoginResult,
 } from "../interactions/types";
 import { Logger } from "../logger";
-import { DomainErrorTypes, makeDomainError } from "../types";
+import { DomainError, DomainErrorTypes, makeDomainError } from "../types";
 import { fromTEOtoTE, show } from "../utils";
 
 type ConfirmConsentUseCaseError = DomainErrorTypes;
 
 const loadOrCreateGrant =
   (grantService: GrantService) =>
-  (interaction: Interaction, rememberGrant: boolean) => {
+  (
+    interaction: Interaction,
+    rememberGrant: boolean
+  ): TE.TaskEither<DomainError, Grant> => {
     if (ConsentResult.is(interaction.result)) {
       return pipe(grantService.find(interaction.result.grantId), fromTEOtoTE);
     } else if (LoginResult.is(interaction.result)) {
@@ -41,6 +44,10 @@ const loadOrCreateGrant =
     }
   };
 
+/**
+ * Given a interaction identity, create a new Grant, or fetch the one referenced,
+ * and connect it to the interaction. Return the Grant identity.
+ */
 export const ConfirmConsentUseCase =
   (
     logger: Logger,

@@ -27,7 +27,7 @@ const makeRenderData =
     kind: "RenderData",
     // TODO: Compare the required scope with the grant (if any) scope.
     // The system should ask the diff
-    missingScope: interaction.params.scope.split(" "),
+    missingScope: (interaction.params.scope || client.scope).split(" "),
   });
 
 const loadRememberedGrant =

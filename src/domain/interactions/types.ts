@@ -19,8 +19,14 @@ export const RequestParams = t.type({
   client_id: ClientId,
   nonce: t.union([t.undefined, t.string]),
   redirect_uri: t.string,
+  response_mode: t.union([
+    t.undefined,
+    t.literal("query"),
+    t.literal("fragment"),
+    t.literal("form_post"),
+  ]),
   response_type: t.string,
-  scope: t.string,
+  scope: t.union([t.undefined, t.string]),
   state: t.string,
 });
 export type RequestParams = t.TypeOf<typeof RequestParams>;
