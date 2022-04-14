@@ -17,7 +17,12 @@ const confirmPostHandler =
       providerService.getInteraction(req, res),
       // create the grant given the interaction
       TE.chain((interaction) =>
-        TE.fromTask(providerService.createGrant(interaction))
+        TE.fromTask(
+          providerService.createGrant(
+            interaction,
+            req.body.to_remember === "on"
+          )
+        )
       ),
       // both left and right are InteractionResult
       TE.toUnion,
@@ -79,7 +84,7 @@ const interactionGetHandler =
               // if the client has the bypass_consent property set to true
               // don't render the consent page, just confirm the interaction
               TE.chain((client) => {
-                if (client.bypass_consent) {
+                if (client.bypass_consent || interaction.grantId) {
                   return TE.of(
                     confirmPostHandler(providerService)(req, res, next)
                   );
@@ -87,10 +92,11 @@ const interactionGetHandler =
                   // render the interaction view
                   return TE.of(
                     res.render("interaction", {
+                      p_abortUrl: `/interaction/${interaction.jti}/abort`,
                       p_client: client,
                       p_details: interaction.prompt.details,
                       p_params: interaction.params,
-                      p_submitUrl: `/interaction/${interaction.uid}/confirm`,
+                      p_submitUrl: `/interaction/${interaction.jti}/confirm`,
                       p_uid: interaction.uid,
                     })
                   );

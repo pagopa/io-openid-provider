@@ -5,6 +5,8 @@ import { FederationToken } from "../identities/domain";
 // useful to improve typing
 const CustomInteraction = t.intersection([
   t.type({
+    grantId: t.union([t.undefined, t.string]),
+    jti: t.string,
     params: t.type({
       client_id: t.string,
     }),
@@ -19,6 +21,9 @@ const CustomInteraction = t.intersection([
   // TODO: improve typing in the future, we can split this CustomInteraction
   // in two different interaction LoginInteraction and ConsentInteraction
   t.partial({
+    consent: t.type({
+      grantId: t.string,
+    }),
     session: t.type({
       accountId: t.string,
     }),

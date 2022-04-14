@@ -67,9 +67,14 @@ const main = pipe(
       config,
       logger,
       identityService,
+      grantRepository,
       providerConfig
     );
-    const providerService = interactions.makeService(provider, logger);
+    const providerService = interactions.makeService(
+      provider,
+      grantRepository,
+      logger
+    );
     const application = makeApplication(
       config,
       provider,

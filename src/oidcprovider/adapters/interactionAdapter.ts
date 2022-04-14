@@ -22,6 +22,7 @@ import {
 
 export const InteractionPayload = t.type({
   exp: DateFromNumericDate,
+  grantId: t.union([t.undefined, t.string]),
   iat: DateFromNumericDate,
   jti: InteractionId,
   kind: t.literal("Interaction"),
@@ -86,6 +87,7 @@ type InteractionPayload = t.TypeOf<typeof InteractionPayload>;
 export const toAdapterPayload = (item: Interaction): oidc.AdapterPayload =>
   InteractionPayload.encode({
     exp: item.expireAt,
+    grantId: item.grantId,
     iat: item.issuedAt,
     jti: item.id,
     kind: "Interaction",
@@ -125,6 +127,7 @@ export const fromAdapterPayload = (
       ...payload,
       clientId: payload.params.client_id as ClientId,
       expireAt: payload.exp,
+      grantId: input.grantId as GrantId,
       id: payload.jti,
       issuedAt: payload.iat,
       prompt: {

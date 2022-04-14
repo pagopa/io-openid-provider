@@ -37,6 +37,8 @@ const makeApplication = (
   // Add a middleware that parses JSON HTTP
   // request bodies into JavaScript objects
   application.use(express.json());
+  // Add a middleware to parse urlencoded bodies
+  application.use(express.urlencoded());
   // Add a middleware that parse cookies
   application.use(cookies.default());
   // Serve static files

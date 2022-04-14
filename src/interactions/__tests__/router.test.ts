@@ -1,6 +1,7 @@
 import express from "express";
 import request from "supertest";
 import * as oidc from "oidc-provider";
+import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as records from "../../__tests__/utils/records";
 import * as phonies from "../../__tests__/utils/phonies";
@@ -47,12 +48,13 @@ describe("Router", () => {
   });
 
   it("should generate an id_token given a client with skip consent", async () => {
-    const { clientSkipConsent, mockIdentityService, app } =
+    const { clientSkipConsent, mockIdentityService, mockGrantRepository, app } =
       phonies.makeFakeApplication();
     const authenticationCookie = "X-IO-Federation-Token=12345667";
     const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, clientSkipConsent);
@@ -98,12 +100,13 @@ describe("Router", () => {
   });
 
   it("should create a session with the correct accountId", async () => {
-    const { client, mockIdentityService, provider, app } =
+    const { client, mockIdentityService, mockGrantRepository, provider, app } =
       phonies.makeFakeApplication();
     const authenticationCookie = "X-IO-Federation-Token=12345667";
     mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, client);
@@ -143,11 +146,13 @@ describe("Router", () => {
   });
 
   it("should render the consent page", async () => {
-    const { client, mockIdentityService, app } = phonies.makeFakeApplication();
+    const { client, mockIdentityService, mockGrantRepository, app } =
+      phonies.makeFakeApplication();
     const authenticationCookie = "X-IO-Federation-Token=12345667";
     const authenticateFn = mockIdentityService.authenticate.mockReturnValue(
       TE.right(records.validIdentity)
     );
+    mockGrantRepository.findRemember.mockReturnValue(TE.right(O.none));
 
     // initialize the implicit flow
     const authorizeResponse = await doAuthorizeRequest(app, client);

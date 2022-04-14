@@ -8,6 +8,7 @@ import * as interactions from "../../interactions/service";
 import * as identities from "../../identities/service";
 import * as oidcprovider from "../../oidcprovider";
 import { ClientRepository } from "../../core/repositories/ClientRepository";
+import { GrantRepository } from "../../core/repositories/GrantRepository";
 
 /**
  * Create and return a fake application and the mocks required by the system.
@@ -15,10 +16,19 @@ import { ClientRepository } from "../../core/repositories/ClientRepository";
  */
 const makeFakeApplication = () => {
   const config = records.validConfig;
-  const { client, clientSkipConsent, provider, mockIdentityService } =
-    makeLocalProvider();
+  const {
+    client,
+    clientSkipConsent,
+    provider,
+    mockIdentityService,
+    mockGrantRepository,
+  } = makeLocalProvider();
   const log = logger.makeLogger(config.logger);
-  const mockProviderService = interactions.makeService(provider, log);
+  const mockProviderService = interactions.makeService(
+    provider,
+    mockGrantRepository,
+    log
+  );
   const mockClientRepository = mock.mock<ClientRepository>();
   // return an application with all mocked services
   const app = application.makeApplication(
@@ -34,8 +44,10 @@ const makeFakeApplication = () => {
     clientSkipConsent,
     mockProviderService,
     mockIdentityService,
+    mockGrantRepository,
     provider,
     app,
+    logger: log,
   };
 };
 
@@ -57,6 +69,7 @@ const makeLocalProvider = () => {
     bypass_consent: true,
   };
   const mockIdentityService = mock.mock<identities.IdentityService>();
+  const mockGrantRepository = mock.mock<GrantRepository>();
   const overridenConfiguration = {
     ...oidcprovider.defaultConfiguration({} as any),
     adapter: undefined,
@@ -66,9 +79,16 @@ const makeLocalProvider = () => {
     records.validConfig,
     logger.makeLogger(records.validConfig.logger),
     mockIdentityService,
+    mockGrantRepository,
     overridenConfiguration
   );
-  return { provider, client, clientSkipConsent, mockIdentityService };
+  return {
+    provider,
+    client,
+    clientSkipConsent,
+    mockIdentityService,
+    mockGrantRepository,
+  };
 };
 
 /**

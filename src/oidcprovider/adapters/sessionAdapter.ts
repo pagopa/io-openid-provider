@@ -61,7 +61,7 @@ export const makeSessionAdapter = (
   ...makeNotImplementedAdapter("Session", logger),
   // remove a session
   destroy: (id: string) => {
-    logger.error(`Session destroy, id: ${id}`);
+    logger.debug(`Session destroy, id: ${id}`);
     const result = pipe(
       pipe(SessionId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
       TE.chain(sessionRepository.remove)
@@ -70,19 +70,18 @@ export const makeSessionAdapter = (
   },
   // given the identifier return a session
   find: (id: string) => {
-    logger.error(`Session find, id: ${id}`);
+    logger.debug(`Session find, id: ${id}`);
     const result = pipe(
       pipe(SessionId.decode(id), E.mapLeft(makeDomainError), TE.fromEither),
       TE.chain(sessionRepository.find),
       TE.map(O.map(toAdapterPayload)),
-      TE.map(O.toUndefined),
-      TE.chainFirst((_) => TE.of(logger.error(_)))
+      TE.map(O.toUndefined)
     );
     return taskEitherToPromise(result);
   },
   // given the uid return a session
   findByUid: (uid: string) => {
-    logger.error(`Session findByUid, id: ${uid}`);
+    logger.debug(`Session findByUid, id: ${uid}`);
     const result = pipe(
       sessionRepository.findByUid(uid),
       TE.map(O.map(toAdapterPayload)),
@@ -92,7 +91,7 @@ export const makeSessionAdapter = (
   },
   // insert or update the session identified with the given id
   upsert: (id: string, payload: oidc.AdapterPayload, expiresIn: number) => {
-    logger.error(
+    logger.debug(
       `Session upsert, id: ${id}, _expiresIn: ${expiresIn}, payload: ${JSON.stringify(
         payload
       )}`

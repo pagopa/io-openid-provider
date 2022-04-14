@@ -39,7 +39,7 @@ export const adapterProvider =
     // create the adapter for RegistrationAccessToken entity
     const registrationAccessTokenAdapter =
       makeRegistrationAccessTokenAdapter(logger);
-    logger.error(`adapterProvider function, parameter 'name': ${name}`);
+    logger.info(`adapterProvider function, parameter 'name': ${name}`);
     switch (name) {
       case "Client":
         return clientAdapter;

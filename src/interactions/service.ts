@@ -8,6 +8,8 @@ import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Logger } from "../logger";
+import { GrantRepository } from "../core/repositories/GrantRepository";
+import { AccountId, ClientId, GrantId } from "../core/domain";
 import {
   CustomInteraction,
   CustomInteractionResult,
@@ -38,7 +40,9 @@ const getInteraction =
     pipe(
       TE.tryCatch(() => provider.interactionDetails(req, res), E.toError),
       TE.chainFirst((interaction) =>
-        TE.of(logger.debug(`interaction ${JSON.stringify(interaction)}`))
+        TE.of(
+          logger.info(`getInteraction ${JSON.stringify(interaction, null, 2)}`)
+        )
       ),
       TE.chain(
         flow(CustomInteraction.decode, TE.fromEither, TE.mapLeft(errorsToError))
@@ -73,10 +77,44 @@ const finishInteraction =
       TE.mapLeft((_) => makeCustomInteractionError(ErrorType.internalError))
     );
 
+/*
+ * Given a grantId and a CustomInteraction save the grant identified with the
+ * given id to be remembered to the next requests
+ */
+export const rememberGrant =
+  (grantRepository: GrantRepository) =>
+  (
+    grantId: string,
+    interaction: CustomInteraction
+  ): T.Task<CustomInteraction> =>
+    pipe(
+      E.of(
+        (gId: GrantId) => (cId: ClientId) => (aId: AccountId) =>
+          pipe(
+            grantRepository.addToRemember(gId, cId, aId),
+            TE.bimap(
+              (_) => interaction,
+              (_) => interaction
+            )
+          )
+      ),
+      E.ap(GrantId.decode(grantId)),
+      E.ap(ClientId.decode(interaction.params.client_id)),
+      E.ap(AccountId.decode(interaction.session?.accountId)),
+      E.fold(
+        (_) => TE.of(interaction),
+        (right) => right
+      ),
+      TE.toUnion
+    );
+
 // Create a Grant given an Interaction
 const createGrant =
-  (provider: oidc.Provider, logger: Logger) =>
-  (interaction: CustomInteraction): T.Task<CustomInteractionResult> => {
+  (provider: oidc.Provider, grantRepository: GrantRepository, logger: Logger) =>
+  (
+    interaction: CustomInteraction,
+    rememberGrantForNextRequests: boolean
+  ): T.Task<CustomInteractionResult> => {
     // create the grant and add the missing scope if any
     const maybeGrant = pipe(
       O.fromNullable(interaction.session),
@@ -87,6 +125,8 @@ const createGrant =
         });
         const missingScope = interaction.prompt.details.missingOIDCScope || [];
         newGrant.addOIDCScope(missingScope.join(" "));
+        // eslint-disable-next-line functional/immutable-data
+        newGrant.jti = interaction.grantId || newGrant.jti;
         return newGrant;
       })
     );
@@ -96,6 +136,15 @@ const createGrant =
         maybeGrant
       ),
       TE.chain((grant) => tryCatchWithLogTE(() => grant.save(), logger)),
+      TE.chainFirst((grantId) => {
+        if (rememberGrantForNextRequests) {
+          return TE.fromTask(
+            rememberGrant(grantRepository)(grantId, interaction)
+          );
+        } else {
+          return TE.right(interaction);
+        }
+      }),
       TE.bimap(
         (_) => makeCustomInteractionError(ErrorType.internalError),
         (grantId) => ({
@@ -141,13 +190,17 @@ type ProviderService = ReturnType<typeof makeService>;
  * @param logger An instance of the Logger.
  * @returns An instance of ProviderService.
  */
-const makeService = (provider: oidc.Provider, logger: Logger) => ({
+const makeService = (
+  provider: oidc.Provider,
+  grantRepository: GrantRepository,
+  logger: Logger
+) => ({
   /**
    * Create and persist a Grant given an interaction.
    *
    * @param interaction: Given a CustomInteraction return a CustomInteractionResult
    */
-  createGrant: createGrant(provider, logger),
+  createGrant: createGrant(provider, grantRepository, logger),
 
   /**
    * Finish an interaction with the given result.
