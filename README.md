@@ -59,21 +59,28 @@ make start.dev
 1. Add a new client:
 
 ``` sh
-curl --location --request POST 'http://localhost:3000/connect/register' \
+curl --request POST 'http://localhost:3001/admin/clients' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-   "redirect_uris":
-     ["https://client.example.org/callback"],
-   "client_name": "This is a test client",
-   "grant_types": ["implicit"],
-   "response_types": ["id_token"],
-   "token_endpoint_auth_method": "none",
-   "scope": "openid profile"
-}'
-```
+  "redirect_uris": [
+    "https://callback.io/callback"
+  ],
+  "organization_id": "my-org",
+  "service_id": "my-service",
+  "response_types": [
+    "id_token"
+  ],
+  "grant_types": [
+    "implicit"
+  ],
+  "application_type": "web",
+  "client_name": "This is the name of this client",
+  "scope": "profile openid",
+  "token_endpoint_auth_method": "none"
+}'```
 
 2. Copy from the output the value of `client_id` key.
-3. Open the browser on the following endpoint `http://localhost:3000`, and add the following cookie:
+3. Open the browser on the following endpoint `http://localhost:3001`, and add the following cookie:
 
 ```
 X-IO-Federation-Token=<any-value>
@@ -81,6 +88,4 @@ X-IO-Federation-Token=<any-value>
 
 4. In the same browser session paste the following endpoint replacing the `<client_id>` with copied `client_id` value and then :
 
-```
-http://localhost:3000/oauth/authorize?client_id=<client_id>&response_type=id_token&redirect_uri=https://client.example.org/callback&scope=openid&state=<state>&nonce=<nonce>
 ```
