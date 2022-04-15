@@ -62,6 +62,7 @@ export const interactionPayload = {
     client_id: "HkyhKaZfGfVbDN7fB4dqs",
     nonce: "<nonce>",
     redirect_uri: "https://callback.io/callback",
+    response_mode: "form_post",
     response_type: "id_token",
     scope: "openid",
     state: "<state>",

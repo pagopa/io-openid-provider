@@ -32,7 +32,8 @@ export const Params = t.type({
   client_id: t.string,
   nonce: t.string,
   redirect_uri: t.string,
-  response_type: t.string,
+  response_mode: t.union([t.undefined, t.string]),
+  response_type: t.union([t.undefined, t.string]),
   scope: t.string,
   state: t.string,
 });
