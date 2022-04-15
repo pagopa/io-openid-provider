@@ -50,13 +50,6 @@ const findAccountAdapter =
     }
   };
 
-// const findAccountAdapter: oidc.FindAccount = (_ctx, sub, _token) => ({
-//   accountId: sub,
-//   async claims(_use, _scope, _claims, _rejected) {
-//     return { sub };
-//   },
-// });
-
 export const makeConfiguration = (
   config: Config,
   logger: Logger,

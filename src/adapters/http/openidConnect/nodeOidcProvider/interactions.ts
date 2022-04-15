@@ -259,6 +259,5 @@ export const makeInteractionRouter = (
     getInteractionAbortHandler(logger, interactionService, provider)
   );
 
-  router.use("/", provider.callback());
   return router;
 };
