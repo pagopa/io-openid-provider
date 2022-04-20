@@ -1,6 +1,8 @@
 import * as crypto from "crypto";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import { GrantService } from "../grants/GrantService";
 import { Grant, GrantId } from "../grants/types";
@@ -26,17 +28,28 @@ const loadOrCreateGrant =
     if (ConsentResult.is(interaction.result)) {
       return pipe(grantService.find(interaction.result.grantId), fromTEOtoTE);
     } else if (LoginResult.is(interaction.result)) {
-      return TE.right({
-        expireAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
-        id: crypto.randomBytes(20).toString("hex") as GrantId,
-        issuedAt: new Date(),
-        remember: rememberGrant,
-        scope: interaction.params.scope,
-        subjects: {
-          clientId: interaction.params.client_id,
+      const subjects = {
+        clientId: interaction.params.client_id,
+        identityId: interaction.result.identity,
+      };
+      return pipe(
+        grantService.findBy({
+          clientId: O.fromNullable(interaction.params.client_id),
           identityId: interaction.result.identity,
-        },
-      });
+          remember: true,
+        }),
+        TE.map(RA.head),
+        TE.map(
+          O.getOrElse<Grant>(() => ({
+            expireAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
+            id: crypto.randomBytes(20).toString("hex") as GrantId,
+            issuedAt: new Date(),
+            remember: rememberGrant,
+            scope: interaction.params.scope,
+            subjects,
+          }))
+        )
+      );
     } else {
       return TE.left(
         makeDomainError("Bad Step", DomainErrorTypes.GENERIC_ERROR)
@@ -55,7 +68,7 @@ export const ConfirmConsentUseCase =
     grantService: GrantService
   ) =>
   (
-    interactionId: string | undefined,
+    interactionId: string | undefined, // TODO: try to use InteractionId
     rememberGrant: boolean
   ): TE.TaskEither<ConfirmConsentUseCaseError, GrantId> =>
     pipe(
@@ -67,8 +80,8 @@ export const ConfirmConsentUseCase =
         pipe(
           // Load or Create a grant
           loadOrCreateGrant(grantService)(interaction, rememberGrant),
-          // TODO: Add missing scope to the grant
           // update the interaction and the grant
+          TE.map((grant) => ({ ...grant, scope: interaction.params.scope })),
           TE.chain((grant) => {
             const newInteraction = {
               ...interaction,

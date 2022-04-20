@@ -47,11 +47,38 @@ describe("ConfirmConsentUseCase", () => {
       TE.right(O.some(afterLoginInteraction))
     );
     interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
+    const grantFindBy = grantServiceMock.findBy.mockReturnValueOnce(
+      TE.right([])
+    );
     grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, false)();
     expect(actual).toStrictEqual(E.right(grant.id));
+    expect(grantFindBy).toBeCalledTimes(1);
   });
+  it("should return the grant remebered if any", async () => {
+    const { useCase, interactionServiceMock, grantServiceMock } =
+      makeConfirmConsentUseCaseTest();
+
+    interactionServiceMock.find.mockReturnValueOnce(
+      TE.right(O.some(afterLoginInteraction))
+    );
+    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
+    const grantFindBy = grantServiceMock.findBy.mockReturnValueOnce(
+      TE.right([grant])
+    );
+    grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
+
+    const actual = await useCase(afterLoginInteraction.id, false)();
+    expect(actual).toStrictEqual(E.right(grant.id));
+    expect(grantFindBy).toBeCalledWith({
+      clientId: O.some(afterLoginInteraction.params.client_id),
+      identityId: grant.subjects.identityId,
+      remember: true,
+    });
+    expect(grantFindBy).toBeCalledTimes(1);
+  });
+
   it("should return the grant referenced by the given interaction", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
       makeConfirmConsentUseCaseTest();
