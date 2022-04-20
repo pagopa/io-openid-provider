@@ -43,7 +43,7 @@ const findAccountAdapter =
           )(),
       };
     } else {
-      logger.debug(
+      logger.error(
         `findAccountAdapter: cookie (${authenticationCookieKey}) or account not found`
       );
       return undefined;

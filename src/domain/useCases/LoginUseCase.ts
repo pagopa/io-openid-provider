@@ -22,7 +22,10 @@ export const LoginUseCase =
         pipe(
           // validate the token
           AccessToken.decode(accessToken),
-          E.mapLeft((_) => "Unauthorized")
+          E.mapLeft((_) => {
+            logger.info("LoginUseCase: invalid access-token");
+            return "Unauthorized";
+          })
         )
       ),
       // given the token validate it, then returns the identity if any
