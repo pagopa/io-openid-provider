@@ -2,6 +2,7 @@ import { pipe } from "fp-ts/function";
 import * as t from "io-ts";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import { Client } from "../clients/types";
 import { Interaction, InteractionId, LoginResult } from "../interactions/types";
@@ -10,6 +11,7 @@ import { Logger } from "../logger";
 import { ClientService } from "../clients/ClientService";
 import { fromTEOtoTE, show } from "../utils";
 import { GrantService } from "../grants/GrantService";
+import { makeDomainError } from "../types";
 
 export const RenderData = t.type({
   client: Client,
@@ -19,7 +21,7 @@ export const RenderData = t.type({
 });
 export type RenderData = t.TypeOf<typeof RenderData>;
 
-const makeRenderData =
+export const makeRenderData =
   (interaction: Interaction) =>
   (client: Client): RenderData => ({
     client,
@@ -36,14 +38,17 @@ const loadRememberedGrant =
     if (LoginResult.is(interaction.result)) {
       logger.debug(`loadRememberGrant - findBySubjects ${show(interaction)}`);
       return pipe(
-        grantService.findBySubjects({
-          clientId: interaction.params.client_id,
+        grantService.findBy({
+          clientId: O.fromNullable(interaction.params.client_id),
           identityId: interaction.result.identity,
-        })
+          remember: true,
+        }),
+        TE.map(RA.head),
+        TE.map(O.filter((grant) => grant.scope === interaction.params.scope))
       );
     } else {
       logger.debug(`loadRememberGrant ${show(interaction)}`);
-      return TE.right(O.none);
+      return TE.left(makeDomainError("Invalid interaction"));
     }
   };
 
@@ -55,14 +60,15 @@ const loadRememberedGrant =
 export const ProcessConsentUseCase =
   (logger: Logger, clientService: ClientService, grantService: GrantService) =>
   (
-    interaction: Interaction
+    interaction: Interaction // TODO: Improve input, here we handle only interaction with a LoginResult
   ): TE.TaskEither<string, E.Either<RenderData, Grant>> => {
     const client = pipe(
       clientService.find(interaction.params.client_id),
       fromTEOtoTE
     );
     return pipe(
-      loadRememberedGrant(logger, grantService)(interaction),
+      client,
+      TE.chain((_) => loadRememberedGrant(logger, grantService)(interaction)),
       TE.chain(
         O.fold(
           () =>

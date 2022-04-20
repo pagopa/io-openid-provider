@@ -1,109 +1,58 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-enum ApplicationType {
-  web
-  native
-}
-
-enum SigningAlgorithm {
-  // Asymmetric
-  PS256
-  PS384
-  PS512
-  ES256
-  ES256K
-  ES384
-  ES512
-  EdDSA
-  RS256
-  RS384
-  RS512
-  // Symmetric
-  HS256
-  HS384
-  HS512
-  none
-}
-
-enum ClientAuthMethod {
-  client_secret_basic
-  client_secret_post
-  client_secret_jwt
-  private_key_jwt
-  tls_client_auth
-  self_signed_tls_client_auth
-  none
-}
-
-enum SubjectType {
-  public
-  pairwise
-}
-
 model Client {
-  clientId                    String @id
-  redirectUris                String[]
-  grantTypes                  String[]
-  responseTypes               String[]
-  applicationType             ApplicationType
-  issuedAt                    DateTime
-  clientName                  String
-  clientSecret                String?
-  idTokenSignedResponseAlg    SigningAlgorithm
-  postLogoutRedirectUris      String[]
-  requireAuthTime             Boolean
-  scope                       String
-  subjectType                 SubjectType
-  tokenEndpointAuthMethod     ClientAuthMethod
-  organization                String
-  serviceId                   String
-  bypassConsent               Boolean
-}
-
-model Grant {
-  accountId   String
-  clientId    String
-  expireAt    DateTime
-  id          String @id
-  issuedAt    DateTime
-  scope       String
-  toRemember  GrantToRemember?
-}
-
-model GrantToRemember {
-  accountId   String
-  clientId    String
-  grantId     String
-  grant       Grant @relation(fields: [grantId], references: [id])
-  @@unique([accountId, clientId])
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  clientId          String @unique
+  grantTypes        String[]
+  issuedAt          DateTime
+  name              String
+  organizationId    String
+  redirectUris      String[]
+  responseTypes     String[]
+  scope             String
+  // the serviceId maybe coulb be the same as clientId
+  // so if the clientId can be defined by the caller
+  // we can then remove the serviceId
+  serviceId         String // remove it
+  skipConsent       Boolean
 }
 
 model Interaction {
-  clientId    String
   expireAt    DateTime
-  id          String @id
+  id          String @id @map("_id")
   issuedAt    DateTime
   params      Json
-  prompt      Json
+  payload     Json
   result      Json?
   returnTo    String
-  accountId   String?
-  grantId     String?
+  // Session information
+  identityId  String?
   cookieId    String?
-  uid         String?
+}
+
+model Grant {
+  expireAt    DateTime
+  id          String @id @map("_id")
+  issuedAt    DateTime
+  remember    Boolean
+  scope       String?
+  clientId    String
+  identityId  String
+
+  @@index([clientId, identityId])
 }
 
 model Session {
-  accountId   String?
   expireAt    DateTime
-  id          String @id
+  id          String @id @map("_id")
+  identityId  String?
   issuedAt    DateTime
-  uid         String
+  uid         String @unique
 }

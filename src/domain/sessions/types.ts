@@ -24,7 +24,7 @@ export const SessionId = t.brand(
 );
 export type SessionId = t.TypeOf<typeof SessionId>;
 
-export const Session = t.type({
+export const Session = t.strict({
   expireAt: tt.date,
   id: SessionId,
   identityId: t.union([t.undefined, IdentityId]),

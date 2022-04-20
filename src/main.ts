@@ -1,11 +1,11 @@
 /** This is the main application entry point, the initialization of the adapters are done here */
-import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
-import * as inMemory from "./adapters/inMemory";
-import * as ioBackend from "./adapters/ioBackend";
-import { parseConfig } from "./config";
-import { makeLogger } from "./adapters/winston";
+import { pipe } from "fp-ts/lib/function";
 import { makeApplication, startApplication } from "./adapters/http";
+import * as ioBackend from "./adapters/ioBackend";
+import * as mongodb from "./adapters/mongodb";
+import { makeLogger } from "./adapters/winston";
+import { parseConfig } from "./config";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {
@@ -26,10 +26,13 @@ pipe(
     );
     const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);
 
-    const clientService = inMemory.makeClientService();
-    const interactionService = inMemory.makeInteractionService();
-    const sessionService = inMemory.makeSessionService();
-    const grantService = inMemory.makeGrantService();
+    const clientService = mongodb.makeClientService(config.mongodb, logger);
+    const interactionService = mongodb.makeInteractionService(
+      config.mongodb,
+      logger
+    );
+    const sessionService = mongodb.makeSessionService(config.mongodb, logger);
+    const grantService = mongodb.makeGrantService(config.mongodb, logger);
 
     const application = makeApplication({
       clientService,

@@ -31,6 +31,9 @@ export const RequestParams = t.type({
 });
 export type RequestParams = t.TypeOf<typeof RequestParams>;
 
+export const Payload = tt.JsonRecord;
+export type Payload = t.TypeOf<typeof Payload>;
+
 export const ErrorResult = t.type({
   error: t.string,
 });
@@ -41,12 +44,13 @@ export const ConsentResult = t.type({
   grantId: GrantId,
 });
 
-const SessionInfo = t.type({
+export const SessionInfo = t.type({
   cookieId: t.string,
   identityId: IdentityId,
   // TODO: Check if this uid could be collapsed to sessionId
   // uid: t.string,
 });
+export type SessionInfo = t.TypeOf<typeof SessionInfo>;
 
 export const Interaction = t.type({
   expireAt: tt.date,
@@ -54,7 +58,7 @@ export const Interaction = t.type({
   issuedAt: tt.date,
   // kind: t.union([t.literal("login"), t.literal("consent")]),
   params: RequestParams,
-  payload: t.record(t.string, t.unknown),
+  payload: Payload,
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),
   returnTo: t.string,
   session: t.union([t.undefined, SessionInfo]),

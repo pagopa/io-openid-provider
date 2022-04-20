@@ -4,16 +4,16 @@ services:
     build: .
     environment:
       - PORT=3001
-      - POSTGRES_URL=postgresql://user:randompassword@postgres:5432/db
+      - MONGODB_URL=mongodb://root:example@mongodb:27017/example?authSource=admin
       - IO_BACKEND_BASE_URL=https://app-backend.io.italia.it
     ports:
       - "3001:3001"
-  postgres:
-    image: postgres:13-alpine
-    restart: always
-    ports:
-      - "5432:5432"
+  mongodb:
+    # This image automatically creates a replica set required for transactions
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: randompassword
-      POSTGRES_DB: db
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: test
+    ports:
+      - 27017:27017

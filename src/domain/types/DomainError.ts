@@ -32,12 +32,17 @@ export type DomainError = t.TypeOf<typeof DomainError>;
  * Create a [[DomaniError]] given a [[t.Errors]] or a message
  */
 export const makeDomainError = (
-  e: t.Errors | string,
+  e: t.Errors | Error | string,
   kind: DomainErrorTypes = DomainErrorTypes.GENERIC_ERROR
 ): DomainError => {
   if (t.string.is(e)) {
     return {
       causedBy: new Error(e),
+      kind,
+    };
+  } else if (e instanceof Error) {
+    return {
+      causedBy: e,
       kind,
     };
   } else {

@@ -45,8 +45,8 @@ Those are all Environment variables needed by the application:
 | LOG_LEVEL                 | The level of the logger                                          | string |
 | APPLICATION_NAME          | The name of the application, used as prefix for the logger       | string |
 | VERSION                   | The version of the service, it should be populated automatically | string |
-| IO_BACKEND_BASE_URL       | The base URL of IO backend used as identity provider             | string |
-| POSTGRES_URL              | The URL used to connect to PostgreSQL                            | string |
+| IO_BACKEND_BASE_URL       | The base URL of IO back-end used as identity provider            | string |
+| MONGODB_URL               | The URL used to connect to MongoDB 4.2 compatible                | string |
 | AUTHENTICATION_COOKIE_KEY | The cookie key where the authentication token is expected        | string |
 
 

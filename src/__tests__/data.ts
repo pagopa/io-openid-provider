@@ -7,6 +7,9 @@ export const config: Config = {
   IOBackend: {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
+  mongodb: {
+    connectionString: new URL(envs["MONGODB_URL"] as string),
+  },
   info: {
     name: envs["APPLICATION_NAME"] as NonEmptyString,
     version: envs["VERSION"] as NonEmptyString,

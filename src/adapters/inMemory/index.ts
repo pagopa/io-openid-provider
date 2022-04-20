@@ -1,5 +1,5 @@
 /* eslint-disable functional/prefer-readonly-type */
-import { constVoid } from "fp-ts/lib/function";
+import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { IdentityId } from "src/domain/identities/types";
@@ -91,12 +91,18 @@ export const makeGrantService = (
   const store = new Map(snapshot.map((grant) => [grant.id, grant]));
   return {
     find: findByIdTE(store),
-    findBySubjects: (sbjs) =>
-      findByTE(store)(
+    findBy: (selector) =>
+      filterByTE(store)(
         (grant) =>
-          sbjs.clientId === grant.subjects.clientId &&
-          sbjs.identityId === grant.subjects.identityId &&
-          grant.remember === true
+          pipe(
+            selector.clientId,
+            O.fold(
+              () => false,
+              (_) => _ === grant.subjects.clientId
+            )
+          ) &&
+          selector.identityId === grant.subjects.identityId &&
+          grant.remember === selector.remember
       ),
     remove: removeByIdTE(store),
     upsert: upsertEntityTE(store)((_) => _.id),

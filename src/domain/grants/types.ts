@@ -20,6 +20,13 @@ export const GrantSubjects = t.type({
 });
 export type GrantSubjects = t.TypeOf<typeof GrantSubjects>;
 
+export const GrantSelector = t.type({
+  clientId: tt.option(ClientId),
+  identityId: IdentityId,
+  remember: t.boolean,
+});
+export type GrantSelector = t.TypeOf<typeof GrantSelector>;
+
 export const Grant = t.type({
   expireAt: tt.date,
   id: GrantId,

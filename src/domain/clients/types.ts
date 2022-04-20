@@ -34,17 +34,23 @@ export const OrganizationId = t.brand(
 );
 export type OrganizationId = t.TypeOf<typeof OrganizationId>;
 
+export const GrantTypes = t.array(t.literal("implicit"));
+export type GrantTypes = t.TypeOf<typeof GrantTypes>;
+
+export const ResponseTypes = t.array(t.literal("id_token"));
+export type ResponseTypes = t.TypeOf<typeof ResponseTypes>;
+
 /**
  * Represents a client of OpenID Connect
  */
 export const Client = t.type({
   clientId: ClientId,
-  grantTypes: t.array(t.literal("implicit")),
+  grantTypes: GrantTypes,
   issuedAt: tt.date,
   name: t.string,
   organizationId: OrganizationId,
   redirectUris: t.array(t.string),
-  responseTypes: t.array(t.literal("id_token")),
+  responseTypes: ResponseTypes,
   scope: t.string,
   serviceId: ServiceId,
 });

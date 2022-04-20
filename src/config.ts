@@ -5,6 +5,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
 import { LogConfig } from "./adapters/winston";
+import { MongoDBConfig } from "./adapters/mongodb";
 
 interface ServerConfig {
   readonly hostname: string;
@@ -37,8 +38,8 @@ const EnvType = t.type({
     verbose: null,
     warn: null,
   }),
+  MONGODB_URL: UrlFromString,
   PORT: t.string,
-  POSTGRES_URL: UrlFromString,
   SERVER_HOSTNAME: t.string,
   VERSION: NonEmptyString,
 });
@@ -56,6 +57,9 @@ const makeConfig = (envs: EnvType): Config => ({
     logLevel: envs.LOG_LEVEL,
     logName: envs.APPLICATION_NAME,
   },
+  mongodb: {
+    connectionString: new URL(envs.MONGODB_URL.href),
+  },
   server: {
     authenticationCookieKey: envs.AUTHENTICATION_COOKIE_KEY,
     enableHelmet: false,
@@ -72,6 +76,7 @@ export interface Config {
   readonly IOBackend: IOBackend;
   readonly logger: LogConfig;
   readonly server: ServerConfig;
+  readonly mongodb: MongoDBConfig;
 }
 
 /**
