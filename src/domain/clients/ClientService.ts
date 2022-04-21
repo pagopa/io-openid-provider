@@ -1,12 +1,13 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import { Option } from "fp-ts/Option";
 import { TaskEither } from "fp-ts/TaskEither";
 import { DomainError } from "../types";
 import { Client, ClientId, OrganizationId, ServiceId } from "./types";
 
 export const ClientSelector = t.type({
-  organizationId: t.union([OrganizationId, t.undefined]),
-  serviceId: t.union([ServiceId, t.undefined]),
+  organizationId: tt.option(OrganizationId),
+  serviceId: tt.option(ServiceId),
 });
 export type ClientSelector = t.TypeOf<typeof ClientSelector>;
 

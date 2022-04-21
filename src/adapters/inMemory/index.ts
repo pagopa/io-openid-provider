@@ -64,8 +64,14 @@ export const makeClientService = (
     list: (selector) =>
       filterByTE(store)(
         (client) =>
-          client.organizationId === selector.organizationId &&
-          client.serviceId === selector.serviceId
+          O.fold(
+            () => true,
+            (org) => client.organizationId === org
+          )(selector.organizationId) &&
+          O.fold(
+            () => true,
+            (sId) => client.serviceId === sId
+          )(selector.serviceId)
       ),
     remove: removeByIdTE(store),
     upsert: upsertEntityTE(store)((_) => _.clientId),

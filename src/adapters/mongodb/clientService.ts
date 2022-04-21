@@ -1,5 +1,6 @@
 import * as t from "io-ts";
 import { constVoid, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as prisma from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
@@ -62,8 +63,8 @@ export const makeClientService = (
       client.client.findMany({
         where: {
           AND: [
-            { serviceId: selector.serviceId },
-            { organizationId: selector.organizationId },
+            { serviceId: O.toUndefined(selector.serviceId) },
+            { organizationId: O.toUndefined(selector.organizationId) },
           ],
         },
       })

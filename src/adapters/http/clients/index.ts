@@ -18,6 +18,7 @@ import {
 } from "../../../domain/clients/types";
 import { ClientService } from "../../../domain/clients/ClientService";
 import { Logger } from "../../../domain/logger";
+import { ClientListUseCase } from "../../../domain/useCases/ClientListUseCase";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   application_type: "web",
@@ -44,24 +45,19 @@ type GetClientListEndpointHandler =
   | responses.IResponseErrorInternal;
 
 const getClientListEndpointHandler =
-  (_logger: Logger, clientService: ClientService) =>
+  (logger: Logger, clientService: ClientService) =>
   (
     organizationId: O.Option<OrganizationId>,
     serviceId: O.Option<ServiceId>
-  ): Promise<GetClientListEndpointHandler> => {
-    const selector = {
-      organizationId: O.toUndefined(organizationId),
-      serviceId: O.toUndefined(serviceId),
-    };
-    return pipe(
-      clientService.list(selector),
+  ): Promise<GetClientListEndpointHandler> =>
+    pipe(
+      ClientListUseCase(logger, clientService)({ organizationId, serviceId }),
       TE.bimap(
         (_) => responses.ResponseErrorInternal("Internal Error"),
         (r) => responses.ResponseSuccessJson(makeAPIClientList(r))
       ),
       TE.toUnion
     )();
-  };
 
 /**
  * Return the router that manage the
