@@ -42,7 +42,7 @@ const loadOrCreateGrant =
         TE.map(
           O.getOrElse<Grant>(() => ({
             expireAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
-            id: crypto.randomBytes(20).toString("hex") as GrantId,
+            id: crypto.randomUUID() as GrantId,
             issuedAt: new Date(),
             remember: rememberGrant,
             scope: interaction.params.scope,

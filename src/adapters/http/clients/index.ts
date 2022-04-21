@@ -9,8 +9,8 @@ import {
   wrapRequestHandler,
 } from "@pagopa/ts-commons/lib/request_middleware";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
-import { APIClientList } from "src/generated/definitions/APIClientList";
-import { APIClientDetail } from "src/generated/definitions/APIClientDetail";
+import { APIClientList } from "../../../generated/definitions/APIClientList";
+import { APIClientDetail } from "../../../generated/definitions/APIClientDetail";
 import {
   Client,
   OrganizationId,
@@ -23,7 +23,7 @@ import { ClientListUseCase } from "../../../domain/useCases/ClientListUseCase";
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   application_type: "web",
   client_id: input.clientId,
-  client_id_issued_at: input.issuedAt.toString(),
+  client_id_issued_at: input.issuedAt.toUTCString(),
   client_name: input.name,
   grant_types: input.grantTypes,
   // FIXME: populate this field
