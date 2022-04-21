@@ -6,24 +6,24 @@ import { AccessToken, Identity } from "../identities/types";
 import { Logger } from "../logger";
 import { show } from "../utils";
 
-export type LoginUseCaseError = "Unauthorized" | string;
+export type AuthenticateUseCaseError = "Unauthorized" | string;
 
 /**
  * Given an accessToken (could be invalid), return the Identity
  * which the accessToken belongs to
  */
-export const LoginUseCase =
+export const AuthenticateUseCase =
   (logger: Logger, identityService: IdentityService) =>
   (
     accessToken: string | undefined
-  ): TE.TaskEither<LoginUseCaseError, Identity> =>
+  ): TE.TaskEither<AuthenticateUseCaseError, Identity> =>
     pipe(
       TE.fromEither(
         pipe(
           // validate the token
           AccessToken.decode(accessToken),
           E.mapLeft((_) => {
-            logger.info("LoginUseCase: invalid access-token");
+            logger.info("AuthenticateUseCase: invalid access-token");
             return "Unauthorized";
           })
         )
@@ -34,11 +34,11 @@ export const LoginUseCase =
           identityService.authenticate,
           TE.bimap(
             (err) => {
-              logger.error(`Error LoginUseCase: ${show(err)}`, err);
+              logger.error(`Error AuthenticateUseCase: ${show(err)}`, err);
               return "Unauthorized";
             },
             (identity) => {
-              logger.info(`LoginUserCase: ${show(identity)}`);
+              logger.info(`AuthenticateUseCase: ${show(identity)}`);
               return identity;
             }
           )

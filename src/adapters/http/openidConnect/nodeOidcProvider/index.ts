@@ -9,7 +9,7 @@ import { SessionService } from "../../../../domain/sessions/SessionService";
 import { GrantService } from "../../../../domain/grants/GrantService";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { Identity } from "../../../../domain/identities/types";
-import { LoginUseCase } from "../../../../domain/useCases/LoginUseCase";
+import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
 import { makeAdapterProvider } from "./AdapterProvider";
 import { disableAuthClientsEndpointMiddleware } from "./middlewares";
 
@@ -34,7 +34,7 @@ const findAccountAdapter =
         accountId,
         claims: (_use, _scope, _claims, _rejected) =>
           pipe(
-            LoginUseCase(logger, identityService)(accessToken),
+            AuthenticateUseCase(logger, identityService)(accessToken),
             TE.map(makeAccountClaims),
             TE.fold(
               (_) => () => Promise.reject(_),

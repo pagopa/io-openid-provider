@@ -18,7 +18,7 @@ import {
   interactionStep,
 } from "../../../../domain/interactions/types";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
-import { LoginUseCase } from "../../../../domain/useCases/LoginUseCase";
+import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
 import {
   ProcessConsentUseCase,
   RenderData,
@@ -107,7 +107,7 @@ const getInteractionHandler =
           if (interactionStep(interaction) === "login") {
             return pipe(
               // run the logic to handle the login
-              LoginUseCase(
+              AuthenticateUseCase(
                 logger,
                 identityService
               )(req.cookies[config.server.authenticationCookieKey]),
