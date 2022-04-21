@@ -1,5 +1,5 @@
 /** This is the main application entry point, the initialization of the adapters are done here */
-import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { makeApplication, startApplication } from "./adapters/http";
 import * as ioBackend from "./adapters/ioBackend";
@@ -15,24 +15,31 @@ const exit = (error: string): void => {
 };
 
 /** The entry-point */
-pipe(
-  parseConfig(process.env),
-  E.map((config) => {
-    const logger = makeLogger(config.logger);
-
+void pipe(
+  TE.Do,
+  // parse configuraiton
+  TE.apS("config", TE.fromEither(parseConfig(process.env))),
+  // create the main logger
+  TE.bind("logger", (env) => TE.of(makeLogger(env.config.logger))),
+  // create connection with db
+  TE.bind("prisma", (env) =>
+    mongodb.makePrismaClient(env.config.mongodb, env.logger)
+  ),
+  // create the application
+  TE.map(({ config, logger, prisma }) => {
     const { ioAuthClient } = ioBackend.makeIOClients(
       config.IOBackend.baseURL,
       ioBackend.timeoutFetch
     );
     const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);
 
-    const clientService = mongodb.makeClientService(config.mongodb, logger);
+    const clientService = mongodb.makeClientService(logger, prisma.client);
     const interactionService = mongodb.makeInteractionService(
-      config.mongodb,
-      logger
+      logger,
+      prisma.interaction
     );
-    const sessionService = mongodb.makeSessionService(config.mongodb, logger);
-    const grantService = mongodb.makeGrantService(config.mongodb, logger);
+    const sessionService = mongodb.makeSessionService(logger, prisma.session);
+    const grantService = mongodb.makeGrantService(logger, prisma.grant);
 
     const application = makeApplication({
       clientService,
@@ -45,5 +52,5 @@ pipe(
     });
     startApplication(application, logger);
   }),
-  E.mapLeft(exit)
-);
+  TE.mapLeft(exit)
+)();

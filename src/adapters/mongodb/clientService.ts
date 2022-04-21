@@ -3,7 +3,7 @@ import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as prisma from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { Logger } from "../../domain/logger";
 import { ClientService } from "../../domain/clients/ClientService";
 import {
@@ -15,7 +15,6 @@ import {
   ServiceId,
 } from "../../domain/clients/types";
 import { runAsTE, runAsTEO } from "./utils";
-import { MongoDBConfig } from "./types";
 
 const fromRecord = (record: prisma.Client): t.Validation<Client> =>
   pipe(
@@ -47,20 +46,17 @@ const toRecord = (entity: Client): prisma.Client => ({
   skipConsent: false,
 });
 
-export const makeClientService = (
-  config: MongoDBConfig,
+export const makeClientService = <T>(
   logger: Logger,
-  client: PrismaClient = new PrismaClient({
-    datasources: { db: { url: config.connectionString.href } },
-  })
+  client: Prisma.ClientDelegate<T>
 ): ClientService => ({
   find: (id) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.client.findUnique({ where: { clientId: id } })
+      client.findUnique({ where: { clientId: id } })
     ),
   list: (selector) =>
     runAsTE(logger)("list", E.traverseArray(fromRecord), () =>
-      client.client.findMany({
+      client.findMany({
         where: {
           AND: [
             { serviceId: O.toUndefined(selector.serviceId) },
@@ -73,12 +69,12 @@ export const makeClientService = (
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.client.delete({ where: { clientId: id } })
+      () => client.delete({ where: { clientId: id } })
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition), id: undefined };
     return runAsTE(logger)("upsert", fromRecord, () =>
-      client.client.upsert({
+      client.upsert({
         create: obj,
         update: obj,
         where: { clientId: definition.clientId },

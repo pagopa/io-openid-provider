@@ -1,13 +1,12 @@
 import { constVoid, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as prisma from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import * as E from "fp-ts/Either";
 import { Logger } from "../../domain/logger";
 import { SessionService } from "../../domain/sessions/SessionService";
 import { Session, SessionId, Uid } from "../../domain/sessions/types";
 import { IdentityId } from "../../domain/identities/types";
-import { MongoDBConfig } from "./types";
 import { runAsTE, runAsTEO } from "./utils";
 
 const toRecord = (entity: Session): prisma.Session => ({
@@ -28,31 +27,28 @@ const fromRecord = (record: prisma.Session): t.Validation<Session> =>
     E.ap(Uid.decode(record.uid))
   );
 
-export const makeSessionService = (
-  config: MongoDBConfig,
+export const makeSessionService = <T>(
   logger: Logger,
-  client: PrismaClient = new PrismaClient({
-    datasources: { db: { url: config.connectionString.href } },
-  })
+  client: Prisma.SessionDelegate<T>
 ): SessionService => ({
   find: (id) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.session.findUnique({ where: { id } })
+      client.findUnique({ where: { id } })
     ),
   findByUid: (uid) =>
     runAsTEO(logger)("findByUid", fromRecord, () =>
-      client.session.findUnique({ where: { uid } })
+      client.findUnique({ where: { uid } })
     ),
   remove: (id) =>
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.session.delete({ where: { id } })
+      () => client.delete({ where: { id } })
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
     return runAsTE(logger)("upsert", fromRecord, () =>
-      client.session.upsert({
+      client.upsert({
         create: obj,
         update: { ...{ ...obj, id: undefined } },
         where: { id: definition.id },

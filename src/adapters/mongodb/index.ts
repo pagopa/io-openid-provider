@@ -1,3 +1,4 @@
+export * from "./prisma";
 export * from "./types";
 export * from "./clientService";
 export * from "./sessionService";

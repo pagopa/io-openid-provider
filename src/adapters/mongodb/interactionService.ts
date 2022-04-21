@@ -2,11 +2,10 @@ import * as t from "io-ts";
 import { constVoid } from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import * as prisma from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { Interaction } from "../../domain/interactions/types";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { Logger } from "../../domain/logger";
-import { MongoDBConfig } from "./types";
 import { runAsTE, runAsTEO } from "./utils";
 
 const toRecord = (
@@ -33,27 +32,24 @@ const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
         : undefined,
   });
 
-export const makeInteractionService = (
-  config: MongoDBConfig,
+export const makeInteractionService = <T>(
   logger: Logger,
-  client: PrismaClient = new PrismaClient({
-    datasources: { db: { url: config.connectionString.href } },
-  })
+  client: Prisma.InteractionDelegate<T>
 ): InteractionService => ({
   find: (id) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.interaction.findUnique({ where: { id } })
+      client.findUnique({ where: { id } })
     ),
   remove: (id) =>
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.interaction.delete({ where: { id } })
+      () => client.delete({ where: { id } })
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
     return runAsTE(logger)("upsert", fromRecord, () =>
-      client.interaction.upsert({
+      client.upsert({
         create: obj,
         update: { ...{ ...obj, id: undefined } },
         where: { id: definition.id },
