@@ -11,7 +11,7 @@ FROM node:14.17.6-alpine
 
 USER node
 WORKDIR /app
-COPY --chown=node:node --from=build /app/dist /app/package.json /app/yarn.lock /app/
+COPY --chown=node:node --from=build /app/dist /app/prisma /app/package.json /app/yarn.lock /app/
 
 ENV NODE_ENV=production
 ENV LOG_LEVEL=silly
