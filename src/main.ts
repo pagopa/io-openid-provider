@@ -28,7 +28,7 @@ void pipe(
   // create the application
   TE.map(({ config, logger, prisma }) => {
     const { ioAuthClient } = ioBackend.makeIOClients(
-      config.IOBackend.baseURL,
+      config.IOClient,
       ioBackend.timeoutFetch
     );
     const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);

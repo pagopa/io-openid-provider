@@ -4,7 +4,7 @@ import { Config } from "../config";
 export const envs = process.env;
 
 export const config: Config = {
-  IOBackend: {
+  IOClient: {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
   mongodb: {

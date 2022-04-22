@@ -6,16 +6,13 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
 import { LogConfig } from "./adapters/winston";
 import { MongoDBConfig } from "./adapters/mongodb";
+import { IOClientConfig } from "./adapters/ioBackend";
 
 interface ServerConfig {
   readonly hostname: string;
   readonly port: string;
   readonly enableHelmet: boolean;
   readonly authenticationCookieKey: string;
-}
-
-interface IOBackend {
-  readonly baseURL: URL;
 }
 
 interface Info {
@@ -46,7 +43,7 @@ const EnvType = t.type({
 type EnvType = t.TypeOf<typeof EnvType>;
 
 const makeConfig = (envs: EnvType): Config => ({
-  IOBackend: {
+  IOClient: {
     baseURL: new URL(envs.IO_BACKEND_BASE_URL.href),
   },
   info: {
@@ -73,7 +70,7 @@ const makeConfig = (envs: EnvType): Config => ({
  */
 export interface Config {
   readonly info: Info;
-  readonly IOBackend: IOBackend;
+  readonly IOClient: IOClientConfig;
   readonly logger: LogConfig;
   readonly server: ServerConfig;
   readonly mongodb: MongoDBConfig;

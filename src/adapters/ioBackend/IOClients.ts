@@ -1,9 +1,15 @@
 import * as authClient from "../../generated/clients/io-auth/client";
 
-// Create all IO clients required by application
-const makeIOClients = (baseUrl: URL, fetchAPI: typeof fetch) => {
+export interface IOClientConfig {
+  readonly baseURL: URL;
+}
+
+/**
+ * Create IO clients
+ */
+const makeIOClients = (config: IOClientConfig, fetchAPI: typeof fetch) => {
   const ioAuthClient = authClient.createClient({
-    baseUrl: baseUrl.href,
+    baseUrl: config.baseURL.href,
     fetchApi: fetchAPI,
   });
   return { ioAuthClient };
