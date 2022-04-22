@@ -4,9 +4,11 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
+import { IntFromString } from "io-ts-types";
 import { LogConfig } from "./adapters/winston";
 import { MongoDBConfig } from "./adapters/mongodb";
 import { IOClientConfig } from "./adapters/ioBackend";
+import { Seconds } from "./domain/types";
 
 interface ServerConfig {
   readonly hostname: string;
@@ -25,6 +27,7 @@ type Envs = NodeJS.ProcessEnv;
 const EnvType = t.type({
   APPLICATION_NAME: NonEmptyString,
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
+  GRANT_TTL_IN_SECONDS: IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
   LOG_LEVEL: t.keyof({
     debug: null,
@@ -46,6 +49,7 @@ const makeConfig = (envs: EnvType): Config => ({
   IOClient: {
     baseURL: new URL(envs.IO_BACKEND_BASE_URL.href),
   },
+  grantTTL: envs.GRANT_TTL_IN_SECONDS.valueOf() as Seconds,
   info: {
     name: envs.APPLICATION_NAME,
     version: envs.VERSION,
@@ -74,6 +78,7 @@ export interface Config {
   readonly logger: LogConfig;
   readonly server: ServerConfig;
   readonly mongodb: MongoDBConfig;
+  readonly grantTTL: Seconds;
 }
 
 /**

@@ -48,6 +48,7 @@ Those are all Environment variables needed by the application:
 | IO_BACKEND_BASE_URL       | The base URL of IO back-end used as identity provider            | string |
 | MONGODB_URL               | The URL used to connect to MongoDB 4.2 compatible                | string |
 | AUTHENTICATION_COOKIE_KEY | The cookie key where the authentication token is expected        | string |
+| GRANT_TTL_IN_SECONDS      | The seconds after which the grant expires                        | string |
 
 
 ## Example

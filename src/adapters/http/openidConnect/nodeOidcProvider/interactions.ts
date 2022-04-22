@@ -167,6 +167,7 @@ const getInteractionHandler =
 
 const postInteractionHandler =
   (
+    config: Config,
     logger: Logger,
     interactionService: InteractionService,
     grantService: GrantService,
@@ -176,6 +177,7 @@ const postInteractionHandler =
     const response = pipe(
       // run the logic to confirm the consent
       ConfirmConsentUseCase(
+        config.grantTTL,
         logger,
         interactionService,
         grantService
@@ -251,7 +253,13 @@ export const makeInteractionRouter = (
 
   router.post(
     "/interaction/:id/confirm",
-    postInteractionHandler(logger, interactionService, grantService, provider)
+    postInteractionHandler(
+      config,
+      logger,
+      interactionService,
+      grantService,
+      provider
+    )
   );
 
   router.get(

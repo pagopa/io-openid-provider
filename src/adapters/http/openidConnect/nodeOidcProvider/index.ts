@@ -112,6 +112,7 @@ export const makeConfiguration = (
     scopes: ["openid", "profile"],
     tokenEndpointAuthMethods: ["none"],
     ttl: {
+      Grant: config.grantTTL,
       Interaction: 60 * 5,
       Session: 60,
     },

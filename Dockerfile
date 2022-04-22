@@ -21,6 +21,8 @@ ENV APPLICATION_NAME=openid-provider
 # TODO: Review version node -p "require('./app/package.json').version"
 ENV VERSION=0.0.0
 ENV AUTHENTICATION_COOKIE_KEY="X-IO-Federation-Token"
+# THE grant expires after one day
+ENV GRANT_TTL_IN_SECONDS=86400
 
 RUN yarn --frozen-lockfile && yarn cache clean --force
 

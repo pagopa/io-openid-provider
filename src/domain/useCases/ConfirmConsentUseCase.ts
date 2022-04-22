@@ -14,13 +14,18 @@ import {
   LoginResult,
 } from "../interactions/types";
 import { Logger } from "../logger";
-import { DomainError, DomainErrorTypes, makeDomainError } from "../types";
+import {
+  DomainError,
+  DomainErrorTypes,
+  makeDomainError,
+  Seconds,
+} from "../types";
 import { fromTEOtoTE, show } from "../utils";
 
 type ConfirmConsentUseCaseError = DomainErrorTypes;
 
 const loadOrCreateGrant =
-  (grantService: GrantService) =>
+  (grantTTL: Seconds, grantService: GrantService) =>
   (
     interaction: Interaction,
     rememberGrant: boolean
@@ -41,7 +46,7 @@ const loadOrCreateGrant =
         TE.map(RA.head),
         TE.map(
           O.getOrElse<Grant>(() => ({
-            expireAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
+            expireAt: new Date(new Date().getTime() + 1000 * grantTTL),
             id: crypto.randomUUID() as GrantId,
             issuedAt: new Date(),
             remember: rememberGrant,
@@ -63,6 +68,7 @@ const loadOrCreateGrant =
  */
 export const ConfirmConsentUseCase =
   (
+    grantTTL: Seconds,
     logger: Logger,
     interactionService: InteractionService,
     grantService: GrantService
@@ -79,7 +85,7 @@ export const ConfirmConsentUseCase =
       TE.chain((interaction) =>
         pipe(
           // Load or Create a grant
-          loadOrCreateGrant(grantService)(interaction, rememberGrant),
+          loadOrCreateGrant(grantTTL, grantService)(interaction, rememberGrant),
           // update the interaction and the grant
           TE.map((grant) => ({ ...grant, scope: interaction.params.scope })),
           TE.chain((grant) => {

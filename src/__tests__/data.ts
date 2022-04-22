@@ -1,5 +1,6 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Config } from "../config";
+import { Seconds } from "../domain/types";
 
 export const envs = process.env;
 
@@ -7,6 +8,7 @@ export const config: Config = {
   IOClient: {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
+  grantTTL: 86400 as Seconds,
   mongodb: {
     connectionString: new URL(envs["MONGODB_URL"] as string),
   },

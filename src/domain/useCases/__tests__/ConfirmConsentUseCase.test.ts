@@ -6,7 +6,7 @@ import { Logger } from "../../logger";
 import { GrantService } from "../../grants/GrantService";
 import { InteractionService } from "../../interactions/InteractionService";
 import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
-import { DomainErrorTypes } from "../../types";
+import { DomainErrorTypes, Seconds } from "../../types";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
@@ -14,10 +14,12 @@ import {
 import { grant } from "../../grants/__tests__/data";
 
 const makeConfirmConsentUseCaseTest = () => {
+  const grantTTL = 86400 as Seconds;
   const logger = mock.mock<Logger>();
   const interactionServiceMock = mock.mock<InteractionService>();
   const grantServiceMock = mock.mock<GrantService>();
   const useCase = ConfirmConsentUseCase(
+    grantTTL,
     logger,
     interactionServiceMock,
     grantServiceMock
