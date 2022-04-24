@@ -30,6 +30,10 @@ export const afterLoginInteraction: Interaction = {
   result: {
     identity: identity.id,
   },
+  session: {
+    identityId: identity.id,
+    cookieId: "cookie-id",
+  },
 };
 
 export const afterConsentInteraction: Interaction = {

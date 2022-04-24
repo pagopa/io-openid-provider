@@ -10,72 +10,20 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { ClientService } from "src/domain/clients/ClientService";
 import { GrantService } from "src/domain/grants/GrantService";
+import {
+  ProcessInteractionUseCase,
+  ProcessInteractionUseCaseError,
+  RequireConsent,
+} from "../../../../domain/useCases/ProcessInteractionUseCase";
 import { Config } from "../../../../config";
 import { Logger } from "../../../../domain/logger";
 import { InteractionService } from "../../../../domain/interactions/InteractionService";
-import {
-  InteractionId,
-  interactionStep,
-} from "../../../../domain/interactions/types";
+import { InteractionId } from "../../../../domain/interactions/types";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
-import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
-import {
-  ProcessConsentUseCase,
-  RenderData,
-} from "../../../../domain/useCases/ProcessConsentUseCase";
 import { ConfirmConsentUseCase } from "../../../../domain/useCases/ConfirmConsentUseCase";
-import { show } from "../../../../domain/utils";
+import { AbortInteractionUseCase } from "../../../../domain/useCases/AbortInteractionUseCase";
 
-const makeInteractionError = (msg: string): oidc.InteractionResults => ({
-  error: msg,
-});
-
-const internalError = {
-  error: "Internal Error",
-};
-
-const getInteraction =
-  (logger: Logger, interactionService: InteractionService) =>
-  (req: express.Request) =>
-    pipe(
-      E.of(interactionService.find),
-      E.ap(InteractionId.decode(req.params.id)),
-      E.bimap(
-        (_) => TE.left(internalError),
-        (res) =>
-          pipe(
-            res,
-            TE.mapLeft((_) => internalError),
-            TE.chain(TE.fromOption(() => internalError))
-          )
-      ),
-      E.fold(
-        (_) => TE.left(internalError),
-        (result) => result
-      ),
-      TE.chainFirst((result) =>
-        TE.of(logger.info(`getInteraction: ${show(result)}`))
-      )
-    );
-
-const finishInteraction =
-  (provider: oidc.Provider) =>
-  (
-    req: express.Request,
-    res: express.Response,
-    result: oidc.InteractionResults
-  ) =>
-    TE.tryCatch(
-      () =>
-        provider.interactionFinished(req, res, result, {
-          mergeWithLastSubmission: true,
-        }),
-      E.toError
-    );
-
-const tryCatch = <T>(fn: () => Promise<T>) => pipe(TE.tryCatch(fn, E.toError));
-
-const renderConsent = (res: express.Response, renderData: RenderData) =>
+const renderConsent = (res: express.Response, renderData: RequireConsent) =>
   E.tryCatch(
     () =>
       res.render("interaction", {
@@ -100,67 +48,68 @@ const getInteractionHandler =
   ): express.Handler =>
   (req, res, next) => {
     const response = pipe(
-      getInteraction(logger, interactionService)(req),
+      // decode the interaction
+      TE.fromEither(
+        pipe(
+          InteractionId.decode(req.params.id),
+          E.mapLeft((_) => ProcessInteractionUseCaseError.invalidInteraction)
+        )
+      ),
+      TE.chain((interactionId) =>
+        // process the interaction
+        ProcessInteractionUseCase(
+          logger,
+          identityService,
+          interactionService,
+          clientService,
+          grantService
+        )(
+          interactionId,
+          () => req.cookies[config.server.authenticationCookieKey]
+        )
+      ),
+      // render the result
       TE.fold(
-        () => TE.fromEither(E.tryCatch(() => next(), E.toError)),
-        (interaction) => {
-          if (interactionStep(interaction) === "login") {
-            return pipe(
-              // run the logic to handle the login
-              AuthenticateUseCase(
-                logger,
-                identityService
-              )(req.cookies[config.server.authenticationCookieKey]),
-              // create the result
-              TE.bimap(
-                (errorMessage) => ({ error: errorMessage }),
-                (identityId) => ({ login: { accountId: identityId.id } })
-              ),
-              // Left and Right has an InteractionResult
-              TE.toUnion,
-              // send the result
-              T.chain((result) =>
-                tryCatch(() => provider.interactionFinished(req, res, result))
-              )
-            );
-          } else {
-            return pipe(
-              // run the logic to handle the consent
-              ProcessConsentUseCase(
-                logger,
-                clientService,
-                grantService
-              )(interaction),
-              // create the result
-              TE.fold(
-                (errorMessage) => TE.right(makeInteractionError(errorMessage)),
-                E.fold(
-                  (renderData) => TE.left(renderData),
-                  (grant) => TE.right({ consent: { grantId: grant.id } })
-                )
-              ),
-              // send the result
-              TE.fold(
-                (renderData) => TE.fromEither(renderConsent(res, renderData)),
-                (result) =>
-                  pipe(
-                    finishInteraction(provider)(req, res, result),
-                    TE.chainFirst((_) =>
-                      TE.of(logger.info(`interactionFinished: ${show(result)}`))
-                    ),
-                    TE.orElseFirst((_) =>
-                      TE.of(
-                        logger.info(
-                          `interactionFinished error: ${show(result)}`
-                        )
-                      )
-                    )
-                  )
-              )
-            );
+        (errorMessage) =>
+          TE.tryCatch(
+            () =>
+              provider.interactionFinished(req, res, { error: errorMessage }),
+            E.toError
+          ),
+        (result) => {
+          switch (result.kind) {
+            case "LoginResult":
+              return TE.tryCatch(
+                () =>
+                  provider.interactionFinished(req, res, {
+                    login: { accountId: result.identity.id },
+                  }),
+                E.toError
+              );
+            case "ConsentResult":
+              return TE.tryCatch(
+                () =>
+                  provider.interactionFinished(req, res, {
+                    consent: { grantId: result.grant.id },
+                  }),
+                E.toError
+              );
+            case "RequireConsent":
+              return TE.fromEither(renderConsent(res, result));
+            default:
+              return TE.tryCatch(
+                () =>
+                  provider.interactionFinished(req, res, {
+                    error: "Invalid Step",
+                  }),
+                E.toError
+              );
           }
         }
-      )
+      ),
+      // the finishInteraction can terminate in error,
+      // in this case call next
+      TE.mapLeft((_) => next())
     );
     return response();
   };
@@ -187,10 +136,15 @@ const postInteractionHandler =
         (errorMessage) => ({ error: errorMessage }),
         (grantId) => ({ consent: { grantId } })
       ),
-      // Left and Right has an InteractionResult
+      // both left and right are InteractionResult
       TE.toUnion,
       // send the result
-      T.chain((result) => finishInteraction(provider)(req, res, result)),
+      T.chain((result) =>
+        TE.tryCatch(
+          () => provider.interactionFinished(req, res, result),
+          E.toError
+        )
+      ),
       // on any strange error call next
       TE.mapLeft((_) => next())
     );
@@ -205,22 +159,37 @@ const getInteractionAbortHandler =
   ): express.Handler =>
   (req, res, next) =>
     pipe(
-      // retrieve the interaction from request
-      getInteraction(logger, interactionService)(req),
-      // create the abort result
-      TE.map((_interaction) => ({
-        error: "access denied",
-        error_description: "End-User aborted interaction",
-      })),
+      // decode the interaction
+      TE.fromEither(
+        pipe(
+          InteractionId.decode(req.params.id),
+          E.mapLeft((_) => "Invalid Step")
+        )
+      ),
+      // run the abort interaction logic
+      TE.chainW(AbortInteractionUseCase(logger, interactionService)),
+      // create the result
+      TE.bimap(
+        (errMsg) => ({
+          error: errMsg,
+        }),
+        (_) => ({
+          error: "access denied",
+          error_description: "End-User aborted interaction",
+        })
+      ),
       // both left and right are InteractionResult
       TE.toUnion,
       // finish the interaction
       T.chain((result) =>
-        tryCatch(() => provider.interactionFinished(req, res, result))
+        TE.tryCatch(
+          () => provider.interactionFinished(req, res, result),
+          E.toError
+        )
       ),
-      // the finishInteraction can end in an error,
+      // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_error) => next())
+      TE.mapLeft((_) => next())
     )();
 
 /**

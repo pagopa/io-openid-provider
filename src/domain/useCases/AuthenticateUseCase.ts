@@ -6,7 +6,9 @@ import { AccessToken, Identity } from "../identities/types";
 import { Logger } from "../logger";
 import { show } from "../utils";
 
-export type AuthenticateUseCaseError = "Unauthorized" | string;
+export const enum AuthenticateUseCaseError {
+  Unauthorized = "Unauthorized",
+}
 
 /**
  * Given an accessToken (could be invalid), return the Identity
@@ -24,7 +26,7 @@ export const AuthenticateUseCase =
           AccessToken.decode(accessToken),
           E.mapLeft((_) => {
             logger.info("AuthenticateUseCase: invalid access-token");
-            return "Unauthorized";
+            return AuthenticateUseCaseError.Unauthorized;
           })
         )
       ),
@@ -35,7 +37,7 @@ export const AuthenticateUseCase =
           TE.bimap(
             (err) => {
               logger.error(`Error AuthenticateUseCase: ${show(err)}`, err);
-              return "Unauthorized";
+              return AuthenticateUseCaseError.Unauthorized;
             },
             (identity) => {
               logger.info(`AuthenticateUseCase: ${show(identity)}`);
