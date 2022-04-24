@@ -23,6 +23,14 @@ import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { ConfirmConsentUseCase } from "../../../../domain/useCases/ConfirmConsentUseCase";
 import { AbortInteractionUseCase } from "../../../../domain/useCases/AbortInteractionUseCase";
 
+const interactionFinishedTE = (
+  provider: oidc.Provider,
+  req: express.Request,
+  res: express.Response,
+  result: oidc.InteractionResults
+) =>
+  TE.tryCatch(() => provider.interactionFinished(req, res, result), E.toError);
+
 const renderConsent = (res: express.Response, renderData: RequireConsent) =>
   E.tryCatch(
     () =>
@@ -79,31 +87,19 @@ const getInteractionHandler =
         (result) => {
           switch (result.kind) {
             case "LoginResult":
-              return TE.tryCatch(
-                () =>
-                  provider.interactionFinished(req, res, {
-                    login: { accountId: result.identity.id },
-                  }),
-                E.toError
-              );
+              return interactionFinishedTE(provider, req, res, {
+                login: { accountId: result.identity.id },
+              });
             case "ConsentResult":
-              return TE.tryCatch(
-                () =>
-                  provider.interactionFinished(req, res, {
-                    consent: { grantId: result.grant.id },
-                  }),
-                E.toError
-              );
+              return interactionFinishedTE(provider, req, res, {
+                consent: { grantId: result.grant.id },
+              });
             case "RequireConsent":
               return TE.fromEither(renderConsent(res, result));
             default:
-              return TE.tryCatch(
-                () =>
-                  provider.interactionFinished(req, res, {
-                    error: "Invalid Step",
-                  }),
-                E.toError
-              );
+              return interactionFinishedTE(provider, req, res, {
+                error: "Invalid Step",
+              });
           }
         }
       ),
@@ -139,12 +135,7 @@ const postInteractionHandler =
       // both left and right are InteractionResult
       TE.toUnion,
       // send the result
-      T.chain((result) =>
-        TE.tryCatch(
-          () => provider.interactionFinished(req, res, result),
-          E.toError
-        )
-      ),
+      T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // on any strange error call next
       TE.mapLeft((_) => next())
     );
@@ -181,12 +172,7 @@ const getInteractionAbortHandler =
       // both left and right are InteractionResult
       TE.toUnion,
       // finish the interaction
-      T.chain((result) =>
-        TE.tryCatch(
-          () => provider.interactionFinished(req, res, result),
-          E.toError
-        )
-      ),
+      T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // the finishInteraction can terminate in error,
       // in this case call next
       TE.mapLeft((_) => next())
