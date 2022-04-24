@@ -6,7 +6,8 @@ import { Logger } from "../../logger";
 import { GrantService } from "../../grants/GrantService";
 import { ClientService } from "../../clients/ClientService";
 import {
-  ProcessInteractionUseCase, ProcessInteractionUseCaseError,
+  ProcessInteractionUseCase,
+  ProcessInteractionUseCaseError,
 } from "../ProcessInteractionUseCase";
 import {
   afterLoginInteraction,
@@ -31,15 +32,28 @@ const makeProcessInteractionUseCaseTest = () => {
     clientServiceMock,
     grantServiceMock
   );
-  return { logger, identityServiceMock, interactionServiceMock, clientServiceMock, grantServiceMock, useCase };
+  return {
+    logger,
+    identityServiceMock,
+    interactionServiceMock,
+    clientServiceMock,
+    grantServiceMock,
+    useCase,
+  };
 };
 
 describe("ProcessInteractionUseCase", () => {
   it("should return error if the client doesn't exists", async () => {
-    const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
-      makeProcessInteractionUseCaseTest();
+    const {
+      useCase,
+      clientServiceMock,
+      grantServiceMock,
+      interactionServiceMock,
+    } = makeProcessInteractionUseCaseTest();
 
-    const interactionFind = interactionServiceMock.find.mockReturnValue(TE.right(O.some(afterLoginInteraction)));
+    const interactionFind = interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(afterLoginInteraction))
+    );
     const clientFind = clientServiceMock.find.mockReturnValueOnce(
       TE.right(O.none)
     );
@@ -65,10 +79,16 @@ describe("ProcessInteractionUseCase", () => {
     expect(actual).toStrictEqual(expected);
   });
   it("should return the information about the consent", async () => {
-    const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
-      makeProcessInteractionUseCaseTest();
+    const {
+      useCase,
+      clientServiceMock,
+      grantServiceMock,
+      interactionServiceMock,
+    } = makeProcessInteractionUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValue(TE.right(O.some(afterLoginInteraction)));
+    interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(afterLoginInteraction))
+    );
     const clientFind = clientServiceMock.find.mockReturnValueOnce(
       TE.right(O.some(client))
     );
@@ -86,10 +106,16 @@ describe("ProcessInteractionUseCase", () => {
     expect(grantList).toBeCalledTimes(1);
   });
   it("should reject invalid remembered grant", async () => {
-    const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
-      makeProcessInteractionUseCaseTest();
+    const {
+      useCase,
+      clientServiceMock,
+      grantServiceMock,
+      interactionServiceMock,
+    } = makeProcessInteractionUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValue(TE.right(O.some(afterLoginInteraction)));
+    interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(afterLoginInteraction))
+    );
     const clientFind = clientServiceMock.find.mockReturnValueOnce(
       TE.right(O.some(client))
     );
@@ -114,10 +140,16 @@ describe("ProcessInteractionUseCase", () => {
     expect(grantList).toBeCalledTimes(1);
   });
   it("should return the grant remembered if any", async () => {
-    const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
-      makeProcessInteractionUseCaseTest();
+    const {
+      useCase,
+      clientServiceMock,
+      grantServiceMock,
+      interactionServiceMock,
+    } = makeProcessInteractionUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValue(TE.right(O.some(afterLoginInteraction)));
+    interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(afterLoginInteraction))
+    );
     const clientFind = clientServiceMock.find.mockReturnValueOnce(
       TE.right(O.some(client))
     );

@@ -17,24 +17,24 @@ const makeAbortInteractionUseCaseTest = () => {
 
 describe("AbortInteractionUseCase", () => {
   it("should return an error if interaction is not found", async () => {
-    const { useCase, interactionServiceMock } = makeAbortInteractionUseCaseTest();
+    const { useCase, interactionServiceMock } =
+      makeAbortInteractionUseCaseTest();
 
-    const interactionFind =
-      interactionServiceMock.find.mockReturnValue(
-        TE.right(O.none)
-      );
+    const interactionFind = interactionServiceMock.find.mockReturnValue(
+      TE.right(O.none)
+    );
     const actual = await useCase(interaction.id)();
     expect(actual).toStrictEqual(E.left("Invalid Step"));
     expect(interactionFind).toBeCalledWith(interaction.id);
     expect(interactionFind).toBeCalledTimes(1);
   });
   it("should execute the abort steps", async () => {
-    const { useCase, interactionServiceMock } = makeAbortInteractionUseCaseTest();
+    const { useCase, interactionServiceMock } =
+      makeAbortInteractionUseCaseTest();
 
-    const interactionFind =
-      interactionServiceMock.find.mockReturnValue(
-        TE.right(O.some(interaction))
-      );
+    const interactionFind = interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(interaction))
+    );
     const actual = await useCase(interaction.id)();
     expect(actual).toStrictEqual(E.right(constVoid()));
     expect(interactionFind).toBeCalledWith(interaction.id);
