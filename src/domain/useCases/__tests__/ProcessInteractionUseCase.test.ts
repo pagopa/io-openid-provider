@@ -160,7 +160,7 @@ describe("ProcessInteractionUseCase", () => {
     const actual = await useCase(afterLoginInteraction.id, () => "")();
     const expected = E.right({ grant: grant, kind: "ConsentResult" });
     expect(actual).toStrictEqual(expected);
-    expect(clientFind).toBeCalledTimes(1);
+    expect(clientFind).toBeCalledTimes(0);
     expect(grantList).toBeCalledWith({
       clientId: O.some(client.clientId),
       identityId: grant.subjects.identityId,

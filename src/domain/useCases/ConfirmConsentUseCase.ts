@@ -1,67 +1,37 @@
 import * as crypto from "crypto";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import { GrantService } from "../grants/GrantService";
 import { Grant, GrantId } from "../grants/types";
 import { InteractionService } from "../interactions/InteractionService";
-import {
-  ConsentResult,
-  Interaction,
-  InteractionId,
-  LoginResult,
-} from "../interactions/types";
+import { Interaction, InteractionId } from "../interactions/types";
 import { Logger } from "../logger";
-import {
-  DomainError,
-  DomainErrorTypes,
-  makeDomainError,
-  Seconds,
-} from "../types";
+import { DomainErrorTypes, makeDomainError, Seconds } from "../types";
 import { fromTEOtoTE, show } from "../utils";
+import { findValidGrant } from "./utils";
 
 type ConfirmConsentUseCaseError = DomainErrorTypes;
 
-const loadOrCreateGrant =
-  (grantTTL: Seconds, grantService: GrantService) =>
-  (
-    interaction: Interaction,
-    rememberGrant: boolean
-  ): TE.TaskEither<DomainError, Grant> => {
-    if (ConsentResult.is(interaction.result)) {
-      return pipe(grantService.find(interaction.result.grantId), fromTEOtoTE);
-    } else if (LoginResult.is(interaction.result)) {
-      const subjects = {
+const makeGrant = (
+  interaction: Interaction,
+  remember: boolean,
+  grantTTL: Seconds
+): O.Option<Grant> =>
+  pipe(
+    O.fromNullable(interaction.session?.identityId),
+    O.map((identityId) => ({
+      expireAt: new Date(new Date().getTime() + 1000 * grantTTL),
+      id: crypto.randomUUID() as GrantId,
+      issuedAt: new Date(),
+      remember,
+      scope: interaction.params.scope,
+      subjects: {
         clientId: interaction.params.client_id,
-        identityId: interaction.result.identity,
-      };
-      return pipe(
-        grantService.findBy({
-          clientId: O.fromNullable(interaction.params.client_id),
-          identityId: interaction.result.identity,
-          remember: true,
-        }),
-        TE.map(RA.filter((_) => _.expireAt.getTime() >= new Date().getTime())),
-        TE.map(RA.head),
-        TE.map(
-          O.getOrElse<Grant>(() => ({
-            expireAt: new Date(new Date().getTime() + 1000 * grantTTL),
-            id: crypto.randomUUID() as GrantId,
-            issuedAt: new Date(),
-            remember: rememberGrant,
-            scope: interaction.params.scope,
-            subjects,
-          }))
-        )
-      );
-    } else {
-      return TE.left(
-        makeDomainError("Bad Step", DomainErrorTypes.GENERIC_ERROR)
-      );
-    }
-  };
+        identityId,
+      },
+    }))
+  );
 
 /**
  * Given a interaction identity, create a new Grant, or fetch the one referenced,
@@ -75,40 +45,47 @@ export const ConfirmConsentUseCase =
     grantService: GrantService
   ) =>
   (
-    interactionId: InteractionId,
+    interactionId: InteractionId, // TODO: try to use InteractionId
     rememberGrant: boolean
   ): TE.TaskEither<ConfirmConsentUseCaseError, GrantId> =>
     pipe(
-      TE.fromEither(
-        pipe(InteractionId.decode(interactionId), E.mapLeft(makeDomainError))
-      ),
-      TE.chain(flow(interactionService.find, fromTEOtoTE)),
+      // fetch the interaction
+      pipe(interactionService.find(interactionId), fromTEOtoTE),
       TE.chain((interaction) =>
         pipe(
-          // Load or Create a grant
-          loadOrCreateGrant(grantTTL, grantService)(interaction, rememberGrant),
-          // update the interaction and the grant
-          TE.map((grant) => ({ ...grant, scope: interaction.params.scope })),
-          TE.chain((grant) => {
-            const newInteraction = {
-              ...interaction,
-              result: {
-                ...interaction.result,
-                grantId: grant.id,
-              },
-            };
-            return pipe(
-              interactionService.upsert(newInteraction),
-              TE.chain((_) => grantService.upsert(grant))
-            );
-          })
+          // find a valid grant
+          findValidGrant(grantService)(interaction),
+          // if no grant was found then create a new one
+          TE.map(O.alt(() => makeGrant(interaction, rememberGrant, grantTTL))),
+          // update the interaction and the grant instance persisting them
+          TE.chain(
+            O.fold(
+              () => TE.left(makeDomainError("Internal Error")),
+              (grant) => {
+                const newInteraction = {
+                  ...interaction,
+                  result: {
+                    ...interaction.result,
+                    grantId: grant.id,
+                  },
+                };
+                return pipe(
+                  interactionService.upsert(newInteraction),
+                  TE.apSecond(grantService.upsert(grant))
+                );
+              }
+            )
+          )
         )
       ),
-      TE.chainFirst((result) =>
-        TE.of(logger.info(`ConfirmConsentUseCase ${show(result)}`))
-      ),
       TE.bimap(
-        (_) => _.kind,
-        (_) => _.id
+        (err) => {
+          logger.error(`Error on ConfirmConsentUseCase ${show(err)}`, err);
+          return err.kind;
+        },
+        (res) => {
+          logger.debug(`ConfirmConsentUseCase ${show(res)}`);
+          return res.id;
+        }
       )
     );

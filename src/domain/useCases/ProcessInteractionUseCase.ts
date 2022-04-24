@@ -1,10 +1,13 @@
 import * as t from "io-ts";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import * as RA from "fp-ts/ReadonlyArray";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Identity } from "../identities/types";
-import { InteractionId, interactionStep } from "../interactions/types";
+import {
+  Interaction,
+  InteractionId,
+  interactionStep,
+} from "../interactions/types";
 import { Grant } from "../grants/types";
 import { Client } from "../clients/types";
 import { InteractionService } from "../interactions/InteractionService";
@@ -13,7 +16,9 @@ import { IdentityService } from "../identities/IdentityService";
 import { Logger } from "../logger";
 import { fromTEOtoTE, show } from "../utils";
 import { ClientService } from "../clients/ClientService";
+import { makeDomainError } from "../types";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
+import { findValidGrant } from "./utils";
 
 export const LoginResult = t.type({
   identity: Identity,
@@ -34,6 +39,18 @@ export const RequireConsent = t.type({
   missingScope: t.array(t.string),
 });
 export type RequireConsent = t.TypeOf<typeof RequireConsent>;
+
+const makeRequireConsent = (
+  interaction: Interaction,
+  client: Client
+): ProcessResult => ({
+  client,
+  interactionId: interaction.id,
+  kind: "RequireConsent",
+  // TODO: Compare the required scope with the grant (if any) scope.
+  // The system should ask the diff
+  missingScope: (interaction.params.scope || client.scope).split(" "),
+});
 
 export const ProcessResult = t.union([
   LoginResult,
@@ -65,8 +82,8 @@ export const ProcessInteractionUseCase =
     accessToken: () => string | undefined
   ): TE.TaskEither<ProcessInteractionUseCaseError, ProcessResult> =>
     pipe(
-      interactionService.find(interactionId),
-      fromTEOtoTE,
+      // fetch the interaction
+      pipe(interactionService.find(interactionId), fromTEOtoTE),
       TE.mapLeft((_) => ProcessInteractionUseCaseError.invalidInteraction),
       TE.chain((interaction) => {
         if (interactionStep(interaction) === "login") {
@@ -80,59 +97,28 @@ export const ProcessInteractionUseCase =
             )
           );
         } else {
-          const requireConsent = pipe(
-            clientService.find(interaction.params.client_id),
-            fromTEOtoTE,
-            TE.map(
-              (client) =>
-                ({
-                  client,
-                  interactionId: interaction.id,
-                  kind: "RequireConsent",
-                  // TODO: Compare the required scope with the grant (if any) scope.
-                  // The system should ask the diff
-                  missingScope: (
-                    interaction.params.scope || client.scope
-                  ).split(" "),
-                } as RequireConsent)
-            )
-          );
-          const maybeGrant = pipe(
-            O.fromNullable(interaction.session?.identityId),
-            O.fold(
-              () => TE.right(O.none),
-              (identityId) =>
-                // if the interaction has an identity linked, retrieve
-                // a "to remember" grant if any.
-                pipe(
-                  grantService.findBy({
-                    clientId: O.some(interaction.params.client_id),
-                    identityId,
-                    remember: true,
-                  }),
-                  TE.map(
-                    flow(
-                      RA.filter(
-                        (_) =>
-                          _.scope === interaction.params.scope &&
-                          _.expireAt.getTime() >= new Date().getTime()
-                      ),
-                      RA.head
-                    )
-                  )
-                )
-            )
-          );
           return pipe(
-            maybeGrant,
+            // find a valid grant so we can return it skipping the require consent step
+            findValidGrant(grantService)(interaction),
             TE.chain(
               O.fold(
-                () => requireConsent,
+                () =>
+                  // grant was not found, so fetch information required to compose the consent information
+                  pipe(
+                    clientService.find(interaction.params.client_id),
+                    TE.chain(
+                      O.fold(
+                        () => TE.left(makeDomainError("Invalid Client")),
+                        (client) =>
+                          TE.right(makeRequireConsent(interaction, client))
+                      )
+                    )
+                  ),
                 (grant) =>
                   TE.right({
                     grant,
                     kind: "ConsentResult",
-                  } as ProcessResult)
+                  } as ConsentResult)
               )
             ),
             TE.mapLeft((error) => {
