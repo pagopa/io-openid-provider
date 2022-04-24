@@ -64,16 +64,3 @@ export const Interaction = t.type({
   session: t.union([t.undefined, SessionInfo]),
 });
 export type Interaction = t.TypeOf<typeof Interaction>;
-
-/**
- * Given an interaction return the step
- */
-export const interactionStep = (
-  interaction: Interaction
-): "login" | "consent" => {
-  if (interaction.result === undefined) {
-    return "login";
-  } else {
-    return "consent";
-  }
-};

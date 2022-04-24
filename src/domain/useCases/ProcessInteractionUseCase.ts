@@ -3,11 +3,7 @@ import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { Identity } from "../identities/types";
-import {
-  Interaction,
-  InteractionId,
-  interactionStep,
-} from "../interactions/types";
+import { Interaction, InteractionId } from "../interactions/types";
 import { Grant } from "../grants/types";
 import { Client } from "../clients/types";
 import { InteractionService } from "../interactions/InteractionService";
@@ -86,7 +82,8 @@ export const ProcessInteractionUseCase =
       pipe(interactionService.find(interactionId), fromTEOtoTE),
       TE.mapLeft((_) => ProcessInteractionUseCaseError.invalidInteraction),
       TE.chain((interaction) => {
-        if (interactionStep(interaction) === "login") {
+        // if the interaction has no result then start from the authentication
+        if (interaction.result === undefined) {
           return pipe(
             // run the logic to handle the login
             AuthenticateUseCase(logger, identityService)(accessToken()),
