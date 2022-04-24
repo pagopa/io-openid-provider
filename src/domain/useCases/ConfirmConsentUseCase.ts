@@ -43,6 +43,7 @@ const loadOrCreateGrant =
           identityId: interaction.result.identity,
           remember: true,
         }),
+        TE.map(RA.filter((_) => _.expireAt.getTime() >= new Date().getTime())),
         TE.map(RA.head),
         TE.map(
           O.getOrElse<Grant>(() => ({

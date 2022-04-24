@@ -3,7 +3,7 @@ import { client } from "../../clients/__tests__/data";
 import { Grant, GrantId } from "../types";
 
 export const grant: Grant = {
-  expireAt: new Date(),
+  expireAt: new Date(new Date().getTime() + 1000 * 60),
   id: "grant-id" as GrantId,
   issuedAt: new Date(),
   remember: false,

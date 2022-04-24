@@ -85,6 +85,34 @@ describe("ProcessInteractionUseCase", () => {
     expect(clientFind).toBeCalledTimes(1);
     expect(grantList).toBeCalledTimes(1);
   });
+  it("should reject invalid remembered grant", async () => {
+    const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
+      makeProcessInteractionUseCaseTest();
+
+    interactionServiceMock.find.mockReturnValue(TE.right(O.some(afterLoginInteraction)));
+    const clientFind = clientServiceMock.find.mockReturnValueOnce(
+      TE.right(O.some(client))
+    );
+    const grantList = grantServiceMock.findBy.mockReturnValueOnce(
+      TE.right([{ ...grant, expireAt: grant.issuedAt }])
+    );
+
+    const actual = await useCase(afterLoginInteraction.id, () => "")();
+    const expected = E.right({
+      client: client,
+      interactionId: interaction.id,
+      kind: "RequireConsent",
+      missingScope: interaction.params.scope?.split(" "),
+    });
+    expect(actual).toStrictEqual(expected);
+    expect(clientFind).toBeCalledTimes(1);
+    expect(grantList).toBeCalledWith({
+      clientId: O.some(client.clientId),
+      identityId: grant.subjects.identityId,
+      remember: true,
+    });
+    expect(grantList).toBeCalledTimes(1);
+  });
   it("should return the grant remembered if any", async () => {
     const { useCase, clientServiceMock, grantServiceMock, interactionServiceMock } =
       makeProcessInteractionUseCaseTest();

@@ -112,7 +112,11 @@ export const ProcessInteractionUseCase =
                   }),
                   TE.map(
                     flow(
-                      RA.filter((_) => _.scope === interaction.params.scope),
+                      RA.filter(
+                        (_) =>
+                          _.scope === interaction.params.scope &&
+                          _.expireAt.getTime() >= new Date().getTime()
+                      ),
                       RA.head
                     )
                   )
