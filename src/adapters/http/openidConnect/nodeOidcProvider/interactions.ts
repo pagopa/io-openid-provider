@@ -8,8 +8,9 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { ClientService } from "src/domain/clients/ClientService";
-import { GrantService } from "src/domain/grants/GrantService";
+import { ClientService } from "../../../../domain/clients/ClientService";
+import { GrantService } from "../../../../domain/grants/GrantService";
+import { DomainErrorTypes } from "../../../../domain/types";
 import {
   ProcessInteractionUseCase,
   ProcessInteractionUseCaseError,
@@ -120,13 +121,22 @@ const postInteractionHandler =
   ): express.Handler =>
   (req, res, next) => {
     const response = pipe(
+      // decode the interaction
+      TE.fromEither(
+        pipe(
+          InteractionId.decode(req.params.id),
+          E.mapLeft((_) => DomainErrorTypes.NOT_FOUND)
+        )
+      ),
       // run the logic to confirm the consent
-      ConfirmConsentUseCase(
-        config.grantTTL,
-        logger,
-        interactionService,
-        grantService
-      )(req.params.id, req.body.to_remember === "on"),
+      TE.chain((interactionId) =>
+        ConfirmConsentUseCase(
+          config.grantTTL,
+          logger,
+          interactionService,
+          grantService
+        )(interactionId, req.body.to_remember === "on")
+      ),
       // create the result
       TE.bimap(
         (errorMessage) => ({ error: errorMessage }),

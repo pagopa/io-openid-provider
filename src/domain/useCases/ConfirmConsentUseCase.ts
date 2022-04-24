@@ -75,7 +75,7 @@ export const ConfirmConsentUseCase =
     grantService: GrantService
   ) =>
   (
-    interactionId: string | undefined, // TODO: try to use InteractionId
+    interactionId: InteractionId,
     rememberGrant: boolean
   ): TE.TaskEither<ConfirmConsentUseCaseError, GrantId> =>
     pipe(

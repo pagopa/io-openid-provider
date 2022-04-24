@@ -10,6 +10,7 @@ import { DomainErrorTypes, Seconds } from "../../types";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
+  interaction,
 } from "../../interactions/__tests__/data";
 import { grant } from "../../grants/__tests__/data";
 
@@ -31,15 +32,12 @@ describe("ConfirmConsentUseCase", () => {
   it("should return an error if the interaction doesn't exists", async () => {
     const { useCase, interactionServiceMock } = makeConfirmConsentUseCaseTest();
 
-    const actual0 = await useCase(undefined, false)();
-    expect(actual0).toStrictEqual(E.left(DomainErrorTypes.GENERIC_ERROR));
-
     const interactionfind = interactionServiceMock.find.mockReturnValue(
       TE.right(O.none)
     );
-    const actual1 = await useCase("doesnt-exist", false)();
-    expect(actual1).toStrictEqual(E.left(DomainErrorTypes.NOT_FOUND));
-    expect(interactionfind).toBeCalledWith("doesnt-exist");
+    const actual = await useCase(interaction.id, false)();
+    expect(actual).toStrictEqual(E.left(DomainErrorTypes.NOT_FOUND));
+    expect(interactionfind).toBeCalledWith(interaction.id);
   });
   it("should return a new Grant", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
