@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import * as PR from "io-ts/PathReporter";
 import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -13,6 +14,7 @@ import { Seconds } from "./domain/types";
 interface ServerConfig {
   readonly hostname: string;
   readonly port: string;
+  readonly enableProxy: boolean;
   readonly enableHelmet: boolean;
   readonly authenticationCookieKey: string;
 }
@@ -27,6 +29,7 @@ type Envs = NodeJS.ProcessEnv;
 const EnvType = t.type({
   APPLICATION_NAME: NonEmptyString,
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
+  ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
   GRANT_TTL_IN_SECONDS: IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
   LOG_LEVEL: t.keyof({
@@ -64,6 +67,7 @@ const makeConfig = (envs: EnvType): Config => ({
   server: {
     authenticationCookieKey: envs.AUTHENTICATION_COOKIE_KEY,
     enableHelmet: false,
+    enableProxy: envs.ENABLE_PROXY,
     hostname: envs.SERVER_HOSTNAME,
     port: envs.PORT,
   },
