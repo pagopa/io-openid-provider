@@ -23,6 +23,7 @@ export const config: Config = {
   server: {
     authenticationCookieKey: envs["AUTHENTICATION_COOKIE_KEY"] as string,
     enableHelmet: false,
+    enableProxy: false,
     hostname: envs["SERVER_HOSTNAME"] as string,
     port: envs["PORT"] as string,
   },

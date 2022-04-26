@@ -140,5 +140,8 @@ export const makeProvider = (
   // the authentication on clients paths. Ugly solution but works ..
   provider.use(disableAuthClientsEndpointMiddleware(providerConfig));
 
+  // eslint-disable-next-line functional/immutable-data
+  provider.proxy = config.server.enableProxy;
+
   return provider;
 };
