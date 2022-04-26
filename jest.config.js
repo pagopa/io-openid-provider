@@ -12,8 +12,8 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
   "modulePathIgnorePatterns": [
-    "__tests__/utils/",
-    "./__tests__/data.ts"
+    "./__tests__/data.ts",
+    "./__tests__/fakes.ts"
   ],
   "coveragePathIgnorePatterns": [
     "<rootDir>/src/generated/",

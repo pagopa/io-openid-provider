@@ -3,21 +3,17 @@ services:
   service:
     build: .
     environment:
-      - REDIS_KEY_PREFIX="oidc:"
-      - REDIS_URL=redis://db:6379
+      - PORT=3001
+      - MONGODB_URL=mongodb://root:randompassword@mongodb:27017/testdb?authSource=admin
       - IO_BACKEND_BASE_URL=https://app-backend.io.italia.it
     ports:
-      - "3000:3000"
-  postgres:
-    image: postgres:13-alpine
-    restart: always
-    ports:
-      - "5432:5432"
+      - "3001:3001"
+  mongodb:
+    # This image automatically creates a replica set required for transactions
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: randompassword
-      POSTGRES_DB: db
-  db:
-    image: "redis:6.2.6-alpine"
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: randompassword
+      MONGO_INITDB_DATABASE: test
     ports:
-      - "6379:6379"
+      - 27017:27017
