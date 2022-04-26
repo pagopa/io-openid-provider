@@ -1,10 +1,9 @@
 import * as C from "../config";
 import * as E from "fp-ts/Either";
 import * as f from "fp-ts/function";
-import * as data from "./utils/records";
+import * as data from "./data";
 
 describe("Config", () => {
-  // TODO integrate with property base test
   describe("given an invalid configuration", () => {
     it("should fail because hostname and log level are missing", () => {
       const envs = {
@@ -20,7 +19,7 @@ describe("Config", () => {
 
   describe("given a valid configuration", () => {
     it("should return a configuration", () => {
-      const expected = E.right(data.validConfig);
+      const expected = E.right(data.config);
       const actual = C.parseConfig(data.envs);
       expect(actual).toStrictEqual(expected);
     });
