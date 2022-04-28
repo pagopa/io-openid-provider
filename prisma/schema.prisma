@@ -27,11 +27,10 @@ model Interaction {
   issuedAt    DateTime
   params      Json
   payload     Json
-  result      Json?
-  returnTo    String
-  // Session information
   identityId  String?
-  cookieId    String?
+  grantId     String?
+  error       String?
+  returnTo    String
 }
 
 model Grant {

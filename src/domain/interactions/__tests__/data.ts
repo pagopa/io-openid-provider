@@ -22,17 +22,12 @@ export const interaction: Interaction = {
   },
   result: undefined,
   returnTo: "https://callback.cb/cb",
-  session: undefined,
 };
 
 export const afterLoginInteraction: Interaction = {
   ...interaction,
   result: {
     identityId: identity.id,
-  },
-  session: {
-    identityId: identity.id,
-    cookieId: "cookie-id",
   },
 };
 

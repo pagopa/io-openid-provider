@@ -19,7 +19,11 @@ const makeGrant = (
   grantTTL: Seconds
 ): O.Option<Grant> =>
   pipe(
-    O.fromNullable(interaction.session?.identityId),
+    O.fromNullable(
+      interaction.result && "identityId" in interaction.result
+        ? interaction.result.identityId
+        : null
+    ),
     O.map((identityId) => ({
       expireAt: new Date(new Date().getTime() + 1000 * grantTTL),
       id: crypto.randomUUID() as GrantId,

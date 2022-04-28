@@ -11,24 +11,31 @@ import { runAsTE, runAsTEO } from "./utils";
 const toRecord = (
   entity: Interaction
 ): prisma.Prisma.InteractionCreateInput => ({
-  cookieId: entity.session?.cookieId || null,
+  error: entity.result && "error" in entity.result ? entity.result.error : null,
   expireAt: entity.expireAt,
+  grantId:
+    entity.result && "grantId" in entity.result ? entity.result.grantId : null,
   id: entity.id,
-  identityId: entity.session?.identityId || null,
+  identityId:
+    entity.result && "identityId" in entity.result
+      ? entity.result.identityId
+      : null,
   issuedAt: entity.issuedAt,
   params: Interaction.props.params.encode(entity.params),
   payload: entity.payload,
-  result: entity.result || null,
   returnTo: entity.returnTo,
 });
 
 const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
   Interaction.decode({
     ...record,
-    result: record.result || undefined,
-    session:
-      record.identityId && record.cookieId
-        ? { cookieId: record.cookieId, identityId: record.identityId }
+    result:
+      record.error || record.grantId || record.identityId
+        ? {
+            error: record.error || undefined,
+            grantId: record.grantId || undefined,
+            identityId: record.identityId || undefined,
+          }
         : undefined,
   });
 
