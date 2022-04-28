@@ -29,7 +29,6 @@ const confirmConsent = (
     .set("Cookie", cookies.concat())
     .type("form")
     .send({
-      prompt: "consent",
       to_remember: "false",
     });
 };
