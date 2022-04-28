@@ -53,6 +53,5 @@ export const Interaction = t.type({
   params: RequestParams,
   payload: Payload,
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),
-  returnTo: t.string,
 });
 export type Interaction = t.TypeOf<typeof Interaction>;

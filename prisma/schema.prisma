@@ -30,7 +30,6 @@ model Interaction {
   identityId  String?
   grantId     String?
   error       String?
-  returnTo    String
 }
 
 model Grant {

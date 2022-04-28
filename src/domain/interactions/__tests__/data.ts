@@ -21,7 +21,6 @@ export const interaction: Interaction = {
     state: "state",
   },
   result: undefined,
-  returnTo: "https://callback.cb/cb",
 };
 
 export const afterLoginInteraction: Interaction = {

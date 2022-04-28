@@ -23,7 +23,6 @@ const toRecord = (
   issuedAt: entity.issuedAt,
   params: Interaction.props.params.encode(entity.params),
   payload: entity.payload,
-  returnTo: entity.returnTo,
 });
 
 const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
