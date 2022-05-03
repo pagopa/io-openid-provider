@@ -16,6 +16,7 @@ export const config: Config = {
     name: envs["APPLICATION_NAME"] as NonEmptyString,
     version: envs["VERSION"] as NonEmptyString,
   },
+  issuer: new URL(envs["ISSUER"] as string),
   logger: {
     logLevel: envs["LOG_LEVEL"] as any,
     logName: envs["APPLICATION_NAME"] as string,
