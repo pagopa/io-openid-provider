@@ -32,7 +32,7 @@ const fromRecord = (record: prisma.Client): t.Validation<Client> =>
           serviceId,
         })
     ),
-    E.ap(ClientId.decode(record.clientId)),
+    E.ap(ClientId.decode(record.id)),
     E.ap(OrganizationId.decode(record.organizationId)),
     E.ap(ServiceId.decode(record.serviceId)),
     E.ap(GrantTypes.decode(record.grantTypes)),
@@ -40,9 +40,15 @@ const fromRecord = (record: prisma.Client): t.Validation<Client> =>
   );
 
 const toRecord = (entity: Client): prisma.Client => ({
-  ...entity,
-  // TODO: remove this hardcoded id
+  grantTypes: entity.grantTypes,
   id: entity.clientId,
+  issuedAt: entity.issuedAt,
+  name: entity.name,
+  organizationId: entity.organizationId,
+  redirectUris: entity.redirectUris,
+  responseTypes: entity.responseTypes,
+  scope: entity.scope,
+  serviceId: entity.serviceId,
   skipConsent: false,
 });
 
@@ -52,7 +58,7 @@ export const makeClientService = <T>(
 ): ClientService => ({
   find: (id) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({ where: { clientId: id } })
+      client.findUnique({ where: { id } })
     ),
   list: (selector) =>
     runAsTE(logger)("list", E.traverseArray(fromRecord), () =>
@@ -69,15 +75,15 @@ export const makeClientService = <T>(
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.delete({ where: { clientId: id } })
+      () => client.delete({ where: { id } })
     ),
   upsert: (definition) => {
-    const obj = { ...toRecord(definition), id: undefined };
+    const obj = { ...toRecord(definition) };
     return runAsTE(logger)("upsert", fromRecord, () =>
       client.upsert({
         create: obj,
-        update: obj,
-        where: { clientId: definition.clientId },
+        update: { ...{ ...obj, id: undefined } },
+        where: { id: definition.clientId },
       })
     );
   },

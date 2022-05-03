@@ -1,4 +1,5 @@
 import { pipe } from "fp-ts/function";
+import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { ClientService } from "../../../../domain/clients/ClientService";
@@ -10,6 +11,12 @@ import { GrantService } from "../../../../domain/grants/GrantService";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { Identity } from "../../../../domain/identities/types";
 import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
+import {
+  makeClientId,
+  OrganizationId,
+  ServiceId,
+} from "../../../../domain/clients/types";
+import { show } from "../../../../domain/utils";
 import { makeAdapterProvider } from "./AdapterProvider";
 import { disableAuthClientsEndpointMiddleware } from "./middlewares";
 
@@ -85,6 +92,17 @@ export const makeConfiguration = (
       },
       registration: {
         enabled: true,
+        idFactory: (ctx) =>
+          pipe(
+            E.of(makeClientId),
+            E.ap(OrganizationId.decode(ctx.oidc.body?.organization_id)),
+            E.ap(ServiceId.decode(ctx.oidc.body?.service_id)),
+            E.flatten,
+            E.getOrElseW((err) => {
+              logger.error(`Some error during client_id factory ${show}`);
+              throw new Error(show(err));
+            })
+          ),
         initialAccessToken: false,
         issueRegistrationAccessToken: false,
       },

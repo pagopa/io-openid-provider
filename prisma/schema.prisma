@@ -8,8 +8,7 @@ generator client {
 }
 
 model Client {
-  id                String @id @default(auto()) @map("_id") @db.ObjectId
-  clientId          String @unique
+  id                String @id @map("_id")
   grantTypes        String[]
   issuedAt          DateTime
   name              String

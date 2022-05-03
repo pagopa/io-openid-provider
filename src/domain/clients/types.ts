@@ -12,6 +12,11 @@ export const ClientId = t.brand(
 );
 export type ClientId = t.TypeOf<typeof ClientId>;
 
+export const makeClientId =
+  (organizationId: OrganizationId) =>
+  (serviceId: ServiceId): t.Validation<ClientId> =>
+    ClientId.decode(`${organizationId}:${serviceId}`);
+
 interface ServiceIdBrand {
   readonly ServiceId: unique symbol;
 }

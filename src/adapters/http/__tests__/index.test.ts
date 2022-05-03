@@ -109,4 +109,24 @@ describe("Application", () => {
       '<input type="hidden" name="id_token"'
     );
   });
+  it("should implement the create client endpoint", async () => {
+    const { app } = makeInMemoryApplication();
+
+    const createClientResponse = await request(app)
+      .post(`/admin/clients`)
+      .send({
+        redirect_uris: ["https://callback.io/callback"],
+        organization_id: "my-org",
+        service_id: "my-service",
+        response_types: ["id_token"],
+        grant_types: ["implicit"],
+        application_type: "web",
+        client_name: "This is the name of this client",
+        scope: "profile openid",
+        token_endpoint_auth_method: "none",
+      });
+
+    expect(createClientResponse.statusCode).toBe(201);
+    expect(createClientResponse.body.client_id).toBe(`my-org:my-service`);
+  });
 });
