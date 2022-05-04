@@ -2,9 +2,9 @@ import * as t from "io-ts";
 import * as PR from "io-ts/PathReporter";
 
 export enum DomainErrorTypes {
-  GENERIC_ERROR,
-  NOT_FOUND,
-  NOT_IMPLEMENTED,
+  GENERIC_ERROR = "GENERIC_ERROR",
+  NOT_FOUND = "NOT_FOUND",
+  NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
 }
 
 export const DomainError = t.type({

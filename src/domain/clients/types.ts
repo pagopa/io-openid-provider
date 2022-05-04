@@ -1,21 +1,7 @@
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-
-interface ClientIdBrand {
-  readonly ClientId: unique symbol;
-}
-// ClientId is just a string
-export const ClientId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, ClientIdBrand> => t.string.is(s),
-  "ClientId"
-);
-export type ClientId = t.TypeOf<typeof ClientId>;
-
-export const makeClientId =
-  (organizationId: OrganizationId) =>
-  (serviceId: ServiceId): t.Validation<ClientId> =>
-    ClientId.decode(`${organizationId}:${serviceId}`);
 
 interface ServiceIdBrand {
   readonly ServiceId: unique symbol;
@@ -39,6 +25,34 @@ export const OrganizationId = t.brand(
 );
 export type OrganizationId = t.TypeOf<typeof OrganizationId>;
 
+const ClientId = t.strict({
+  organizationId: OrganizationId,
+  serviceId: ServiceId,
+});
+export type ClientId = t.TypeOf<typeof ClientId>;
+
+const separator = ":";
+const ClientIdFromString = new t.Type<ClientId, string, unknown>(
+  "ClientIdFromString",
+  (s): s is ClientId => ClientId.is(s),
+  (s, _ctx) =>
+    pipe(
+      t.string.decode(s),
+      E.chain((str) => {
+        const [orgIdStr, srvIdStr] = str.split(separator);
+        return pipe(
+          E.of((organizationId: OrganizationId) => (serviceId: ServiceId) => ({
+            organizationId,
+            serviceId,
+          })),
+          E.ap(OrganizationId.decode(orgIdStr)),
+          E.ap(ServiceId.decode(srvIdStr))
+        );
+      })
+    ),
+  (clientId) => `${clientId.organizationId}${separator}${clientId.serviceId}`
+);
+
 export const GrantTypes = t.array(t.literal("implicit"));
 export type GrantTypes = t.TypeOf<typeof GrantTypes>;
 
@@ -49,14 +63,12 @@ export type ResponseTypes = t.TypeOf<typeof ResponseTypes>;
  * Represents a client of OpenID Connect
  */
 export const Client = t.type({
-  clientId: ClientId,
+  clientId: ClientIdFromString,
   grantTypes: GrantTypes,
   issuedAt: tt.date,
   name: t.string,
-  organizationId: OrganizationId,
-  redirectUris: t.array(t.string),
+  redirectUris: t.readonlyArray(t.string),
   responseTypes: ResponseTypes,
   scope: t.string,
-  serviceId: ServiceId,
 });
 export type Client = t.TypeOf<typeof Client>;

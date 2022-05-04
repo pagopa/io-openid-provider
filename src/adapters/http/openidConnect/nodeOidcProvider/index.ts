@@ -12,7 +12,7 @@ import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { Identity } from "../../../../domain/identities/types";
 import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
 import {
-  makeClientId,
+  Client,
   OrganizationId,
   ServiceId,
 } from "../../../../domain/clients/types";
@@ -94,10 +94,12 @@ export const makeConfiguration = (
         enabled: true,
         idFactory: (ctx) =>
           pipe(
-            E.of(makeClientId),
+            E.of(
+              (organizationId: OrganizationId) => (serviceId: ServiceId) =>
+                Client.props.clientId.encode({ organizationId, serviceId })
+            ),
             E.ap(OrganizationId.decode(ctx.oidc.body?.organization_id)),
             E.ap(ServiceId.decode(ctx.oidc.body?.service_id)),
-            E.flatten,
             E.getOrElseW((err) => {
               logger.error(`Some error during client_id factory ${show}`);
               throw new Error(show(err));

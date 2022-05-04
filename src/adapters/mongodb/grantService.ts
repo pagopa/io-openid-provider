@@ -8,11 +8,11 @@ import { Grant, GrantId } from "../../domain/grants/types";
 import { GrantService } from "../../domain/grants/GrantService";
 import { Logger } from "../../domain/logger";
 import { IdentityId } from "../../domain/identities/types";
-import { ClientId } from "../../domain/clients/types";
+import { Client, ClientId } from "../../domain/clients/types";
 import { runAsTE, runAsTEO } from "./utils";
 
 const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
-  clientId: entity.subjects.clientId,
+  clientId: Client.props.clientId.encode(entity.subjects.clientId),
   expireAt: entity.expireAt,
   id: entity.id,
   identityId: entity.subjects.identityId,
@@ -38,7 +38,7 @@ const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
     ),
     E.ap(GrantId.decode(record.id)),
     E.ap(IdentityId.decode(record.identityId)),
-    E.ap(ClientId.decode(record.clientId))
+    E.ap(Client.props.clientId.decode(record.clientId))
   );
 
 export const makeGrantService = <T>(
@@ -56,7 +56,13 @@ export const makeGrantService = <T>(
           AND: [
             { identityId: selector.identityId },
             { remember: selector.remember },
-            { clientId: O.toUndefined(selector.clientId) },
+            {
+              clientId: pipe(
+                selector.clientId,
+                O.map(Client.props.clientId.encode),
+                O.toUndefined
+              ),
+            },
           ],
         },
       })

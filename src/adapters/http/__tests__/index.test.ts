@@ -8,7 +8,7 @@ const initImplicitFlow = (app: express.Application, client: Client) => {
   return request(app)
     .get("/oauth/authorize")
     .query({
-      client_id: client.clientId,
+      client_id: Client.props.clientId.encode(client.clientId),
       response_type: (client.responseTypes || [""])[0],
       redirect_uri: (client.redirectUris || [""])[0],
       response_mode: "form_post",
@@ -82,10 +82,9 @@ describe("Application", () => {
       authorizeRedirectResponseCookies
     );
 
-    const interactionId = authorizeRedirectResponse.headers["location"].replace(
-      "/interaction/",
-      ""
-    );
+    const interactionId = authorizeRedirectResponse.headers[
+      "location"
+    ]?.replace("/interaction/", "");
 
     const confirmConsentResponse = await confirmConsent(
       app,
@@ -116,8 +115,8 @@ describe("Application", () => {
       .post(`/admin/clients`)
       .send({
         redirect_uris: ["https://callback.io/callback"],
-        organization_id: "my-org",
-        service_id: "my-service",
+        organization_id: "my-org-1",
+        service_id: "my-service-1",
         response_types: ["id_token"],
         grant_types: ["implicit"],
         application_type: "web",
@@ -127,6 +126,17 @@ describe("Application", () => {
       });
 
     expect(createClientResponse.statusCode).toBe(201);
-    expect(createClientResponse.body.client_id).toBe(`my-org:my-service`);
+    expect(createClientResponse.body.client_id).toBe(`my-org-1:my-service-1`);
+  });
+  it("should implement the find client endpoint", async () => {
+    const { app, client } = makeInMemoryApplication();
+    const clientId = Client.props.clientId.encode(client.clientId);
+
+    const findClientResponse = await request(app)
+      .get(`/admin/clients/${clientId}`)
+      .send();
+
+    expect(findClientResponse.statusCode).toBe(200);
+    expect(findClientResponse.body.client_id).toBe(`${clientId}`);
   });
 });

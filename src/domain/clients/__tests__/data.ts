@@ -1,13 +1,16 @@
 import { Client, ClientId, OrganizationId, ServiceId } from "../types";
 
+const clientId: ClientId = {
+  organizationId: "org-id" as OrganizationId,
+  serviceId: "service-id" as ServiceId,
+};
+
 export const client: Client = {
-  clientId: "org-id:service-id" as ClientId,
+  clientId: clientId,
   grantTypes: ["implicit"],
   issuedAt: new Date(),
   name: "This is the client name",
-  organizationId: "org-id" as OrganizationId,
   redirectUris: ["https://callback.cb/cb"],
-  serviceId: "service-id" as ServiceId,
   responseTypes: ["id_token"],
   scope: "openid profile",
 };
