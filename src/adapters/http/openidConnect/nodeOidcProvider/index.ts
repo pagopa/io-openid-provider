@@ -18,7 +18,10 @@ import {
 } from "../../../../domain/clients/types";
 import { show } from "../../../../domain/utils";
 import { makeAdapterProvider } from "./AdapterProvider";
-import { disableAuthClientsEndpointMiddleware } from "./middlewares";
+import {
+  disableAuthClientsEndpointMiddleware,
+  updateDiscoveryResponseMiddleware,
+} from "./middlewares";
 
 export const makeAccountClaims = (identity: Identity): oidc.AccountClaims => ({
   family_name: identity.familyName,
@@ -150,15 +153,15 @@ export const makeProvider = (
   config: Config,
   providerConfig: oidc.Configuration
 ) => {
-  const provider = new oidc.Provider(
-    `https://${config.server.hostname}:${config.server.port}`,
-    providerConfig
-  );
+  const provider = new oidc.Provider(config.issuer.href, providerConfig);
   // Add the middleware that disable the authorization on the
   // clients management endpoints.
   // This middleware toghether with a fake RegistrationAccessTokenAdapter disable
   // the authentication on clients paths. Ugly solution but works ..
   provider.use(disableAuthClientsEndpointMiddleware(providerConfig));
+
+  // Add the middleware that remove some fields from response of discovert endpoint
+  provider.use(updateDiscoveryResponseMiddleware);
 
   // eslint-disable-next-line functional/immutable-data
   provider.proxy = config.server.enableProxy;

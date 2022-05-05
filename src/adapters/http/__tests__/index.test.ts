@@ -139,4 +139,14 @@ describe("Application", () => {
     expect(findClientResponse.statusCode).toBe(200);
     expect(findClientResponse.body.client_id).toBe(`${clientId}`);
   });
+  it("should implement the discovery endpoint", async () => {
+    const { app } = makeInMemoryApplication();
+
+    const discoveryResponse = await request(app)
+      .get(`/.well-known/openid-configuration`)
+      .send();
+
+    expect(discoveryResponse.statusCode).toBe(200);
+    expect(discoveryResponse.body).not.toContain("token_endpoint");
+  });
 });
