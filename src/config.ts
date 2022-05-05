@@ -32,6 +32,7 @@ const EnvType = t.type({
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
   GRANT_TTL_IN_SECONDS: IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
+  ISSUER: UrlFromString,
   LOG_LEVEL: t.keyof({
     debug: null,
     error: null,
@@ -57,6 +58,7 @@ const makeConfig = (envs: EnvType): Config => ({
     name: envs.APPLICATION_NAME,
     version: envs.VERSION,
   },
+  issuer: new URL(envs.ISSUER.href),
   logger: {
     logLevel: envs.LOG_LEVEL,
     logName: envs.APPLICATION_NAME,
@@ -83,6 +85,7 @@ export interface Config {
   readonly server: ServerConfig;
   readonly mongodb: MongoDBConfig;
   readonly grantTTL: Seconds;
+  readonly issuer: URL;
 }
 
 /**
