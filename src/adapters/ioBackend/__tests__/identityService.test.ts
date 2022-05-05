@@ -46,7 +46,13 @@ describe("IdentityService", () => {
         responses: {
           getUserIdentityResp: mkResponse(200)(userIdentity),
         },
-        expected: E.right(identity),
+        expected: E.right({
+          ...identity,
+          acr: undefined,
+          authTime: undefined,
+          dateOfBirth: undefined,
+          email: undefined,
+        }),
       },
       {
         title: "manage unknown error",
