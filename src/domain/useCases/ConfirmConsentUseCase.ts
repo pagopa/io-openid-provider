@@ -47,7 +47,7 @@ export const ConfirmConsentUseCase =
   (
     interactionId: InteractionId, // TODO: try to use InteractionId
     rememberGrant: boolean
-  ): TE.TaskEither<ConfirmConsentUseCaseError, GrantId> =>
+  ): TE.TaskEither<ConfirmConsentUseCaseError, Grant> =>
     pipe(
       // fetch the interaction
       pipe(interactionService.find(interactionId), fromTEOtoTE),
@@ -65,8 +65,8 @@ export const ConfirmConsentUseCase =
                 const newInteraction = {
                   ...interaction,
                   result: {
-                    ...interaction.result,
                     grantId: grant.id,
+                    identityId: grant.subjects.identityId,
                   },
                 };
                 return pipe(
@@ -85,7 +85,7 @@ export const ConfirmConsentUseCase =
         },
         (res) => {
           logger.debug(`ConfirmConsentUseCase ${show(res)}`);
-          return res.id;
+          return res;
         }
       )
     );

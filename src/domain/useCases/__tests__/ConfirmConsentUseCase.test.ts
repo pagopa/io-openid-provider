@@ -53,7 +53,7 @@ describe("ConfirmConsentUseCase", () => {
     grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, false)();
-    expect(actual).toStrictEqual(E.right(grant.id));
+    expect(actual).toStrictEqual(E.right(grant));
     expect(grantFindBy).toBeCalledTimes(1);
   });
   it("should reject expired remebered grant", async () => {
@@ -71,7 +71,7 @@ describe("ConfirmConsentUseCase", () => {
 
     const actual = await useCase(afterLoginInteraction.id, false)();
     // check that the grant is different from the expired one
-    expect(actual).not.toStrictEqual(E.right(grant.id));
+    expect(actual).not.toStrictEqual(E.right(grant));
     expect(grantFindBy).toBeCalledWith({
       clientId: O.some(afterLoginInteraction.params.client_id),
       identityId: grant.subjects.identityId,
@@ -93,7 +93,7 @@ describe("ConfirmConsentUseCase", () => {
     grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, false)();
-    expect(actual).toStrictEqual(E.right(grant.id));
+    expect(actual).toStrictEqual(E.right(grant));
     expect(grantFindBy).toBeCalledWith({
       clientId: O.some(afterLoginInteraction.params.client_id),
       identityId: grant.subjects.identityId,
@@ -101,7 +101,7 @@ describe("ConfirmConsentUseCase", () => {
     });
     expect(grantFindBy).toBeCalledTimes(1);
   });
-  it("should return the grant referenced by the given interaction", async () => {
+  it.only("should return the grant referenced by the given interaction", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
       makeConfirmConsentUseCaseTest();
 
@@ -110,11 +110,11 @@ describe("ConfirmConsentUseCase", () => {
     );
     interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
     grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
-    grantServiceMock.find.mockImplementationOnce((_) =>
+    grantServiceMock.find.mockImplementationOnce((_0, _1) =>
       TE.right(O.some(grant))
     );
 
     const actual = await useCase(afterConsentInteraction.id, false)();
-    expect(actual).toStrictEqual(E.right(grant.id));
+    expect(actual).toStrictEqual(E.right(grant));
   });
 });

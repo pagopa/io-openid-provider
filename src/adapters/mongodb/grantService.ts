@@ -45,9 +45,11 @@ export const makeGrantService = <T>(
   logger: Logger,
   client: Prisma.GrantDelegate<T>
 ): GrantService => ({
-  find: (id) =>
+  find: (identityId, grantId) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({ where: { id } })
+      client.findUnique({
+        where: { identityId_id: { id: grantId, identityId } },
+      })
     ),
   findBy: (selector) =>
     runAsTE(logger)("findBy", E.traverseArray(fromRecord), () =>
@@ -61,11 +63,14 @@ export const makeGrantService = <T>(
         },
       })
     ),
-  remove: (id) =>
+  remove: (identityId, grantId) =>
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.delete({ where: { id } })
+      () =>
+        client.delete({
+          where: { identityId_id: { id: grantId, identityId } },
+        })
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };

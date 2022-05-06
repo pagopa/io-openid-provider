@@ -28,7 +28,7 @@ export const interaction: Interaction = {
 export const afterLoginInteraction: Interaction = {
   ...interaction,
   result: {
-    identity: identity.id,
+    identityId: identity.id,
   },
   session: {
     identityId: identity.id,
@@ -39,7 +39,7 @@ export const afterLoginInteraction: Interaction = {
 export const afterConsentInteraction: Interaction = {
   ...interaction,
   result: {
-    identity: identity.id,
+    identityId: identity.id,
     grantId: grant.id,
   },
 };

@@ -1,5 +1,6 @@
 import { Option } from "fp-ts/Option";
 import { TaskEither } from "fp-ts/TaskEither";
+import { IdentityId } from "../identities/types";
 import { DomainError } from "../types";
 import { Grant, GrantId, GrantSelector } from "./types";
 
@@ -8,9 +9,12 @@ import { Grant, GrantId, GrantSelector } from "./types";
  */
 export interface GrantService {
   /**
-   * Given a grantId return the grant.
+   * Given an identityId and a grantId return the grant.
    */
-  readonly find: (grantId: GrantId) => TaskEither<DomainError, Option<Grant>>;
+  readonly find: (
+    identityId: IdentityId,
+    grantId: GrantId
+  ) => TaskEither<DomainError, Option<Grant>>;
   /**
    * Given a selector return grants that matches it
    */
@@ -24,5 +28,8 @@ export interface GrantService {
   /**
    * Delete the Grant identified with the given grantId.
    */
-  readonly remove: (grantId: GrantId) => TaskEither<DomainError, void>;
+  readonly remove: (
+    identityId: IdentityId,
+    grantId: GrantId
+  ) => TaskEither<DomainError, void>;
 }
