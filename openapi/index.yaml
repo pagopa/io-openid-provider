@@ -96,6 +96,16 @@ paths:
           $ref: '#/responses/404NotFound'
         500:
           $ref: '#/responses/500InternalServerError'
+    delete:
+      operationId: deleteGrant
+      summary: Delete a grant
+      response:
+        204:
+          $ref: '#/responses/204NoContent'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
 
   /.well-known/openid-configuration:
     get:
@@ -574,6 +584,9 @@ responses:
     description: OpenID Discovery Configuration
     schema:
       $ref: '#/definitions/OpenIDDiscovery'
+  204NoContent:
+    description: >-
+      Operation is completed
   400HtmlBadRequest:
     description: >-
       This response is returned if an error occurred but we can't redirect to a given client callback.
