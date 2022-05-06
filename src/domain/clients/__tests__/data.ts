@@ -1,7 +1,7 @@
 import { Client, ClientId, OrganizationId, ServiceId } from "../types";
 
 const clientId: ClientId = {
-  organizationId: "org-id" as OrganizationId,
+  organizationId: "00000000000" as OrganizationId,
   serviceId: "service-id" as ServiceId,
 };
 

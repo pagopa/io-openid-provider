@@ -1,3 +1,4 @@
+import * as fc from "fast-check";
 import * as E from "fp-ts/Either";
 import { client } from "./data";
 import * as d from "../types";
@@ -19,8 +20,15 @@ describe("Client.props.clientId", () => {
       );
     });
     it("should return left given an invalid value", () => {
-      const invalid = "invalid";
-      expect(E.isLeft(clientIdType.decode(invalid))).toStrictEqual(true);
+      const inputGen = fc.oneof(
+        fc.string(),
+        fc.string().map((s) => fc.constantFrom(`${s}:`, `:${s}`))
+      );
+      fc.assert(
+        fc.property(inputGen, (input) => {
+          expect(E.isLeft(clientIdType.decode(input))).toStrictEqual(true);
+        })
+      );
     });
   });
 });

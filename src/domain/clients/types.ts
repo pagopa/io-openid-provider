@@ -2,27 +2,21 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
+import { NonEmptyString } from "io-ts-types";
+import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 interface ServiceIdBrand {
   readonly ServiceId: unique symbol;
 }
 // ServiceId is just a string
 export const ServiceId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, ServiceIdBrand> => t.string.is(s),
+  NonEmptyString,
+  (s): s is t.Branded<NonEmptyString, ServiceIdBrand> => NonEmptyString.is(s),
   "ServiceId"
 );
 export type ServiceId = t.TypeOf<typeof ServiceId>;
 
-interface OrganizationIdBrand {
-  readonly OrganizationId: unique symbol;
-}
-// OrganizationId is just a string
-export const OrganizationId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, OrganizationIdBrand> => t.string.is(s),
-  "OrganizationId"
-);
+export const OrganizationId = OrganizationFiscalCode;
 export type OrganizationId = t.TypeOf<typeof OrganizationId>;
 
 const ClientId = t.strict({
@@ -32,19 +26,21 @@ const ClientId = t.strict({
 export type ClientId = t.TypeOf<typeof ClientId>;
 
 const separator = ":";
-const ClientIdFromString = new t.Type<ClientId, string, unknown>(
+const ClientIdFromString = new t.Type<ClientId, string>(
   "ClientIdFromString",
   (s): s is ClientId => ClientId.is(s),
-  (s, _ctx) =>
+  (s, ctx) =>
     pipe(
-      t.string.decode(s),
+      t.string.validate(s, ctx),
       E.chain((str) => {
         const [orgIdStr, srvIdStr] = str.split(separator);
-        return pipe(
-          E.of((organizationId: OrganizationId) => (serviceId: ServiceId) => ({
+        const makeClientId =
+          (organizationId: OrganizationId) => (serviceId: ServiceId) => ({
             organizationId,
             serviceId,
-          })),
+          });
+        return pipe(
+          E.of(makeClientId),
           E.ap(OrganizationId.decode(orgIdStr)),
           E.ap(ServiceId.decode(srvIdStr))
         );

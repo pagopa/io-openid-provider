@@ -115,7 +115,7 @@ describe("Application", () => {
       .post(`/admin/clients`)
       .send({
         redirect_uris: ["https://callback.io/callback"],
-        organization_id: "my-org-1",
+        organization_id: "00000000001",
         service_id: "my-service-1",
         response_types: ["id_token"],
         grant_types: ["implicit"],
@@ -126,7 +126,9 @@ describe("Application", () => {
       });
 
     expect(createClientResponse.statusCode).toBe(201);
-    expect(createClientResponse.body.client_id).toBe(`my-org-1:my-service-1`);
+    expect(createClientResponse.body.client_id).toBe(
+      `00000000001:my-service-1`
+    );
   });
   it("should implement the find client endpoint", async () => {
     const { app, client } = makeInMemoryApplication();
