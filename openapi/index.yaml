@@ -81,6 +81,22 @@ paths:
         500:
           $ref: '#/responses/500InternalServerError'
 
+  /admin/grants/{organizationId}/{serviceId}:
+    parameters:
+      - $ref: '#/parameters/pathOrganizationId'
+      - $ref: '#/parameters/pathServiceId'
+      - $ref: '#/parameters/headerIdentityId'
+    get:
+      operationId: detailGrant
+      summary: Return a grant detail
+      responses:
+        200:
+          $ref: '#/responses/200GrantDetailResponse'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+
   /.well-known/openid-configuration:
     get:
       operationId: openidConfiguration
@@ -111,11 +127,29 @@ paths:
             $ref: '#/definitions/ProblemJson'
 
 parameters:
+  headerIdentityId:
+    name: identityId
+    in: header
+    required: true
+    description: The identifier of the user
+    type: string
   pathClientId:
     name: clientId
     in: path
     required: true
     description: The identifier of a client
+    type: string
+  pathOrganizationId:
+    name: organizationId
+    description: The organization identifier
+    in: path
+    required: true
+    type: string
+  pathServiceId:
+    name: serviceId
+    description: The service identifier
+    in: path
+    required: true
     type: string
   queryOrganizationId:
     name: organizationId
@@ -205,6 +239,35 @@ parameters:
       $ref: '#/definitions/APIClientDefinition'
 
 definitions:
+  APIGrantDetail:
+    type: object
+    required:
+      - id
+      - issuedAt
+      - expireAt
+      - organizationId
+      - serviceId
+      - identityId
+      - scope
+    properties:
+      id:
+        type: string
+      issuedAt:
+        type: string
+        format: date-time
+      expireAt:
+        type: string
+        format: date-time
+      organizationId:
+        type: string
+      serviceId:
+        type: string
+      identityId:
+        type: string
+      scope:
+        type: array
+        items:
+          type: string
   APIClientDefinition:
     type: object
     required:
@@ -450,6 +513,10 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
 
 responses:
+  200GrantDetailResponse:
+    description: Detail of a grant
+    schema:
+      $ref: "#/definitions/APIGrantDetail"
   200ClientResponse:
     description: Detail of a client
     schema:
