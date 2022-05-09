@@ -61,7 +61,7 @@ export const makeApplication = ({
   /* Mount the routes */
   // mount some custom client endpoints
   application.use(clients.makeRouter(logger, clientService));
-  application.use(grants.makeRouter(logger, grantService));
+  application.use(grants.makeRouter(logger, grantService, clientService));
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({

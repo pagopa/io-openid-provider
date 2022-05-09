@@ -1,4 +1,5 @@
 import { strings } from "@pagopa/ts-commons";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 
 interface AccessTokenBrand {
@@ -17,8 +18,8 @@ interface IdentityIdBrand {
 }
 // IdentityId is just a string
 export const IdentityId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, IdentityIdBrand> => t.string.is(s),
+  FiscalCode,
+  (s): s is t.Branded<FiscalCode, IdentityIdBrand> => FiscalCode.is(s),
   "IdentityId"
 );
 export type IdentityId = t.TypeOf<typeof IdentityId>;

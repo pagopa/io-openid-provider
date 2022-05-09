@@ -5,7 +5,7 @@ export const client: Client = {
   grantTypes: ["implicit"],
   issuedAt: new Date(),
   name: "This is the client name",
-  organizationId: "org-id" as OrganizationId,
+  organizationId: "00000000000" as OrganizationId,
   redirectUris: ["https://callback.cb/cb"],
   serviceId: "service-id" as ServiceId,
   responseTypes: ["id_token"],

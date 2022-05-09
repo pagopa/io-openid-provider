@@ -1,3 +1,7 @@
+import {
+  OrganizationFiscalCode,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
 
@@ -17,8 +21,8 @@ interface ServiceIdBrand {
 }
 // ServiceId is just a string
 export const ServiceId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, ServiceIdBrand> => t.string.is(s),
+  NonEmptyString,
+  (s): s is t.Branded<NonEmptyString, ServiceIdBrand> => NonEmptyString.is(s),
   "ServiceId"
 );
 export type ServiceId = t.TypeOf<typeof ServiceId>;
@@ -28,8 +32,9 @@ interface OrganizationIdBrand {
 }
 // OrganizationId is just a string
 export const OrganizationId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, OrganizationIdBrand> => t.string.is(s),
+  OrganizationFiscalCode,
+  (s): s is t.Branded<OrganizationFiscalCode, OrganizationIdBrand> =>
+    OrganizationFiscalCode.is(s),
   "OrganizationId"
 );
 export type OrganizationId = t.TypeOf<typeof OrganizationId>;
