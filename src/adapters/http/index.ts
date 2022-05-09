@@ -12,6 +12,7 @@ import { GrantService } from "../../domain/grants/GrantService";
 import { IdentityService } from "../../domain/identities/IdentityService";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
+import * as grants from "./grants";
 
 /** This trait defined all the dependencies required by the Application */
 export interface AppEnv {
@@ -60,6 +61,7 @@ export const makeApplication = ({
   /* Mount the routes */
   // mount some custom client endpoints
   application.use(clients.makeRouter(logger, clientService));
+  application.use(grants.makeRouter(logger, grantService));
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({
