@@ -1,6 +1,6 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { ClientId } from "../clients/types";
+import { Client } from "../clients/types";
 import { IdentityId } from "../identities/types";
 
 interface GrantIdBrand {
@@ -15,13 +15,13 @@ export const GrantId = t.brand(
 export type GrantId = t.TypeOf<typeof GrantId>;
 
 export const GrantSubjects = t.type({
-  clientId: ClientId,
+  clientId: Client.props.clientId,
   identityId: IdentityId,
 });
 export type GrantSubjects = t.TypeOf<typeof GrantSubjects>;
 
 export const GrantSelector = t.type({
-  clientId: tt.option(ClientId),
+  clientId: tt.option(Client.props.clientId),
   identityId: IdentityId,
   remember: t.boolean,
 });

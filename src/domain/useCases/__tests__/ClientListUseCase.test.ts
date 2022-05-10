@@ -18,8 +18,8 @@ describe("ClientListUseCase", () => {
   it("should call client list as expected", async () => {
     const { useCase, clientServiceMock } = makeClientListUseCaseTest();
     const selector = {
-      serviceId: O.some(client.serviceId),
-      organizationId: O.some(client.organizationId),
+      serviceId: O.some(client.clientId.serviceId),
+      organizationId: O.some(client.clientId.organizationId),
     };
 
     const clientList = clientServiceMock.list.mockReturnValueOnce(

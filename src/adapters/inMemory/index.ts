@@ -57,23 +57,25 @@ const removeByIdTE =
 export const makeClientService = (
   snapshot: ReadonlyArray<Client> = []
 ): ClientService => {
-  const store = new Map(snapshot.map((client) => [client.clientId, client]));
+  const store = new Map(
+    snapshot.map((client) => [client.clientId.serviceId, client])
+  );
   return {
-    find: findByIdTE(store),
+    find: (id) => findByIdTE(store)(id.serviceId),
     list: (selector) =>
       filterByTE(store)(
         (client) =>
           O.fold(
             () => true,
-            (org) => client.organizationId === org
+            (org) => client.clientId.organizationId === org
           )(selector.organizationId) &&
           O.fold(
             () => true,
-            (sId) => client.serviceId === sId
+            (sId) => client.clientId.serviceId === sId
           )(selector.serviceId)
       ),
-    remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.clientId),
+    remove: (id) => removeByIdTE(store)(id.serviceId),
+    upsert: upsertEntityTE(store)((_) => _.clientId.serviceId),
   };
 };
 

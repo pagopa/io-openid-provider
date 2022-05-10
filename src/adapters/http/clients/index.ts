@@ -22,17 +22,17 @@ import { ClientListUseCase } from "../../../domain/useCases/ClientListUseCase";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   application_type: "web",
-  client_id: input.clientId,
+  client_id: Client.props.clientId.encode(input.clientId),
   client_id_issued_at: input.issuedAt.toUTCString(),
   client_name: input.name,
   grant_types: input.grantTypes,
   // FIXME: populate this field
   logo_uri: undefined,
-  organization_id: input.organizationId,
+  organization_id: input.clientId.organizationId,
   redirect_uris: input.redirectUris,
   response_types: input.responseTypes,
   scope: input.scope,
-  service_id: input.serviceId,
+  service_id: input.clientId.serviceId,
   subject_type: "public",
 });
 
