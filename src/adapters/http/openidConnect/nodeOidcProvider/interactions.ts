@@ -23,6 +23,7 @@ import { InteractionId } from "../../../../domain/interactions/types";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { ConfirmConsentUseCase } from "../../../../domain/useCases/ConfirmConsentUseCase";
 import { AbortInteractionUseCase } from "../../../../domain/useCases/AbortInteractionUseCase";
+import { grantToAdapterPayload } from "./adapters/grantAdapter";
 
 const interactionFinishedTE = (
   provider: oidc.Provider,
@@ -93,7 +94,9 @@ const getInteractionHandler =
               });
             case "ConsentResult":
               return interactionFinishedTE(provider, req, res, {
-                consent: { grantId: result.grant.id },
+                consent: {
+                  grantId: grantToAdapterPayload(result.grant).jti,
+                },
               });
             case "RequireConsent":
               return TE.fromEither(renderConsent(res, result));
@@ -140,7 +143,9 @@ const postInteractionHandler =
       // create the result
       TE.bimap(
         (errorMessage) => ({ error: errorMessage }),
-        (grantId) => ({ consent: { grantId } })
+        (grant) => ({
+          consent: { grantId: grantToAdapterPayload(grant).jti },
+        })
       ),
       // both left and right are InteractionResult
       TE.toUnion,

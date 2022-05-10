@@ -43,6 +43,7 @@ model Grant {
   clientId    String
   identityId  String
 
+  @@unique([identityId, id])
   @@index([clientId, identityId])
 }
 

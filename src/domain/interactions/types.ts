@@ -38,10 +38,11 @@ export const ErrorResult = t.type({
   error: t.string,
 });
 export const LoginResult = t.type({
-  identity: IdentityId,
+  identityId: IdentityId,
 });
 export const ConsentResult = t.type({
   grantId: GrantId,
+  identityId: IdentityId,
 });
 
 export const SessionInfo = t.type({

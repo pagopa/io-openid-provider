@@ -13,6 +13,7 @@ import { Session } from "../../domain/sessions/types";
 import { SessionService } from "../../domain/sessions/SessionService";
 import { Grant } from "../../domain/grants/types";
 import { GrantService } from "../../domain/grants/GrantService";
+import { IdentityIdAndGrantId } from "../http/openidConnect/nodeOidcProvider/utils";
 
 const upsertEntityTE =
   <K, V>(store: Map<K, V>) =>
@@ -95,9 +96,15 @@ export const makeInteractionService = (
 export const makeGrantService = (
   snapshot: ReadonlyArray<Grant> = []
 ): GrantService => {
-  const store = new Map(snapshot.map((grant) => [grant.id, grant]));
+  const encodeId = IdentityIdAndGrantId.encode;
+  const store = new Map(
+    snapshot.map((grant) => [
+      encodeId([grant.subjects.identityId, grant.id]),
+      grant,
+    ])
+  );
   return {
-    find: findByIdTE(store),
+    find: (idn, grn) => findByIdTE(store)(encodeId([idn, grn])),
     findBy: (selector) =>
       filterByTE(store)(
         (grant) =>
@@ -111,8 +118,10 @@ export const makeGrantService = (
           selector.identityId === grant.subjects.identityId &&
           grant.remember === selector.remember
       ),
-    remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.id),
+    remove: (idn, grn) => removeByIdTE(store)(encodeId([idn, grn])),
+    upsert: upsertEntityTE(store)((_) =>
+      encodeId([_.subjects.identityId, _.id])
+    ),
   };
 };
 

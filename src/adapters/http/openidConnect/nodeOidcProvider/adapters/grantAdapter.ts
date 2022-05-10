@@ -4,33 +4,30 @@ import { pipe } from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import { Logger } from "../../../../../domain/logger";
 import { GrantService } from "../../../../../domain/grants/GrantService";
-import { Grant, GrantId } from "../../../../../domain/grants/types";
+import { Grant } from "../../../../../domain/grants/types";
+import { Client, ClientId } from "../../../../../domain/clients/types";
 import {
   makeNotImplementedAdapter,
   findFromTEO,
   destroyFromTE,
   upsertFromTE,
+  IdentityIdAndGrantId,
   DateFromNumericDate,
 } from "../utils";
 
-const grantToAdapterPayload = (entity: Grant): oidc.AdapterPayload => ({
+export const grantToAdapterPayload = (entity: Grant): oidc.AdapterPayload => ({
   accountId: entity.subjects.identityId,
   clientId: Grant.props.subjects.props.clientId.encode(
     entity.subjects.clientId
   ),
   exp: DateFromNumericDate.encode(entity.expireAt),
   iat: DateFromNumericDate.encode(entity.issuedAt),
-  jti: entity.id,
+  jti: IdentityIdAndGrantId.encode([entity.subjects.identityId, entity.id]),
   kind: "Grant",
   loginTs: DateFromNumericDate.encode(entity.issuedAt),
   openid: {
     scope: entity.scope,
-    // claims?: string[] | undefined;
   },
-  // resources?: {
-  //     [resource: string]: string;
-  // } | undefined;
-  // rejected?: Pick<Grant, 'openid' | 'resources'> | undefined;
 });
 
 const adapterPayloadToGrant = (
@@ -38,21 +35,25 @@ const adapterPayloadToGrant = (
 ): t.Validation<Grant> =>
   pipe(
     E.of(
-      (exp: Date) => (iat: Date) =>
-        Grant.decode({
+      ([idnId, grnId]: IdentityIdAndGrantId) =>
+        (clientId: ClientId) =>
+        (exp: Date) =>
+        (iat: Date) => ({
           expireAt: exp,
-          id: payload.jti,
+          id: grnId,
           issuedAt: iat,
+          remember: undefined,
           scope: payload.openid?.scope,
           subjects: {
-            clientId: payload.clientId,
-            identityId: payload.accountId,
+            clientId,
+            identityId: idnId,
           },
         })
     ),
+    E.ap(IdentityIdAndGrantId.decode(payload.jti)),
+    E.ap(Client.props.clientId.decode(payload.clientId)),
     E.ap(DateFromNumericDate.decode(payload.exp)),
-    E.ap(DateFromNumericDate.decode(payload.iat)),
-    E.flatten
+    E.ap(DateFromNumericDate.decode(payload.iat))
   );
 
 export const makeGrantAdapter = (
@@ -60,13 +61,18 @@ export const makeGrantAdapter = (
   grantService: GrantService
 ): oidc.Adapter => ({
   ...makeNotImplementedAdapter("Grant", logger),
-  destroy: destroyFromTE(logger, "Grant", GrantId.decode, grantService.remove),
+  destroy: destroyFromTE(
+    logger,
+    "Grant",
+    IdentityIdAndGrantId.decode,
+    ([identityId, grantId]) => grantService.remove(identityId, grantId)
+  ),
   find: findFromTEO(
     logger,
     "Grant",
-    GrantId.decode,
+    IdentityIdAndGrantId.decode,
     grantToAdapterPayload,
-    grantService.find
+    ([identityId, grantId]) => grantService.find(identityId, grantId)
   ),
   upsert: upsertFromTE(
     logger,
