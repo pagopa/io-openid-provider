@@ -1,6 +1,7 @@
 import express from "express";
 import request from "supertest";
 import { Client } from "../../../domain/clients/types";
+import { grant } from "../../../domain/grants/__tests__/data";
 import { makeInMemoryApplication } from "./fakes";
 
 // initialize the implicit flow
@@ -162,5 +163,17 @@ describe("Application", () => {
       "profile",
       "sub",
     ]);
+  });
+  it("should implement the grant detail endpoint", async () => {
+    const { app } = makeInMemoryApplication([{ ...grant, remember: true }]);
+    const { organizationId, serviceId } = grant.subjects.clientId;
+
+    const findGrantResponse = await request(app)
+      .get(`/admin/grants/${organizationId}/${serviceId}`)
+      .set({ identityId: grant.subjects.identityId })
+      .send();
+
+    expect(findGrantResponse.statusCode).toBe(200);
+    expect(findGrantResponse.body.id).toBe(`${grant.id}`);
   });
 });
