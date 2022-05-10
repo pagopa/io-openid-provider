@@ -9,5 +9,5 @@ export const identity: Identity = {
   familyName: "Asdrubale",
   fiscalCode: "TMMEXQ60A10Y526X" as NonEmptyString,
   givenName: "Roitek",
-  id: "identity-id" as IdentityId,
+  id: "TMMEXQ60A10Y526X" as IdentityId,
 };

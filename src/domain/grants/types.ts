@@ -2,14 +2,14 @@ import * as t from "io-ts";
 import * as tt from "io-ts-types";
 import { Client } from "../clients/types";
 import { IdentityId } from "../identities/types";
+import { IdPattern } from "../types";
 
 interface GrantIdBrand {
   readonly GrantId: unique symbol;
 }
-// GrantId is just a string
 export const GrantId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, GrantIdBrand> => t.string.is(s),
+  IdPattern,
+  (s): s is t.Branded<IdPattern, GrantIdBrand> => IdPattern.is(s),
   "GrantId"
 );
 export type GrantId = t.TypeOf<typeof GrantId>;

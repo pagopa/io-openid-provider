@@ -52,8 +52,15 @@ describe("IdentityIdAndGrantId", () => {
       expect(Type.decode(valid)).toStrictEqual(E.right([identityId, grantId]));
     });
     it("should return left given an invalid value", () => {
-      const invalid = "invalid";
-      expect(E.isLeft(Type.decode(invalid))).toStrictEqual(true);
+      const inputGen = fc.oneof(
+        fc.string(),
+        fc.string().map((s) => fc.constantFrom(`${s}:`, `:${s}`))
+      );
+      fc.assert(
+        fc.property(inputGen, (input) => {
+          expect(E.isLeft(Type.decode(input))).toStrictEqual(true);
+        })
+      );
     });
   });
 });
