@@ -176,4 +176,15 @@ describe("Application", () => {
     expect(findGrantResponse.statusCode).toBe(200);
     expect(findGrantResponse.body.id).toBe(`${grant.id}`);
   });
+  it("should implement the grant remove endpoint", async () => {
+    const { app } = makeInMemoryApplication([{ ...grant, remember: true }]);
+    const { organizationId, serviceId } = grant.subjects.clientId;
+
+    const findGrantResponse = await request(app)
+      .delete(`/admin/grants/${organizationId}/${serviceId}`)
+      .set({ identityId: grant.subjects.identityId })
+      .send();
+
+    expect(findGrantResponse.statusCode).toBe(204);
+  });
 });
