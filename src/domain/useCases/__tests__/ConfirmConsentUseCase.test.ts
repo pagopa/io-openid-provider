@@ -101,7 +101,7 @@ describe("ConfirmConsentUseCase", () => {
     });
     expect(grantFindBy).toBeCalledTimes(1);
   });
-  it.only("should return the grant referenced by the given interaction", async () => {
+  it("should return the grant referenced by the given interaction", async () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
       makeConfirmConsentUseCaseTest();
 
