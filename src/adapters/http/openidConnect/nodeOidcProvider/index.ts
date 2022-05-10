@@ -88,6 +88,7 @@ export const makeConfiguration = (
       family_name: ["family_name"],
       given_name: ["given_name"],
       name: ["family_name", "given_name"],
+      openid: ["sub"],
       profile: ["family_name", "given_name", "name"],
       sub: ["sub"],
     },

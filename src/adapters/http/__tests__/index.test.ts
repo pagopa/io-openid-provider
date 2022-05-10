@@ -118,5 +118,17 @@ describe("Application", () => {
 
     expect(discoveryResponse.statusCode).toBe(200);
     expect(discoveryResponse.body).not.toContain("token_endpoint");
+    expect(discoveryResponse.body.scopes_supported).toStrictEqual([
+      "openid",
+      "acr",
+      "auth_time",
+      "date_of_birth",
+      "email_verified",
+      "family_name",
+      "given_name",
+      "name",
+      "profile",
+      "sub",
+    ]);
   });
 });
