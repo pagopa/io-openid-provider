@@ -1,5 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/function";
+import { constVoid, pipe } from "fp-ts/function";
 import { some } from "fp-ts/lib/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import { OrganizationId, ServiceId } from "../clients/types";
@@ -10,6 +10,7 @@ import { IdentityId } from "../identities/types";
 import { show } from "../utils";
 
 export type RemoveGrantError = DomainErrorTypes;
+export const RemoveGrantError = DomainErrorTypes;
 
 /**
  * Given a selector return a list of client that matches the given selector
@@ -29,9 +30,14 @@ export const RemoveGrantUseCase =
       }),
       TE.map(RA.map((grant) => grantService.remove(identityId, grant.id))),
       TE.chain(RA.sequence(TE.ApplicativePar)),
-      TE.map((_) => void 0),
-      TE.mapLeft((error) => {
-        logger.error(`RemoveGrantUseCase error; ${show(error)}`, error);
-        return error.kind;
-      })
+      TE.fold(
+        (error) => {
+          logger.error(`RemoveGrantUseCase error; ${show(error)}`, error);
+          return TE.left(error.kind);
+        },
+        (results) =>
+          RA.isEmpty(results)
+            ? TE.left(RemoveGrantError.NOT_FOUND)
+            : TE.right(constVoid())
+      )
     );
