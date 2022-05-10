@@ -7,6 +7,8 @@ import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { Logger } from "../../../../domain/logger";
 import { DomainError, makeDomainError } from "../../../../domain/types";
+import { IdentityId } from "../../../../domain/identities/types";
+import { GrantId } from "../../../../domain/grants/types";
 
 export const notImplementedError = new Error("Not Implemented");
 
@@ -150,6 +152,34 @@ export const upsertFromTE =
         }
       )
     )();
+
+const separator = ":";
+// This type is useful when you need to keep in a simple string both values
+// identityId and grantId
+export const IdentityIdAndGrantId = new t.Type<
+  readonly [IdentityId, GrantId],
+  string
+>(
+  "IdentityIdAndGrantId",
+  (s): s is readonly [IdentityId, GrantId] =>
+    t.tuple([IdentityId, GrantId]).is(s),
+  (s, c) =>
+    pipe(
+      t.string.validate(s, c),
+      E.chain((str) => {
+        const [idn, grn] = str.split(separator);
+        const makeIdnAndGrn = (identityId: IdentityId) => (grantId: GrantId) =>
+          [identityId, grantId] as const;
+        return pipe(
+          E.of(makeIdnAndGrn),
+          E.ap(IdentityId.decode(idn)),
+          E.ap(GrantId.decode(grn))
+        );
+      })
+    ),
+  ([identityId, grantId]) => `${identityId}${separator}${grantId}`
+);
+export type IdentityIdAndGrantId = t.TypeOf<typeof IdentityIdAndGrantId>;
 
 /**
  * Accepts a NumericDate.

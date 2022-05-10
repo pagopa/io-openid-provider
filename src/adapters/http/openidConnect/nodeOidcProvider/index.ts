@@ -1,4 +1,5 @@
 import { pipe } from "fp-ts/function";
+import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as oidc from "oidc-provider";
 import { ClientService } from "../../../../domain/clients/ClientService";
@@ -10,6 +11,12 @@ import { GrantService } from "../../../../domain/grants/GrantService";
 import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { Identity } from "../../../../domain/identities/types";
 import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
+import {
+  Client,
+  OrganizationId,
+  ServiceId,
+} from "../../../../domain/clients/types";
+import { show } from "../../../../domain/utils";
 import { makeAdapterProvider } from "./AdapterProvider";
 import {
   disableAuthClientsEndpointMiddleware,
@@ -17,6 +24,10 @@ import {
 } from "./middlewares";
 
 export const makeAccountClaims = (identity: Identity): oidc.AccountClaims => ({
+  acr: identity.acr,
+  auth_time: identity.authTime,
+  date_of_birth: identity.dateOfBirth,
+  email_verified: identity.email,
   family_name: identity.familyName,
   given_name: identity.givenName,
   name: `${identity.givenName} ${identity.familyName}`,
@@ -77,7 +88,16 @@ export const makeConfiguration = (
   return {
     adapter: adaptTheAdapterFun,
     claims: {
+      acr: ["acr"],
+      auth_time: ["auth_time"],
+      date_of_birth: ["date_of_birth"],
+      email_verified: ["email_verified"],
+      family_name: ["family_name"],
+      given_name: ["given_name"],
+      name: ["family_name", "given_name"],
+      openid: ["sub"],
       profile: ["family_name", "given_name", "name"],
+      sub: ["sub"],
     },
     extraClientMetadata: {
       properties: ["bypass_consent", "organization_id", "service_id"],
@@ -88,6 +108,19 @@ export const makeConfiguration = (
       },
       registration: {
         enabled: true,
+        idFactory: (ctx) =>
+          pipe(
+            E.of(
+              (organizationId: OrganizationId) => (serviceId: ServiceId) =>
+                Client.props.clientId.encode({ organizationId, serviceId })
+            ),
+            E.ap(OrganizationId.decode(ctx.oidc.body?.organization_id)),
+            E.ap(ServiceId.decode(ctx.oidc.body?.service_id)),
+            E.getOrElseW((err) => {
+              logger.error(`Some error during client_id factory ${show(err)}`);
+              throw new Error(show(err));
+            })
+          ),
         initialAccessToken: false,
         issueRegistrationAccessToken: false,
       },
@@ -112,7 +145,7 @@ export const makeConfiguration = (
       authorization: "/oauth/authorize",
       registration: "/admin/clients",
     },
-    scopes: ["openid", "profile"],
+    scopes: ["openid"],
     tokenEndpointAuthMethods: ["none"],
     ttl: {
       Grant: config.grantTTL,

@@ -44,7 +44,7 @@ export const adapterPayloadToInteraction = (
             payload.session?.accountId
               ? {
                   grantId: payload.result?.consent?.grantId,
-                  identity:
+                  identityId:
                     payload.result?.login?.accountId ||
                     payload.session?.accountId,
                 }

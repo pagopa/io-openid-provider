@@ -12,7 +12,9 @@ import { ClientId } from "../../domain/clients/types";
 import { runAsTE, runAsTEO } from "./utils";
 
 const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
-  clientId: entity.subjects.clientId,
+  clientId: Grant.props.subjects.props.clientId.encode(
+    entity.subjects.clientId
+  ),
   expireAt: entity.expireAt,
   id: entity.id,
   identityId: entity.subjects.identityId,
@@ -38,16 +40,18 @@ const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
     ),
     E.ap(GrantId.decode(record.id)),
     E.ap(IdentityId.decode(record.identityId)),
-    E.ap(ClientId.decode(record.clientId))
+    E.ap(Grant.props.subjects.props.clientId.decode(record.clientId))
   );
 
 export const makeGrantService = <T>(
   logger: Logger,
   client: Prisma.GrantDelegate<T>
 ): GrantService => ({
-  find: (id) =>
+  find: (identityId, grantId) =>
     runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({ where: { id } })
+      client.findUnique({
+        where: { identityId_id: { id: grantId, identityId } },
+      })
     ),
   findBy: (selector) =>
     runAsTE(logger)("findBy", E.traverseArray(fromRecord), () =>
@@ -56,16 +60,25 @@ export const makeGrantService = <T>(
           AND: [
             { identityId: selector.identityId },
             { remember: selector.remember },
-            { clientId: O.toUndefined(selector.clientId) },
+            {
+              clientId: pipe(
+                selector.clientId,
+                O.map(Grant.props.subjects.props.clientId.encode),
+                O.toUndefined
+              ),
+            },
           ],
         },
       })
     ),
-  remove: (id) =>
+  remove: (identityId, grantId) =>
     runAsTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.delete({ where: { id } })
+      () =>
+        client.delete({
+          where: { identityId_id: { id: grantId, identityId } },
+        })
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };

@@ -33,6 +33,10 @@ const authenticate =
         switch (response.status) {
           case 200:
             return E.right({
+              acr: undefined,
+              authTime: undefined,
+              dateOfBirth: undefined,
+              email: undefined,
               familyName: response.value.family_name,
               fiscalCode: response.value
                 .fiscal_code as unknown as strings.NonEmptyString,

@@ -8,7 +8,7 @@ const initImplicitFlow = (app: express.Application, client: Client) => {
   return request(app)
     .get("/oauth/authorize")
     .query({
-      client_id: client.clientId,
+      client_id: Client.props.clientId.encode(client.clientId),
       response_type: (client.responseTypes || [""])[0],
       redirect_uri: (client.redirectUris || [""])[0],
       response_mode: "form_post",
@@ -82,10 +82,9 @@ describe("Application", () => {
       authorizeRedirectResponseCookies
     );
 
-    const interactionId = authorizeRedirectResponse.headers["location"].replace(
-      "/interaction/",
-      ""
-    );
+    const interactionId = authorizeRedirectResponse.headers[
+      "location"
+    ]?.replace("/interaction/", "");
 
     const confirmConsentResponse = await confirmConsent(
       app,
@@ -109,6 +108,39 @@ describe("Application", () => {
       '<input type="hidden" name="id_token"'
     );
   });
+  it("should implement the create client endpoint", async () => {
+    const { app } = makeInMemoryApplication();
+
+    const createClientResponse = await request(app)
+      .post(`/admin/clients`)
+      .send({
+        redirect_uris: ["https://callback.io/callback"],
+        organization_id: "00000000001",
+        service_id: "my-service-1",
+        response_types: ["id_token"],
+        grant_types: ["implicit"],
+        application_type: "web",
+        client_name: "This is the name of this client",
+        scope: "profile openid",
+        token_endpoint_auth_method: "none",
+      });
+
+    expect(createClientResponse.statusCode).toBe(201);
+    expect(createClientResponse.body.client_id).toBe(
+      `00000000001:my-service-1`
+    );
+  });
+  it("should implement the find client endpoint", async () => {
+    const { app, client } = makeInMemoryApplication();
+    const clientId = Client.props.clientId.encode(client.clientId);
+
+    const findClientResponse = await request(app)
+      .get(`/admin/clients/${clientId}`)
+      .send();
+
+    expect(findClientResponse.statusCode).toBe(200);
+    expect(findClientResponse.body.client_id).toBe(`${clientId}`);
+  });
   it("should implement the discovery endpoint", async () => {
     const { app } = makeInMemoryApplication();
 
@@ -118,5 +150,17 @@ describe("Application", () => {
 
     expect(discoveryResponse.statusCode).toBe(200);
     expect(discoveryResponse.body).not.toContain("token_endpoint");
+    expect(discoveryResponse.body.scopes_supported).toStrictEqual([
+      "openid",
+      "acr",
+      "auth_time",
+      "date_of_birth",
+      "email_verified",
+      "family_name",
+      "given_name",
+      "name",
+      "profile",
+      "sub",
+    ]);
   });
 });

@@ -2,10 +2,13 @@ import * as fc from "fast-check";
 import * as mock from "jest-mock-extended";
 import * as E from "fp-ts/Either";
 import { Logger } from "../../../../../domain/logger";
+import { identity } from "../../../../../domain/identities/__tests__/data";
+import { grant } from "../../../../../domain/grants/__tests__/data";
 import {
   DateFromNumericDate,
   makeNotImplementedAdapter,
   notImplementedError,
+  IdentityIdAndGrantId,
 } from "../utils";
 
 describe("makeNotImplementedAdapter", () => {
@@ -29,6 +32,36 @@ describe("makeNotImplementedAdapter", () => {
     await expect(adapter.upsert(id, {}, 123)).rejects.toThrowError(
       notImplementedError
     );
+  });
+});
+
+describe("IdentityIdAndGrantId", () => {
+  const Type = IdentityIdAndGrantId;
+  const identityId = identity.id;
+  const grantId = grant.id;
+  describe("encode", () => {
+    it("should encode without error", () => {
+      expect(Type.encode([identityId, grantId])).toStrictEqual(
+        `${identityId}:${grantId}`
+      );
+    });
+  });
+  describe("decode", () => {
+    it("should return right given a valid value", () => {
+      const valid = `${identityId}:${grantId}`;
+      expect(Type.decode(valid)).toStrictEqual(E.right([identityId, grantId]));
+    });
+    it("should return left given an invalid value", () => {
+      const inputGen = fc.oneof(
+        fc.string(),
+        fc.string().map((s) => fc.constantFrom(`${s}:`, `:${s}`))
+      );
+      fc.assert(
+        fc.property(inputGen, (input) => {
+          expect(E.isLeft(Type.decode(input))).toStrictEqual(true);
+        })
+      );
+    });
   });
 });
 
