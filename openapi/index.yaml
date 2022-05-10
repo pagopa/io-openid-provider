@@ -89,11 +89,17 @@ paths:
     get:
       operationId: detailGrant
       summary: Return a grant detail
+      security:
+        - SubscriptionKey: []
       responses:
         200:
           $ref: '#/responses/200GrantDetailResponse'
         404:
           $ref: '#/responses/404NotFound'
+        400:
+          $ref: "#/responses/400BadRequest"
+        401:
+          $ref: "#/responses/401Unauthorized"
         500:
           $ref: '#/responses/500InternalServerError'
 
@@ -259,11 +265,11 @@ definitions:
         type: string
         format: date-time
       organizationId:
-        type: string
+        $ref: '#/definitions/OrganizationFiscalCode'
       serviceId:
-        type: string
+        $ref: '#/definitions/ServiceId'
       identityId:
-        type: string
+        $ref: '#/definitions/FiscalCode'
       scope:
         type: array
         items:
@@ -511,6 +517,19 @@ definitions:
           characters outside the set %x20-21 / %x23-5B / %x5D-7E.
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
+  OrganizationFiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/OrganizationFiscalCode"
+  ServiceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ServiceId"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/FiscalCode"
+
+securityDefinitions:
+  SubscriptionKey:
+    type: apiKey
+    name: Ocp-Apim-Subscription-Key
+    in: header
+    description: The API key obtained through the developer portal or the getService operation.
 
 responses:
   200GrantDetailResponse:
@@ -598,6 +617,11 @@ responses:
       The given payload is invalid
     schema:
       $ref: '#/definitions/OAuthError'
+  401Unauthorized:
+    description: >-
+      The authorization token is missing or invalid
+    schema:
+      type: string
   404NotFound:
     description: The requested entity is not found
     schema:
