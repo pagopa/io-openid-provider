@@ -104,7 +104,7 @@ export const makeConfiguration = (
             E.ap(OrganizationId.decode(ctx.oidc.body?.organization_id)),
             E.ap(ServiceId.decode(ctx.oidc.body?.service_id)),
             E.getOrElseW((err) => {
-              logger.error(`Some error during client_id factory ${show}`);
+              logger.error(`Some error during client_id factory ${show(err)}`);
               throw new Error(show(err));
             })
           ),

@@ -2,8 +2,10 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { NonEmptyString } from "io-ts-types";
-import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode,
+} from "@pagopa/ts-commons/lib/strings";
 
 interface ServiceIdBrand {
   readonly ServiceId: unique symbol;
@@ -16,9 +18,17 @@ export const ServiceId = t.brand(
 );
 export type ServiceId = t.TypeOf<typeof ServiceId>;
 
-export const OrganizationId = OrganizationFiscalCode;
+interface OrganizationIdBrand {
+  readonly OrganizationId: unique symbol;
+}
+// OrganizationId is just a string
+export const OrganizationId = t.brand(
+  OrganizationFiscalCode,
+  (s): s is t.Branded<OrganizationFiscalCode, OrganizationIdBrand> =>
+    OrganizationFiscalCode.is(s),
+  "OrganizationId"
+);
 export type OrganizationId = t.TypeOf<typeof OrganizationId>;
-
 const ClientId = t.strict({
   organizationId: OrganizationId,
   serviceId: ServiceId,
