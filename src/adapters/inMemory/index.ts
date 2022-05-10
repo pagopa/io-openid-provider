@@ -2,9 +2,8 @@
 import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import { IdentityId } from "src/domain/identities/types";
+import { Identity } from "src/domain/identities/types";
 import { IdentityService } from "src/domain/identities/IdentityService";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Client } from "../../domain/clients/types";
 import { ClientService } from "../../domain/clients/ClientService";
 import { DomainError } from "../../domain/types";
@@ -59,23 +58,25 @@ const removeByIdTE =
 export const makeClientService = (
   snapshot: ReadonlyArray<Client> = []
 ): ClientService => {
-  const store = new Map(snapshot.map((client) => [client.clientId, client]));
+  const store = new Map(
+    snapshot.map((client) => [client.clientId.serviceId, client])
+  );
   return {
-    find: findByIdTE(store),
+    find: (id) => findByIdTE(store)(id.serviceId),
     list: (selector) =>
       filterByTE(store)(
         (client) =>
           O.fold(
             () => true,
-            (org) => client.organizationId === org
+            (org) => client.clientId.organizationId === org
           )(selector.organizationId) &&
           O.fold(
             () => true,
-            (sId) => client.serviceId === sId
+            (sId) => client.clientId.serviceId === sId
           )(selector.serviceId)
       ),
-    remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.clientId),
+    remove: (id) => removeByIdTE(store)(id.serviceId),
+    upsert: upsertEntityTE(store)((_) => _.clientId.serviceId),
   };
 };
 
@@ -136,12 +137,6 @@ export const makeSessionService = (
   };
 };
 
-export const makeIdentityService = (): IdentityService => ({
-  authenticate: (_accessToken) =>
-    TE.right({
-      familyName: "familyName",
-      fiscalCode: "123" as NonEmptyString,
-      givenName: "givenName",
-      id: "identity-id" as IdentityId,
-    }),
+export const makeIdentityService = (identity: Identity): IdentityService => ({
+  authenticate: (_accessToken) => TE.right(identity),
 });

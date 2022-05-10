@@ -8,8 +8,7 @@ generator client {
 }
 
 model Client {
-  id                String @id @default(auto()) @map("_id") @db.ObjectId
-  clientId          String @unique
+  serviceId         String @id @map("_id")
   grantTypes        String[]
   issuedAt          DateTime
   name              String
@@ -17,11 +16,9 @@ model Client {
   redirectUris      String[]
   responseTypes     String[]
   scope             String
-  // the serviceId maybe coulb be the same as clientId
-  // so if the clientId can be defined by the caller
-  // we can then remove the serviceId
-  serviceId         String // remove it
   skipConsent       Boolean
+
+  @@unique([organizationId, serviceId])
 }
 
 model Interaction {

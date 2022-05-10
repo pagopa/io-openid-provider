@@ -17,7 +17,9 @@ import {
 
 export const grantToAdapterPayload = (entity: Grant): oidc.AdapterPayload => ({
   accountId: entity.subjects.identityId,
-  clientId: entity.subjects.clientId,
+  clientId: Grant.props.subjects.props.clientId.encode(
+    entity.subjects.clientId
+  ),
   exp: DateFromNumericDate.encode(entity.expireAt),
   iat: DateFromNumericDate.encode(entity.issuedAt),
   jti: IdentityIdAndGrantId.encode([entity.subjects.identityId, entity.id]),

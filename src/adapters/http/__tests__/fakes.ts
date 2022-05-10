@@ -1,5 +1,6 @@
 import { makeApplication } from "../index";
 import { client } from "../../../domain/clients/__tests__/data";
+import { identity } from "../../../domain/identities/__tests__/data";
 import { config } from "../../../__tests__/data";
 import * as inMemory from "../../inMemory";
 import { makeLogger } from "../../winston";
@@ -13,7 +14,7 @@ export const makeInMemoryApplication = () => {
   const interactionService = inMemory.makeInteractionService();
   const sessionService = inMemory.makeSessionService();
   const grantService = inMemory.makeGrantService();
-  const identityService = inMemory.makeIdentityService();
+  const identityService = inMemory.makeIdentityService(identity);
   const app = makeApplication({
     config,
     logger,

@@ -1,5 +1,7 @@
 import { strings } from "@pagopa/ts-commons";
+import * as tt from "io-ts-types";
 import * as t from "io-ts";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
 interface AccessTokenBrand {
   readonly AccessToken: unique symbol;
@@ -24,6 +26,10 @@ export const IdentityId = t.brand(
 export type IdentityId = t.TypeOf<typeof IdentityId>;
 
 export const Identity = t.type({
+  acr: t.union([t.undefined, t.string]),
+  authTime: t.union([t.undefined, tt.date]),
+  dateOfBirth: t.union([t.undefined, tt.date]),
+  email: t.union([t.undefined, EmailString]),
   familyName: t.string,
   fiscalCode: strings.NonEmptyString,
   givenName: t.string,
