@@ -17,6 +17,10 @@ import {
 } from "./middlewares";
 
 export const makeAccountClaims = (identity: Identity): oidc.AccountClaims => ({
+  acr: identity.acr,
+  auth_time: identity.authTime,
+  date_of_birth: identity.dateOfBirth,
+  email_verified: identity.email,
   family_name: identity.familyName,
   given_name: identity.givenName,
   name: `${identity.givenName} ${identity.familyName}`,
@@ -77,7 +81,16 @@ export const makeConfiguration = (
   return {
     adapter: adaptTheAdapterFun,
     claims: {
+      acr: ["acr"],
+      auth_time: ["auth_time"],
+      date_of_birth: ["date_of_birth"],
+      email_verified: ["email_verified"],
+      family_name: ["family_name"],
+      given_name: ["given_name"],
+      name: ["family_name", "given_name"],
+      openid: ["sub"],
       profile: ["family_name", "given_name", "name"],
+      sub: ["sub"],
     },
     extraClientMetadata: {
       properties: ["bypass_consent", "organization_id", "service_id"],
@@ -112,7 +125,7 @@ export const makeConfiguration = (
       authorization: "/oauth/authorize",
       registration: "/admin/clients",
     },
-    scopes: ["openid", "profile"],
+    scopes: ["openid"],
     tokenEndpointAuthMethods: ["none"],
     ttl: {
       Grant: config.grantTTL,

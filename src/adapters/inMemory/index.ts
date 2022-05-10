@@ -2,9 +2,8 @@
 import { constVoid, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import { IdentityId } from "src/domain/identities/types";
+import { Identity } from "src/domain/identities/types";
 import { IdentityService } from "src/domain/identities/IdentityService";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Client } from "../../domain/clients/types";
 import { ClientService } from "../../domain/clients/ClientService";
 import { DomainError } from "../../domain/types";
@@ -127,12 +126,6 @@ export const makeSessionService = (
   };
 };
 
-export const makeIdentityService = (): IdentityService => ({
-  authenticate: (_accessToken) =>
-    TE.right({
-      familyName: "familyName",
-      fiscalCode: "123" as NonEmptyString,
-      givenName: "givenName",
-      id: "identity-id" as IdentityId,
-    }),
+export const makeIdentityService = (identity: Identity): IdentityService => ({
+  authenticate: (_accessToken) => TE.right(identity),
 });
