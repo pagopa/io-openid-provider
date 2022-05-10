@@ -16,7 +16,7 @@ const toRecord = (
   id: entity.id,
   identityId: entity.session?.identityId || null,
   issuedAt: entity.issuedAt,
-  params: entity.params,
+  params: Interaction.props.params.encode(entity.params),
   payload: entity.payload,
   result: entity.result || null,
   returnTo: entity.returnTo,

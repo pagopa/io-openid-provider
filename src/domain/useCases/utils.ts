@@ -14,14 +14,19 @@ export const findValidGrant =
   (grantService: GrantService) =>
   (interaction: Interaction): TE.TaskEither<DomainError, O.Option<Grant>> => {
     if (ConsentResult.is(interaction.result)) {
-      // if the interaction has a grantId then load the grant by id
-      return pipe(grantService.find(interaction.result.grantId));
+      // if the interaction has a grantId then load it
+      return pipe(
+        grantService.find(
+          interaction.result.identityId,
+          interaction.result.grantId
+        )
+      );
     } else if (LoginResult.is(interaction.result)) {
       // if the interaction has not a grant id and has an identity then
       // load a grant given the tuple (identityId, clientId)
       const selector = {
         clientId: O.some(interaction.params.client_id),
-        identityId: interaction.result.identity,
+        identityId: interaction.result.identityId,
         remember: true,
       };
       return pipe(

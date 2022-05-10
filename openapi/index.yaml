@@ -281,11 +281,11 @@ definitions:
         type: string
         format: date-time
       organizationId:
-        type: string
+        $ref: '#/definitions/OrganizationFiscalCode'
       serviceId:
-        type: string
+        $ref: '#/definitions/ServiceId'
       identityId:
-        type: string
+        $ref: '#/definitions/FiscalCode'
       scope:
         type: array
         items:

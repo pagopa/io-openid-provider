@@ -1,7 +1,7 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
 import { IdentityId } from "../identities/types";
-import { ClientId } from "../clients/types";
+import { Client } from "../clients/types";
 import { GrantId } from "../grants/types";
 
 interface InteractionIdBrand {
@@ -16,7 +16,7 @@ export const InteractionId = t.brand(
 export type InteractionId = t.TypeOf<typeof InteractionId>;
 
 export const RequestParams = t.type({
-  client_id: ClientId,
+  client_id: Client.props.clientId,
   nonce: t.union([t.undefined, t.string]),
   redirect_uri: t.string,
   response_mode: t.union([
@@ -38,10 +38,11 @@ export const ErrorResult = t.type({
   error: t.string,
 });
 export const LoginResult = t.type({
-  identity: IdentityId,
+  identityId: IdentityId,
 });
 export const ConsentResult = t.type({
   grantId: GrantId,
+  identityId: IdentityId,
 });
 
 export const SessionInfo = t.type({
