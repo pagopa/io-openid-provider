@@ -5,11 +5,17 @@ import helmet from "helmet";
 import * as cookies from "cookie-parser";
 import { Config } from "../../config";
 import { Logger } from "../../domain/logger";
+import { ConfirmConsentUseCase } from "../../domain/useCases/ConfirmConsentUseCase";
+import { ClientListUseCase } from "../../domain/useCases/ClientListUseCase";
+import { AuthenticateUseCase } from "../../domain/useCases/AuthenticateUseCase";
+import { FindGrantUseCase } from "../../domain/useCases/FindGrantUseCases";
+import { ProcessInteractionUseCase } from "../../domain/useCases/ProcessInteractionUseCase";
+import { RemoveGrantUseCase } from "../../domain/useCases/RemoveGrantUseCase";
+import { AbortInteractionUseCase } from "../../domain/useCases/AbortInteractionUseCase";
 import { ClientService } from "../../domain/clients/ClientService";
+import { GrantService } from "../../domain/grants/GrantService";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { SessionService } from "../../domain/sessions/SessionService";
-import { GrantService } from "../../domain/grants/GrantService";
-import { IdentityService } from "../../domain/identities/IdentityService";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
@@ -18,11 +24,17 @@ import * as grants from "./grants";
 export interface AppEnv {
   readonly config: Config;
   readonly logger: Logger;
-  readonly identityService: IdentityService;
+  readonly abortInteractionUseCase: AbortInteractionUseCase;
+  readonly authenticateUseCase: AuthenticateUseCase;
+  readonly clientListUseCase: ClientListUseCase;
+  readonly confirmConsentUseCase: ConfirmConsentUseCase;
+  readonly findGrantUseCase: FindGrantUseCase;
+  readonly processInteractionUseCase: ProcessInteractionUseCase;
+  readonly removeGrantUseCase: RemoveGrantUseCase;
   readonly clientService: ClientService;
+  readonly grantService: GrantService;
   readonly interactionService: InteractionService;
   readonly sessionService: SessionService;
-  readonly grantService: GrantService;
 }
 
 /**
@@ -31,11 +43,17 @@ export interface AppEnv {
 export const makeApplication = ({
   config,
   logger,
+  abortInteractionUseCase,
+  authenticateUseCase,
+  clientListUseCase,
+  confirmConsentUseCase,
+  findGrantUseCase,
+  processInteractionUseCase,
+  removeGrantUseCase,
   clientService,
-  identityService,
+  grantService,
   interactionService,
   sessionService,
-  grantService,
 }: AppEnv): express.Application => {
   const application = express();
 
@@ -60,18 +78,26 @@ export const makeApplication = ({
 
   /* Mount the routes */
   // mount some custom client endpoints
-  application.use(clients.makeRouter(logger, clientService));
+  application.use(clients.makeRouter(clientListUseCase));
   // mount grant endpoints
-  application.use(grants.makeRouter(logger, grantService));
+  application.use(
+    grants.makeRouter(logger, findGrantUseCase, removeGrantUseCase)
+  );
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({
+      abortInteractionUseCase,
+      authenticateUseCase,
+      clientListUseCase,
       clientService,
       config,
+      confirmConsentUseCase,
+      findGrantUseCase,
       grantService,
-      identityService,
       interactionService,
       logger,
+      processInteractionUseCase,
+      removeGrantUseCase,
       sessionService,
     })
   );

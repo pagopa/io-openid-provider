@@ -8,7 +8,6 @@ import { Logger } from "../../../../domain/logger";
 import { InteractionService } from "../../../../domain/interactions/InteractionService";
 import { SessionService } from "../../../../domain/sessions/SessionService";
 import { GrantService } from "../../../../domain/grants/GrantService";
-import { IdentityService } from "../../../../domain/identities/IdentityService";
 import { Identity } from "../../../../domain/identities/types";
 import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
 import {
@@ -38,7 +37,7 @@ const findAccountAdapter =
   (
     authenticationCookieKey: string,
     logger: Logger,
-    identityService: IdentityService
+    authenticateUseCase: AuthenticateUseCase
   ): oidc.FindAccount =>
   (ctx, _sub, _token) => {
     const accountId = ctx.oidc.session?.accountId;
@@ -48,7 +47,7 @@ const findAccountAdapter =
         accountId,
         claims: (_use, _scope, _claims, _rejected) =>
           pipe(
-            AuthenticateUseCase(logger, identityService)(accessToken),
+            authenticateUseCase(accessToken),
             TE.map(makeAccountClaims),
             TE.fold(
               (_) => () => Promise.reject(_),
@@ -67,7 +66,7 @@ const findAccountAdapter =
 export const makeConfiguration = (
   config: Config,
   logger: Logger,
-  identityService: IdentityService,
+  authenticateUseCase: AuthenticateUseCase,
   clientService: ClientService,
   interactionService: InteractionService,
   sessionService: SessionService,
@@ -138,7 +137,7 @@ export const makeConfiguration = (
     findAccount: findAccountAdapter(
       config.server.authenticationCookieKey,
       logger,
-      identityService
+      authenticateUseCase
     ),
     responseTypes: ["id_token"],
     routes: {
