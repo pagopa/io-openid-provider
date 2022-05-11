@@ -129,3 +129,6 @@ export const ProcessInteractionUseCase =
         }
       })
     );
+export type ProcessInteractionUseCase = ReturnType<
+  typeof ProcessInteractionUseCase
+>;

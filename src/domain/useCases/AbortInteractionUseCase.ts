@@ -30,3 +30,6 @@ export const AbortInteractionUseCase =
         (_) => constVoid()
       )
     );
+export type AbortInteractionUseCase = ReturnType<
+  typeof AbortInteractionUseCase
+>;

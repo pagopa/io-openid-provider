@@ -98,3 +98,4 @@ export const ConfirmConsentUseCase =
         }
       )
     );
+export type ConfirmConsentUseCase = ReturnType<typeof ConfirmConsentUseCase>;

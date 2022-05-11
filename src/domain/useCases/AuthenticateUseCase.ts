@@ -46,3 +46,4 @@ export const AuthenticateUseCase =
         )
       )
     );
+export type AuthenticateUseCase = ReturnType<typeof AuthenticateUseCase>;

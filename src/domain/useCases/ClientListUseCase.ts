@@ -23,3 +23,4 @@ export const ClientListUseCase =
         return error;
       })
     );
+export type ClientListUseCase = ReturnType<typeof ClientListUseCase>;

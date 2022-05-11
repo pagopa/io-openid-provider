@@ -40,3 +40,4 @@ export const RemoveGrantUseCase =
             : TE.right(constVoid())
       )
     );
+export type RemoveGrantUseCase = ReturnType<typeof RemoveGrantUseCase>;
