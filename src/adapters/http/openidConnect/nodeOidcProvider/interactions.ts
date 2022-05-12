@@ -10,10 +10,9 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { ClientService } from "../../../../domain/clients/ClientService";
 import { GrantService } from "../../../../domain/grants/GrantService";
-import { DomainErrorTypes } from "../../../../domain/types";
+import { formatError } from "../../../../domain/types";
 import {
   ProcessInteractionUseCase,
-  ProcessInteractionUseCaseError,
   RequireConsent,
 } from "../../../../domain/useCases/ProcessInteractionUseCase";
 import { Config } from "../../../../config";
@@ -29,7 +28,7 @@ const interactionFinishedTE = (
   provider: oidc.Provider,
   req: express.Request,
   res: express.Response,
-  result: oidc.InteractionResults
+  result: oidc.InteractionResults & { readonly error?: string }
 ) =>
   TE.tryCatch(() => provider.interactionFinished(req, res, result), E.toError);
 
@@ -62,7 +61,7 @@ const getInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => ProcessInteractionUseCaseError.invalidInteraction)
+          E.mapLeft((_) => formatError)
         )
       ),
       TE.chain((interactionId) =>
@@ -128,7 +127,7 @@ const postInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => DomainErrorTypes.NOT_FOUND)
+          E.mapLeft((_) => formatError)
         )
       ),
       // run the logic to confirm the consent
@@ -142,7 +141,7 @@ const postInteractionHandler =
       ),
       // create the result
       TE.bimap(
-        (errorMessage) => ({ error: errorMessage }),
+        (error) => ({ error: error.kind }),
         (grant) => ({
           consent: { grantId: grantToAdapterPayload(grant).jti },
         })
@@ -169,15 +168,15 @@ const getInteractionAbortHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => "Invalid Step")
+          E.mapLeft((_) => formatError)
         )
       ),
       // run the abort interaction logic
-      TE.chainW(AbortInteractionUseCase(logger, interactionService)),
+      TE.chain(AbortInteractionUseCase(logger, interactionService)),
       // create the result
       TE.bimap(
         (errMsg) => ({
-          error: errMsg,
+          error: errMsg.kind,
         }),
         (_) => ({
           error: "access denied",

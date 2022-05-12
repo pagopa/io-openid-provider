@@ -7,11 +7,11 @@ import { Grant, GrantId } from "../grants/types";
 import { InteractionService } from "../interactions/InteractionService";
 import { Interaction, InteractionId } from "../interactions/types";
 import { Logger } from "../logger";
-import { DomainErrorTypes, makeDomainError, Seconds } from "../types";
+import { DomainError, makeDomainError, Seconds } from "../types";
 import { fromTEOtoTE, show } from "../utils";
 import { findValidGrant } from "./utils";
 
-type ConfirmConsentUseCaseError = DomainErrorTypes;
+type ConfirmConsentUseCaseError = DomainError;
 
 const makeGrant = (
   interaction: Interaction,
@@ -64,7 +64,12 @@ export const ConfirmConsentUseCase =
           // update the interaction and the grant instance persisting them
           TE.chain(
             O.fold(
-              () => TE.left(makeDomainError("Internal Error")),
+              () => {
+                logger.error("Unable to create a valid grant");
+                return TE.left(
+                  makeDomainError("Unable to create a valid grant")
+                );
+              },
               (grant) => {
                 const newInteraction = {
                   ...interaction,
@@ -85,7 +90,7 @@ export const ConfirmConsentUseCase =
       TE.bimap(
         (err) => {
           logger.error(`Error on ConfirmConsentUseCase ${show(err)}`, err);
-          return err.kind;
+          return err;
         },
         (res) => {
           logger.debug(`ConfirmConsentUseCase ${show(res)}`);

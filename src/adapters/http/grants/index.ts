@@ -50,7 +50,7 @@ const deleteGrantEndpointHandler =
       ),
       TE.bimap(
         (error) => {
-          switch (error) {
+          switch (error.kind) {
             case DomainErrorTypes.NOT_FOUND:
               return responses.ResponseErrorNotFound(
                 "Not Found",

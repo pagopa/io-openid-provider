@@ -3,7 +3,11 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../logger";
 import { AuthenticateUseCase } from "../AuthenticateUseCase";
-import { DomainErrorTypes, makeDomainError } from "../../types";
+import {
+  DomainErrorTypes,
+  makeDomainError,
+  unauthorizedError,
+} from "../../types";
 import { IdentityService } from "../../identities/IdentityService";
 import { identity } from "../../identities/__tests__/data";
 
@@ -19,14 +23,14 @@ describe("AuthenticateUseCase", () => {
     const { useCase, identityServiceMock } = makeAuthenticateUseCaseTest();
 
     const actual0 = await useCase(undefined)();
-    expect(actual0).toStrictEqual(E.left("Unauthorized"));
+    expect(actual0).toStrictEqual(E.left(unauthorizedError));
 
     const identityAuthenticate =
       identityServiceMock.authenticate.mockReturnValue(
         TE.left(makeDomainError("Error", DomainErrorTypes.GENERIC_ERROR))
       );
     const actual1 = await useCase("invalid")();
-    expect(actual1).toStrictEqual(E.left("Unauthorized"));
+    expect(actual1).toStrictEqual(E.left(unauthorizedError));
     expect(identityAuthenticate).toBeCalledWith("invalid");
     expect(identityAuthenticate).toBeCalledTimes(1);
   });

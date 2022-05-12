@@ -4,11 +4,11 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { GrantService } from "../../grants/GrantService";
 import { Logger } from "../../logger";
-import { RemoveGrantError, RemoveGrantUseCase } from "../RemoveGrantUseCase";
+import { RemoveGrantUseCase } from "../RemoveGrantUseCase";
 import { client } from "../../clients/__tests__/data";
 import { identity } from "../../identities/__tests__/data";
 import { grant } from "../../grants/__tests__/data";
-import { makeDomainError } from "../../types";
+import { makeDomainError, makeNotFoundError } from "../../types";
 import { constVoid } from "fp-ts/lib/function";
 
 const makeRemoveGrantUseCaseTest = () => {
@@ -56,7 +56,7 @@ describe("RemoveGrantUseCase", () => {
       identity.id
     )();
 
-    expect(actual).toStrictEqual(E.left(RemoveGrantError.NOT_FOUND));
+    expect(actual).toStrictEqual(E.left(makeNotFoundError("Grant not found")));
     expect(grantFindMock).toBeCalledTimes(1);
   });
   it("should map Errors", async () => {
@@ -71,7 +71,7 @@ describe("RemoveGrantUseCase", () => {
       identity.id
     )();
 
-    expect(actual).toStrictEqual(E.left(RemoveGrantError.GENERIC_ERROR));
+    expect(actual).toStrictEqual(E.left(makeDomainError("error")));
     expect(grantFindMock).toBeCalledTimes(1);
   });
 });

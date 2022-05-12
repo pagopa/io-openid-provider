@@ -5,10 +5,7 @@ import * as TE from "fp-ts/TaskEither";
 import { Logger } from "../../logger";
 import { GrantService } from "../../grants/GrantService";
 import { ClientService } from "../../clients/ClientService";
-import {
-  ProcessInteractionUseCase,
-  ProcessInteractionUseCaseError,
-} from "../ProcessInteractionUseCase";
+import { ProcessInteractionUseCase } from "../ProcessInteractionUseCase";
 import {
   afterLoginInteraction,
   interaction,
@@ -18,6 +15,7 @@ import { client } from "../../clients/__tests__/data";
 import { grant } from "../../grants/__tests__/data";
 import { IdentityService } from "../../identities/IdentityService";
 import { InteractionService } from "../../interactions/InteractionService";
+import { makeNotFoundError } from "../../types";
 
 const makeProcessInteractionUseCaseTest = () => {
   const logger = mock.mock<Logger>();
@@ -60,7 +58,7 @@ describe("ProcessInteractionUseCase", () => {
     grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
 
     const actual = await useCase(afterLoginInteraction.id, () => "")();
-    const expected = E.left(ProcessInteractionUseCaseError.invalidInteraction);
+    const expected = E.left(makeNotFoundError("Client not found"));
     expect(actual).toStrictEqual(expected);
     expect(interactionFind).toBeCalledWith(afterLoginInteraction.id);
     expect(interactionFind).toBeCalledTimes(1);
