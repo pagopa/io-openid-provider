@@ -14,7 +14,11 @@ import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
 
-/** This trait defined all the dependencies required by the Application */
+/**
+ * This trait defined all the dependencies required by the Application.
+ * Because of nodeOidcProvider, we need the services to wrap them into the
+ * library's adapters. The best is depend only on use-cases
+ */
 export interface AppEnv {
   readonly config: Config;
   readonly useCases: UseCases;
