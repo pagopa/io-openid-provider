@@ -5,66 +5,14 @@ import { makeApplication, startApplication } from "./adapters/http";
 import * as ioBackend from "./adapters/ioBackend";
 import * as mongodb from "./adapters/mongodb";
 import { makeLogger } from "./adapters/winston";
-import { Config, parseConfig } from "./config";
-import { AbortInteractionUseCase } from "./domain/useCases/AbortInteractionUseCase";
-import { AuthenticateUseCase } from "./domain/useCases/AuthenticateUseCase";
-import { ClientListUseCase } from "./domain/useCases/ClientListUseCase";
-import { ConfirmConsentUseCase } from "./domain/useCases/ConfirmConsentUseCase";
-import { FindGrantUseCase } from "./domain/useCases/FindGrantUseCases";
-import { ProcessInteractionUseCase } from "./domain/useCases/ProcessInteractionUseCase";
-import { RemoveGrantUseCase } from "./domain/useCases/RemoveGrantUseCase";
-import { Logger } from "./domain/logger";
-import { IdentityService } from "./domain/identities/IdentityService";
-import { InteractionService } from "./domain/interactions/InteractionService";
-import { ClientService } from "./domain/clients/ClientService";
-import { GrantService } from "./domain/grants/GrantService";
+import { parseConfig } from "./config";
+import { makeUseCases } from "./domain/useCases";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {
   const logger = makeLogger({ logLevel: "error", logName: "main" });
   logger.error(`Shutting down application ${error}`);
   process.exit(1);
-};
-
-export const makeUseCases = (
-  logger: Logger,
-  config: Config,
-  identityService: IdentityService,
-  interactionService: InteractionService,
-  clientService: ClientService,
-  grantService: GrantService
-  // eslint-disable-next-line max-params
-) => {
-  const abortInteractionUseCase = AbortInteractionUseCase(
-    logger,
-    interactionService
-  );
-  const authenticateUseCase = AuthenticateUseCase(logger, identityService);
-  const clientListUseCase = ClientListUseCase(logger, clientService);
-  const confirmConsentUseCase = ConfirmConsentUseCase(
-    config.grantTTL,
-    logger,
-    interactionService,
-    grantService
-  );
-  const findGrantUseCase = FindGrantUseCase(logger, grantService);
-  const processInteractionUseCase = ProcessInteractionUseCase(
-    logger,
-    identityService,
-    interactionService,
-    clientService,
-    grantService
-  );
-  const removeGrantUseCase = RemoveGrantUseCase(logger, grantService);
-  return {
-    abortInteractionUseCase,
-    authenticateUseCase,
-    clientListUseCase,
-    confirmConsentUseCase,
-    findGrantUseCase,
-    processInteractionUseCase,
-    removeGrantUseCase,
-  };
 };
 
 /** The entry-point */
@@ -96,8 +44,8 @@ void pipe(
 
     // initialize UseCases
     const useCases = makeUseCases(
+      config.grantTTL,
       logger,
-      config,
       identityService,
       interactionService,
       clientService,
