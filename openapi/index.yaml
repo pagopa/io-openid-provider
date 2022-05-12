@@ -45,17 +45,6 @@ paths:
           $ref: '#/responses/400BadRequest'
         500:
           $ref: '#/responses/500InternalServerError'
-    get:
-      operationId: getClients
-      summary: List clients
-      parameters:
-        - $ref: '#/parameters/queryOrganizationId'
-        - $ref: '#/parameters/queryServiceId'
-      responses:
-        200:
-          $ref: '#/responses/200ClientListResponse'
-        500:
-          $ref: '#/responses/500InternalServerError'
 
   /admin/clients/{clientId}:
     parameters:

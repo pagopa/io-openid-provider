@@ -6,7 +6,6 @@ import { GrantService } from "../domain/grants/GrantService";
 import { Seconds } from "../domain/types";
 import { AbortInteractionUseCase } from "./AbortInteractionUseCase";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
-import { ClientListUseCase } from "./ClientListUseCase";
 import { ConfirmConsentUseCase } from "./ConfirmConsentUseCase";
 import { FindGrantUseCase } from "./FindGrantUseCases";
 import { ProcessInteractionUseCase } from "./ProcessInteractionUseCase";
@@ -26,7 +25,6 @@ export const makeUseCases = (
     interactionService
   );
   const authenticateUseCase = AuthenticateUseCase(logger, identityService);
-  const clientListUseCase = ClientListUseCase(logger, clientService);
   const confirmConsentUseCase = ConfirmConsentUseCase(
     grantTTL,
     logger,
@@ -45,7 +43,6 @@ export const makeUseCases = (
   return {
     abortInteractionUseCase,
     authenticateUseCase,
-    clientListUseCase,
     confirmConsentUseCase,
     findGrantUseCase,
     processInteractionUseCase,
