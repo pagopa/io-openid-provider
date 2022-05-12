@@ -6,7 +6,7 @@ import { Logger } from "../../logger";
 import { GrantService } from "../../grants/GrantService";
 import { InteractionService } from "../../interactions/InteractionService";
 import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
-import { DomainErrorTypes, Seconds } from "../../types";
+import { makeNotFoundError, Seconds } from "../../types";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
@@ -36,7 +36,7 @@ describe("ConfirmConsentUseCase", () => {
       TE.right(O.none)
     );
     const actual = await useCase(interaction.id, false)();
-    expect(actual).toStrictEqual(E.left(DomainErrorTypes.NOT_FOUND));
+    expect(actual).toStrictEqual(E.left(makeNotFoundError("Not Found")));
     expect(interactionfind).toBeCalledWith(interaction.id);
   });
   it("should return a new Grant", async () => {

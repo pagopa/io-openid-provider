@@ -7,6 +7,7 @@ import { Logger } from "../../logger";
 import { AbortInteractionUseCase } from "../AbortInteractionUseCase";
 import { interaction } from "../../interactions/__tests__/data";
 import { InteractionService } from "../../interactions/InteractionService";
+import { DomainErrorTypes, makeDomainError } from "../../types";
 
 const makeAbortInteractionUseCaseTest = () => {
   const logger = mock.mock<Logger>();
@@ -24,7 +25,9 @@ describe("AbortInteractionUseCase", () => {
       TE.right(O.none)
     );
     const actual = await useCase(interaction.id)();
-    expect(actual).toStrictEqual(E.left("Invalid Step"));
+    expect(actual).toStrictEqual(
+      E.left(makeDomainError("Not Found", DomainErrorTypes.NOT_FOUND))
+    );
     expect(interactionFind).toBeCalledWith(interaction.id);
     expect(interactionFind).toBeCalledTimes(1);
   });

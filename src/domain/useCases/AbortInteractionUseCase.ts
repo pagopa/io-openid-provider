@@ -3,9 +3,10 @@ import * as TE from "fp-ts/TaskEither";
 import { InteractionService } from "../interactions/InteractionService";
 import { InteractionId } from "../interactions/types";
 import { Logger } from "../logger";
+import { DomainError } from "../types";
 import { fromTEOtoTE, show } from "../utils";
 
-export type AbortInteractionUseCaseError = "Invalid Step";
+export type AbortInteractionUseCaseError = DomainError;
 
 /**
  * Given an interaction try to abort it.
@@ -24,7 +25,7 @@ export const AbortInteractionUseCase =
             `Error during AbortInteractionUseCase: ${show(error)}`,
             error.causedBy
           );
-          return "Invalid Step";
+          return error;
         },
         (_) => constVoid()
       )

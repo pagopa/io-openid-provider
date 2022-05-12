@@ -12,7 +12,7 @@ import { IdentityService } from "../identities/IdentityService";
 import { Logger } from "../logger";
 import { fromTEOtoTE, show } from "../utils";
 import { ClientService } from "../clients/ClientService";
-import { makeDomainError } from "../types";
+import { DomainError, DomainErrorTypes, makeDomainError } from "../types";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
 import { findValidGrant } from "./utils";
 
@@ -55,10 +55,8 @@ export const ProcessResult = t.union([
 ]);
 export type ProcessResult = t.TypeOf<typeof ProcessResult>;
 
-export const enum ProcessInteractionUseCaseError {
-  invalidInteraction = "Invalid Interaction",
-  unauthorized = "Unauthorized",
-}
+export type ProcessInteractionUseCaseError = DomainError;
+
 /**
  * Given an interactionId process it.
  * If there is no identity linked to this interaction run the authentication, otherwise
@@ -80,7 +78,6 @@ export const ProcessInteractionUseCase =
     pipe(
       // fetch the interaction
       pipe(interactionService.find(interactionId), fromTEOtoTE),
-      TE.mapLeft((_) => ProcessInteractionUseCaseError.invalidInteraction),
       TE.chain((interaction) => {
         // if the interaction has no result then start from the authentication
         if (interaction.result === undefined) {
@@ -88,10 +85,7 @@ export const ProcessInteractionUseCase =
             // run the logic to handle the login
             AuthenticateUseCase(logger, identityService)(accessToken()),
             // create the result
-            TE.bimap(
-              (_) => ProcessInteractionUseCaseError.unauthorized,
-              (identity) => ({ identity, kind: "LoginResult" })
-            )
+            TE.map((identity) => ({ identity, kind: "LoginResult" }))
           );
         } else {
           return pipe(
@@ -105,7 +99,13 @@ export const ProcessInteractionUseCase =
                     clientService.find(interaction.params.client_id),
                     TE.chain(
                       O.fold(
-                        () => TE.left(makeDomainError("Invalid Client")),
+                        () =>
+                          TE.left(
+                            makeDomainError(
+                              "Client not found",
+                              DomainErrorTypes.NOT_FOUND
+                            )
+                          ),
                         (client) =>
                           TE.right(makeRequireConsent(interaction, client))
                       )
@@ -123,7 +123,7 @@ export const ProcessInteractionUseCase =
                 `Error on ProcessInteractionUseCase: ${show(error)}`,
                 error.causedBy
               );
-              return ProcessInteractionUseCaseError.invalidInteraction;
+              return error;
             })
           );
         }

@@ -5,28 +5,52 @@ export enum DomainErrorTypes {
   GENERIC_ERROR = "GENERIC_ERROR",
   NOT_FOUND = "NOT_FOUND",
   NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
+  FORMAT_ERROR = "FORMAT_ERROR",
+  UNAUTHORIZED = "UNAUTHORIZED",
 }
 
-export const DomainError = t.type({
-  causedBy: t.union([
-    t.type({
-      message: t.string,
-      name: t.string,
-    }),
-    t.undefined,
-  ]),
-  kind: t.union([
-    t.literal(DomainErrorTypes.GENERIC_ERROR),
-    t.literal(DomainErrorTypes.NOT_FOUND),
-    t.literal(DomainErrorTypes.NOT_IMPLEMENTED),
-  ]),
+export interface BaseError {
+  readonly causedBy: Error | undefined;
+}
+
+export type NotFoundError = BaseError & {
+  readonly kind: DomainErrorTypes.NOT_FOUND;
+};
+export const makeNotFoundError = (msg: string): NotFoundError => ({
+  causedBy: new Error(msg),
+  kind: DomainErrorTypes.NOT_FOUND,
 });
+export type NotImplementedError = BaseError & {
+  readonly kind: DomainErrorTypes.NOT_IMPLEMENTED;
+};
+export type UnauthorizedError = BaseError & {
+  readonly kind: DomainErrorTypes.UNAUTHORIZED;
+};
+export const unauthorizedError: UnauthorizedError = {
+  causedBy: undefined,
+  kind: DomainErrorTypes.UNAUTHORIZED,
+};
+export type FormatError = BaseError & {
+  readonly kind: DomainErrorTypes.FORMAT_ERROR;
+};
+export const formatError: FormatError = {
+  causedBy: undefined,
+  kind: DomainErrorTypes.FORMAT_ERROR,
+};
+export type GenericError = BaseError & {
+  readonly kind: DomainErrorTypes.GENERIC_ERROR;
+};
 
 /**
  * This type represents an error, any services and function of the core
  * package should use this as Error rappresentation
  */
-export type DomainError = t.TypeOf<typeof DomainError>;
+export type DomainError =
+  | NotFoundError
+  | NotImplementedError
+  | FormatError
+  | UnauthorizedError
+  | GenericError;
 
 /**
  * Create a [[DomaniError]] given a [[t.Errors]] or a message
