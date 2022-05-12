@@ -5,17 +5,11 @@ import helmet from "helmet";
 import * as cookies from "cookie-parser";
 import { Config } from "../../config";
 import { Logger } from "../../domain/logger";
-import { ConfirmConsentUseCase } from "../../useCases/ConfirmConsentUseCase";
-import { ClientListUseCase } from "../../useCases/ClientListUseCase";
-import { AuthenticateUseCase } from "../../useCases/AuthenticateUseCase";
-import { FindGrantUseCase } from "../../useCases/FindGrantUseCases";
-import { ProcessInteractionUseCase } from "../../useCases/ProcessInteractionUseCase";
-import { RemoveGrantUseCase } from "../../useCases/RemoveGrantUseCase";
-import { AbortInteractionUseCase } from "../../useCases/AbortInteractionUseCase";
 import { ClientService } from "../../domain/clients/ClientService";
 import { GrantService } from "../../domain/grants/GrantService";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { SessionService } from "../../domain/sessions/SessionService";
+import { UseCases } from "../../useCases";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
@@ -23,14 +17,8 @@ import * as grants from "./grants";
 /** This trait defined all the dependencies required by the Application */
 export interface AppEnv {
   readonly config: Config;
+  readonly useCases: UseCases;
   readonly logger: Logger;
-  readonly abortInteractionUseCase: AbortInteractionUseCase;
-  readonly authenticateUseCase: AuthenticateUseCase;
-  readonly clientListUseCase: ClientListUseCase;
-  readonly confirmConsentUseCase: ConfirmConsentUseCase;
-  readonly findGrantUseCase: FindGrantUseCase;
-  readonly processInteractionUseCase: ProcessInteractionUseCase;
-  readonly removeGrantUseCase: RemoveGrantUseCase;
   readonly clientService: ClientService;
   readonly grantService: GrantService;
   readonly interactionService: InteractionService;
@@ -43,17 +31,11 @@ export interface AppEnv {
 export const makeApplication = ({
   config,
   logger,
-  abortInteractionUseCase,
-  authenticateUseCase,
-  clientListUseCase,
-  confirmConsentUseCase,
-  findGrantUseCase,
-  processInteractionUseCase,
-  removeGrantUseCase,
   clientService,
   grantService,
   interactionService,
   sessionService,
+  useCases,
 }: AppEnv): express.Application => {
   const application = express();
 
@@ -78,27 +60,25 @@ export const makeApplication = ({
 
   /* Mount the routes */
   // mount some custom client endpoints
-  application.use(clients.makeRouter(clientListUseCase));
+  application.use(clients.makeRouter(useCases.clientListUseCase));
   // mount grant endpoints
   application.use(
-    grants.makeRouter(logger, findGrantUseCase, removeGrantUseCase)
+    grants.makeRouter(
+      logger,
+      useCases.findGrantUseCase,
+      useCases.removeGrantUseCase
+    )
   );
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({
-      abortInteractionUseCase,
-      authenticateUseCase,
-      clientListUseCase,
       clientService,
       config,
-      confirmConsentUseCase,
-      findGrantUseCase,
       grantService,
       interactionService,
       logger,
-      processInteractionUseCase,
-      removeGrantUseCase,
       sessionService,
+      useCases,
     })
   );
 

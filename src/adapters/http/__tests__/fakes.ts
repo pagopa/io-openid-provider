@@ -27,7 +27,7 @@ export const makeInMemoryApplication = (grants: ReadonlyArray<Grant> = []) => {
     grantService
   );
   const app = makeApplication({
-    ...useCases,
+    useCases,
     config,
     logger,
     clientService,

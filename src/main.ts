@@ -53,13 +53,13 @@ void pipe(
     );
 
     const application = makeApplication({
-      ...useCases,
       clientService,
       config,
       grantService,
       interactionService,
       logger,
       sessionService,
+      useCases,
     });
     startApplication(application, logger);
   }),

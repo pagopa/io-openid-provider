@@ -13,10 +13,7 @@ import { makeInteractionRouter } from "./nodeOidcProvider/interactions";
 export const makeRouter = ({
   config,
   logger,
-  authenticateUseCase,
-  processInteractionUseCase,
-  confirmConsentUseCase,
-  abortInteractionUseCase,
+  useCases,
   clientService,
   interactionService,
   sessionService,
@@ -29,7 +26,7 @@ export const makeRouter = ({
     makeConfiguration(
       config,
       logger,
-      authenticateUseCase,
+      useCases.authenticateUseCase,
       clientService,
       interactionService,
       sessionService,
@@ -40,9 +37,9 @@ export const makeRouter = ({
   router.use(
     makeInteractionRouter(
       config,
-      processInteractionUseCase,
-      confirmConsentUseCase,
-      abortInteractionUseCase,
+      useCases.processInteractionUseCase,
+      useCases.confirmConsentUseCase,
+      useCases.abortInteractionUseCase,
       provider
     )
   );

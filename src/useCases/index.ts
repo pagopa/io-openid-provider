@@ -52,3 +52,4 @@ export const makeUseCases = (
     removeGrantUseCase,
   };
 };
+export type UseCases = ReturnType<typeof makeUseCases>;
