@@ -1,15 +1,15 @@
 import * as mock from "jest-mock-extended";
+import { constVoid } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../../grants/GrantService";
-import { Logger } from "../../logger";
+import { GrantService } from "../../domain/grants/GrantService";
+import { Logger } from "../../domain/logger";
 import { RemoveGrantUseCase } from "../RemoveGrantUseCase";
-import { client } from "../../clients/__tests__/data";
-import { identity } from "../../identities/__tests__/data";
-import { grant } from "../../grants/__tests__/data";
-import { makeDomainError, makeNotFoundError } from "../../types";
-import { constVoid } from "fp-ts/lib/function";
+import { client } from "../../domain/clients/__tests__/data";
+import { identity } from "../../domain/identities/__tests__/data";
+import { grant } from "../../domain/grants/__tests__/data";
+import { makeDomainError, makeNotFoundError } from "../../domain/types";
 
 const makeRemoveGrantUseCaseTest = () => {
   const logger = mock.mock<Logger>();

@@ -1,15 +1,15 @@
 import * as mock from "jest-mock-extended";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../logger";
+import { Logger } from "../../domain/logger";
 import { AuthenticateUseCase } from "../AuthenticateUseCase";
 import {
   DomainErrorTypes,
   makeDomainError,
   unauthorizedError,
-} from "../../types";
-import { IdentityService } from "../../identities/IdentityService";
-import { identity } from "../../identities/__tests__/data";
+} from "../../domain/types";
+import { IdentityService } from "../../domain/identities/IdentityService";
+import { identity } from "../../domain/identities/__tests__/data";
 
 const makeAuthenticateUseCaseTest = () => {
   const logger = mock.mock<Logger>();

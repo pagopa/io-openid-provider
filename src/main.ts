@@ -6,7 +6,7 @@ import * as ioBackend from "./adapters/ioBackend";
 import * as mongodb from "./adapters/mongodb";
 import { makeLogger } from "./adapters/winston";
 import { parseConfig } from "./config";
-import { makeUseCases } from "./domain/useCases";
+import { makeUseCases } from "./useCases";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {

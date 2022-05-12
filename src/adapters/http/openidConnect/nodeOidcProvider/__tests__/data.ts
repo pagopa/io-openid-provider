@@ -3,7 +3,7 @@ import { makeLogger } from "../../../../winston";
 import { makeConfiguration } from "../index";
 import { config } from "../../../../../__tests__/data";
 import { identity } from "../../../../../domain/identities/__tests__/data";
-import { AuthenticateUseCase } from "../../../../../domain/useCases/AuthenticateUseCase";
+import { AuthenticateUseCase } from "../../../../../useCases/AuthenticateUseCase";
 
 export const configuration = makeConfiguration(
   config,

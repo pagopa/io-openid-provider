@@ -3,11 +3,11 @@ import { constVoid } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../logger";
+import { Logger } from "../../domain/logger";
 import { AbortInteractionUseCase } from "../AbortInteractionUseCase";
-import { interaction } from "../../interactions/__tests__/data";
-import { InteractionService } from "../../interactions/InteractionService";
-import { DomainErrorTypes, makeDomainError } from "../../types";
+import { interaction } from "../../domain/interactions/__tests__/data";
+import { InteractionService } from "../../domain/interactions/InteractionService";
+import { DomainErrorTypes, makeDomainError } from "../../domain/types";
 
 const makeAbortInteractionUseCaseTest = () => {
   const logger = mock.mock<Logger>();

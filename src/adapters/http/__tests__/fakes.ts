@@ -5,7 +5,7 @@ import { config } from "../../../__tests__/data";
 import * as inMemory from "../../inMemory";
 import { makeLogger } from "../../winston";
 import { Grant } from "../../../domain/grants/types";
-import { makeUseCases } from "../../../domain/useCases";
+import { makeUseCases } from "../../../useCases";
 
 /**
  * Create and return a fake application and in memory services required by the system.

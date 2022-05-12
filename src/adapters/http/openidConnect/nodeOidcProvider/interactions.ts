@@ -11,11 +11,11 @@ import * as TE from "fp-ts/TaskEither";
 import {
   ProcessInteractionUseCase,
   RequireConsent,
-} from "../../../../domain/useCases/ProcessInteractionUseCase";
+} from "../../../../useCases/ProcessInteractionUseCase";
 import { Config } from "../../../../config";
 import { InteractionId } from "../../../../domain/interactions/types";
-import { ConfirmConsentUseCase } from "../../../../domain/useCases/ConfirmConsentUseCase";
-import { AbortInteractionUseCase } from "../../../../domain/useCases/AbortInteractionUseCase";
+import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase";
+import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase";
 import { formatError } from "../../../../domain/types";
 import { grantToAdapterPayload } from "./adapters/grantAdapter";
 

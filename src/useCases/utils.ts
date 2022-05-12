@@ -2,10 +2,14 @@ import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../grants/GrantService";
-import { Grant } from "../grants/types";
-import { ConsentResult, Interaction, LoginResult } from "../interactions/types";
-import { DomainError } from "../types";
+import { GrantService } from "../domain/grants/GrantService";
+import { Grant } from "../domain/grants/types";
+import {
+  ConsentResult,
+  Interaction,
+  LoginResult,
+} from "../domain/interactions/types";
+import { DomainError } from "../domain/types";
 
 /**
  * Try to retrieve a valid grant given an interaciton

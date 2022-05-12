@@ -1,10 +1,10 @@
 import { pipe } from "fp-ts/function";
 import * as TE from "fp-ts/TaskEither";
-import { Client } from "../clients/types";
-import { ClientSelector, ClientService } from "../clients/ClientService";
-import { Logger } from "../logger";
-import { DomainError } from "../types";
-import { show } from "../utils";
+import { Client } from "../domain/clients/types";
+import { ClientSelector, ClientService } from "../domain/clients/ClientService";
+import { Logger } from "../domain/logger";
+import { DomainError } from "../domain/types";
+import { show } from "../domain/utils";
 
 export type ClientListUseCaseError = DomainError;
 

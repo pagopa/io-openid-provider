@@ -16,7 +16,7 @@ import {
   OrganizationId,
   ServiceId,
 } from "../../../domain/clients/types";
-import { ClientListUseCase } from "../../../domain/useCases/ClientListUseCase";
+import { ClientListUseCase } from "../../../useCases/ClientListUseCase";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   application_type: "web",

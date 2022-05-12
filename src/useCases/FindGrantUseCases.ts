@@ -2,11 +2,11 @@ import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
-import { GrantService } from "../../domain/grants/GrantService";
-import { Grant } from "../grants/types";
-import { IdentityId } from "../identities/types";
-import { OrganizationId, ServiceId } from "../clients/types";
+import { Logger } from "../domain/logger";
+import { GrantService } from "../domain/grants/GrantService";
+import { Grant } from "../domain/grants/types";
+import { IdentityId } from "../domain/identities/types";
+import { OrganizationId, ServiceId } from "../domain/clients/types";
 
 export type NotFound = "NotFound";
 export const NotFound = (): FindGrantUseCaseError => "NotFound";

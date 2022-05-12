@@ -2,17 +2,21 @@ import * as t from "io-ts";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { Identity } from "../identities/types";
-import { Interaction, InteractionId } from "../interactions/types";
-import { Grant } from "../grants/types";
-import { Client } from "../clients/types";
-import { InteractionService } from "../interactions/InteractionService";
-import { GrantService } from "../grants/GrantService";
-import { IdentityService } from "../identities/IdentityService";
-import { Logger } from "../logger";
-import { fromTEOtoTE, show } from "../utils";
-import { ClientService } from "../clients/ClientService";
-import { DomainError, DomainErrorTypes, makeDomainError } from "../types";
+import { Identity } from "../domain/identities/types";
+import { Interaction, InteractionId } from "../domain/interactions/types";
+import { Grant } from "../domain/grants/types";
+import { Client } from "../domain/clients/types";
+import { InteractionService } from "../domain/interactions/InteractionService";
+import { GrantService } from "../domain/grants/GrantService";
+import { IdentityService } from "../domain/identities/IdentityService";
+import { Logger } from "../domain/logger";
+import { fromTEOtoTE, show } from "../domain/utils";
+import { ClientService } from "../domain/clients/ClientService";
+import {
+  DomainError,
+  DomainErrorTypes,
+  makeDomainError,
+} from "../domain/types";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
 import { findValidGrant } from "./utils";
 

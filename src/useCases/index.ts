@@ -1,9 +1,9 @@
-import { Logger } from "../logger";
-import { IdentityService } from "../identities/IdentityService";
-import { InteractionService } from "../interactions/InteractionService";
-import { ClientService } from "../clients/ClientService";
-import { GrantService } from "../grants/GrantService";
-import { Seconds } from "../types";
+import { Logger } from "../domain/logger";
+import { IdentityService } from "../domain/identities/IdentityService";
+import { InteractionService } from "../domain/interactions/InteractionService";
+import { ClientService } from "../domain/clients/ClientService";
+import { GrantService } from "../domain/grants/GrantService";
+import { Seconds } from "../domain/types";
 import { AbortInteractionUseCase } from "./AbortInteractionUseCase";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
 import { ClientListUseCase } from "./ClientListUseCase";

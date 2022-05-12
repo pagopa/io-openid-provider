@@ -2,17 +2,17 @@ import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../logger";
-import { GrantService } from "../../grants/GrantService";
-import { InteractionService } from "../../interactions/InteractionService";
+import { Logger } from "../../domain/logger";
+import { GrantService } from "../../domain/grants/GrantService";
+import { InteractionService } from "../../domain/interactions/InteractionService";
 import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
-import { makeNotFoundError, Seconds } from "../../types";
+import { makeNotFoundError, Seconds } from "../../domain/types";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
   interaction,
-} from "../../interactions/__tests__/data";
-import { grant } from "../../grants/__tests__/data";
+} from "../../domain/interactions/__tests__/data";
+import { grant } from "../../domain/grants/__tests__/data";
 
 const makeConfirmConsentUseCaseTest = () => {
   const grantTTL = 86400 as Seconds;

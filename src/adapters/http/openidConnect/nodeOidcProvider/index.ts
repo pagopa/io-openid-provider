@@ -9,7 +9,7 @@ import { InteractionService } from "../../../../domain/interactions/InteractionS
 import { SessionService } from "../../../../domain/sessions/SessionService";
 import { GrantService } from "../../../../domain/grants/GrantService";
 import { Identity } from "../../../../domain/identities/types";
-import { AuthenticateUseCase } from "../../../../domain/useCases/AuthenticateUseCase";
+import { AuthenticateUseCase } from "../../../../useCases/AuthenticateUseCase";
 import {
   Client,
   OrganizationId,

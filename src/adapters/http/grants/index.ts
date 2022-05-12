@@ -17,14 +17,14 @@ import {
   RequiredHeaderMiddleware,
 } from "../utils";
 import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail";
-import { FindGrantUseCase } from "../../../domain/useCases/FindGrantUseCases";
+import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
 import {
   OrganizationId,
   ServiceId as DomainServiceId,
 } from "../../../domain/clients/types";
 import { IdentityId } from "../../../domain/identities/types";
 import { Grant } from "../../../domain/grants/types";
-import { RemoveGrantUseCase } from "../../../domain/useCases/RemoveGrantUseCase";
+import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
 import { DomainErrorTypes } from "../../../domain/types";
 import { show } from "../../../domain/utils";
 
