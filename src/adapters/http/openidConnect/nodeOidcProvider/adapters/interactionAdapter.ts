@@ -34,10 +34,9 @@ export const adapterPayloadToInteraction = (
         Interaction.decode({
           expireAt: exp,
           id: payload.jti,
-          identity: undefined,
           issuedAt: iat,
           params: payload.params,
-          payload,
+          payload: { ...payload },
           result:
             payload.result?.consent ||
             payload.result?.login ||
@@ -50,13 +49,6 @@ export const adapterPayloadToInteraction = (
                 }
               : undefined,
           returnTo: payload.returnTo,
-          session: payload.session
-            ? {
-                cookieId: payload.session.cookie,
-                identityId: payload.session.accountId,
-                // uid: payload.session.uid,
-              }
-            : undefined,
         })
     ),
     E.ap(DateFromNumericDate.decode(payload.exp)),

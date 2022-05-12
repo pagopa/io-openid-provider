@@ -45,14 +45,6 @@ export const ConsentResult = t.type({
   identityId: IdentityId,
 });
 
-export const SessionInfo = t.type({
-  cookieId: t.string,
-  identityId: IdentityId,
-  // TODO: Check if this uid could be collapsed to sessionId
-  // uid: t.string,
-});
-export type SessionInfo = t.TypeOf<typeof SessionInfo>;
-
 export const Interaction = t.type({
   expireAt: tt.date,
   id: InteractionId,
@@ -61,7 +53,5 @@ export const Interaction = t.type({
   params: RequestParams,
   payload: Payload,
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),
-  returnTo: t.string,
-  session: t.union([t.undefined, SessionInfo]),
 });
 export type Interaction = t.TypeOf<typeof Interaction>;
