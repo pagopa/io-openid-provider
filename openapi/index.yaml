@@ -245,19 +245,25 @@ parameters:
       $ref: '#/definitions/APIClientDefinition'
 
 definitions:
+  APIScope:
+    type: string
+    enum:
+      - "acr"
+      - "auth_time"
+      - "date_of_birth"
+      - "email_verified"
+      - "family_name"
+      - "given_name"
+      - "name"
+      - "openid"
+      - "profile"
+      - "sub"
   APIGrantDetail:
     type: object
-    required:
-      - id
-      - issuedAt
-      - expireAt
-      - organizationId
-      - serviceId
-      - identityId
-      - scope
     properties:
       id:
         type: string
+        minLength: 1
       issuedAt:
         type: string
         format: date-time
@@ -272,8 +278,22 @@ definitions:
         $ref: '#/definitions/FiscalCode'
       scope:
         type: array
+        description: >-
+          The scope the user granted to the client, at the moment the values could be:
+            acr, auth_time, date_of_birth, email_verified, family_name, given_name, name, openid, profile, sub
+        minItems: 1
+        uniqueItems: true
         items:
+          # TODO: Improve type using APIScope
           type: string
+    required:
+      - id
+      - issuedAt
+      - expireAt
+      - organizationId
+      - serviceId
+      - identityId
+      - scope
   APIClientDefinition:
     type: object
     required:

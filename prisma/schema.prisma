@@ -39,7 +39,7 @@ model Grant {
   id          String @id @map("_id")
   issuedAt    DateTime
   remember    Boolean
-  scope       String?
+  scope       String
   clientId    String
   identityId  String
 

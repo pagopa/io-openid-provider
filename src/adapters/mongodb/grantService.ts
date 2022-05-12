@@ -31,7 +31,7 @@ const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
         id: grantId,
         issuedAt: record.issuedAt,
         remember: record.remember,
-        scope: record.scope || undefined,
+        scope: record.scope,
         subjects: {
           clientId,
           identityId,

@@ -38,12 +38,13 @@ const adapterPayloadToGrant = (
       ([idnId, grnId]: IdentityIdAndGrantId) =>
         (clientId: ClientId) =>
         (exp: Date) =>
-        (iat: Date) => ({
+        (iat: Date) =>
+        (scope: string) => ({
           expireAt: exp,
           id: grnId,
           issuedAt: iat,
           remember: undefined,
-          scope: payload.openid?.scope,
+          scope,
           subjects: {
             clientId,
             identityId: idnId,
@@ -53,7 +54,8 @@ const adapterPayloadToGrant = (
     E.ap(IdentityIdAndGrantId.decode(payload.jti)),
     E.ap(Client.props.clientId.decode(payload.clientId)),
     E.ap(DateFromNumericDate.decode(payload.exp)),
-    E.ap(DateFromNumericDate.decode(payload.iat))
+    E.ap(DateFromNumericDate.decode(payload.iat)),
+    E.ap(Grant.props.scope.decode(payload.openid?.scope))
   );
 
 export const makeGrantAdapter = (

@@ -28,7 +28,7 @@ const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
   identityId: grant.subjects.identityId,
   issuedAt: grant.issuedAt,
   organizationId: grant.subjects.clientId.organizationId,
-  scope: grant.scope?.split(" ") || [],
+  scope: grant.scope.split(" "),
   serviceId: grant.subjects.clientId.serviceId,
 });
 type FindGrantEndpoint =

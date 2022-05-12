@@ -26,7 +26,7 @@ export const RequestParams = t.type({
     t.literal("form_post"),
   ]),
   response_type: t.string,
-  scope: t.union([t.undefined, t.string]),
+  scope: t.string,
   state: t.string,
 });
 export type RequestParams = t.TypeOf<typeof RequestParams>;
