@@ -12,7 +12,11 @@ import { GrantService } from "../../../domain/grants/GrantService";
 import { Logger } from "../../../domain/logger";
 import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
 import { ServiceId } from "../../../generated/definitions/ServiceId";
-import { RequiredHeaderMiddleware } from "../utils";
+import {
+  IResponseNoContent,
+  ResponseNoContent,
+  RequiredHeaderMiddleware,
+} from "../utils";
 import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail";
 import { FindGrantUseCase } from "../../../domain/useCases/FindGrantUseCases";
 import {
@@ -26,7 +30,7 @@ import { DomainErrorTypes } from "../../../domain/types";
 import { show } from "../../../domain/utils";
 
 type DeleteGrantEndpointHandler =
-  | responses.IResponseSuccessAccepted // TODO: Use NoContent instead Accepted
+  | IResponseNoContent // TODO: Use NoContent instead Accepted
   | responses.IResponseErrorValidation
   | responses.IResponseErrorNotFound
   | responses.IResponseErrorInternal;
@@ -67,7 +71,7 @@ const deleteGrantEndpointHandler =
               );
           }
         },
-        () => responses.ResponseSuccessAccepted("No Content", undefined)
+        () => ResponseNoContent("No Content")
       ),
       TE.toUnion
     )();
@@ -78,7 +82,7 @@ const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
   identityId: grant.subjects.identityId,
   issuedAt: grant.issuedAt,
   organizationId: grant.subjects.clientId.organizationId,
-  scope: grant.scope?.split(" ") || [],
+  scope: grant.scope.split(" "),
   serviceId: grant.subjects.clientId.serviceId,
 });
 type FindGrantEndpoint =

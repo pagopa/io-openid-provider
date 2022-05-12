@@ -32,7 +32,7 @@ export const Grant = t.type({
   id: GrantId,
   issuedAt: tt.date,
   remember: t.union([t.undefined, t.boolean]),
-  scope: t.union([t.undefined, t.string]),
+  scope: t.string,
   subjects: GrantSubjects,
 });
 export type Grant = t.TypeOf<typeof Grant>;
