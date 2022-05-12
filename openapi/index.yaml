@@ -81,6 +81,28 @@ paths:
         500:
           $ref: '#/responses/500InternalServerError'
 
+  /admin/grants/{organizationId}/{serviceId}:
+    parameters:
+      - $ref: '#/parameters/pathOrganizationId'
+      - $ref: '#/parameters/pathServiceId'
+      - $ref: '#/parameters/headerIdentityId'
+    get:
+      operationId: detailGrant
+      summary: Return a grant detail
+      security:
+        - SubscriptionKey: []
+      responses:
+        200:
+          $ref: '#/responses/200GrantDetailResponse'
+        404:
+          $ref: '#/responses/404NotFound'
+        400:
+          $ref: "#/responses/400BadRequest"
+        401:
+          $ref: "#/responses/401Unauthorized"
+        500:
+          $ref: '#/responses/500InternalServerError'
+
   /.well-known/openid-configuration:
     get:
       operationId: openidConfiguration
@@ -111,11 +133,29 @@ paths:
             $ref: '#/definitions/ProblemJson'
 
 parameters:
+  headerIdentityId:
+    name: identityId
+    in: header
+    required: true
+    description: The identifier of the user
+    type: string
   pathClientId:
     name: clientId
     in: path
     required: true
     description: The identifier of a client
+    type: string
+  pathOrganizationId:
+    name: organizationId
+    description: The organization identifier
+    in: path
+    required: true
+    type: string
+  pathServiceId:
+    name: serviceId
+    description: The service identifier
+    in: path
+    required: true
     type: string
   queryOrganizationId:
     name: organizationId
@@ -205,6 +245,55 @@ parameters:
       $ref: '#/definitions/APIClientDefinition'
 
 definitions:
+  APIScope:
+    type: string
+    enum:
+      - "acr"
+      - "auth_time"
+      - "date_of_birth"
+      - "email_verified"
+      - "family_name"
+      - "given_name"
+      - "name"
+      - "openid"
+      - "profile"
+      - "sub"
+  APIGrantDetail:
+    type: object
+    properties:
+      id:
+        type: string
+        minLength: 1
+      issuedAt:
+        type: string
+        format: date-time
+      expireAt:
+        type: string
+        format: date-time
+      organizationId:
+        $ref: '#/definitions/OrganizationFiscalCode'
+      serviceId:
+        $ref: '#/definitions/ServiceId'
+      identityId:
+        $ref: '#/definitions/FiscalCode'
+      scope:
+        type: array
+        description: >-
+          The scope the user granted to the client, at the moment the values could be:
+            acr, auth_time, date_of_birth, email_verified, family_name, given_name, name, openid, profile, sub
+        minItems: 1
+        uniqueItems: true
+        items:
+          # TODO: Improve type using APIScope
+          type: string
+    required:
+      - id
+      - issuedAt
+      - expireAt
+      - organizationId
+      - serviceId
+      - identityId
+      - scope
   APIClientDefinition:
     type: object
     required:
@@ -448,8 +537,25 @@ definitions:
           characters outside the set %x20-21 / %x23-5B / %x5D-7E.
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ProblemJson"
+  OrganizationFiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/OrganizationFiscalCode"
+  ServiceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/ServiceId"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.2.1/openapi/definitions.yaml#/FiscalCode"
+
+securityDefinitions:
+  SubscriptionKey:
+    type: apiKey
+    name: Ocp-Apim-Subscription-Key
+    in: header
+    description: The API key obtained through the developer portal or the getService operation.
 
 responses:
+  200GrantDetailResponse:
+    description: Detail of a grant
+    schema:
+      $ref: "#/definitions/APIGrantDetail"
   200ClientResponse:
     description: Detail of a client
     schema:
@@ -531,6 +637,11 @@ responses:
       The given payload is invalid
     schema:
       $ref: '#/definitions/OAuthError'
+  401Unauthorized:
+    description: >-
+      The authorization token is missing or invalid
+    schema:
+      type: string
   404NotFound:
     description: The requested entity is not found
     schema:

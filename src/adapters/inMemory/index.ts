@@ -112,7 +112,7 @@ export const makeGrantService = (
             selector.clientId,
             O.fold(
               () => false,
-              (_) => _ === grant.subjects.clientId
+              (_) => _.serviceId === grant.subjects.clientId.serviceId
             )
           ) &&
           selector.identityId === grant.subjects.identityId &&
