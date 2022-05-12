@@ -8,20 +8,15 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { ClientService } from "../../../../domain/clients/ClientService";
-import { GrantService } from "../../../../domain/grants/GrantService";
-import { formatError } from "../../../../domain/types";
 import {
   ProcessInteractionUseCase,
   RequireConsent,
-} from "../../../../domain/useCases/ProcessInteractionUseCase";
+} from "../../../../useCases/ProcessInteractionUseCase";
 import { Config } from "../../../../config";
-import { Logger } from "../../../../domain/logger";
-import { InteractionService } from "../../../../domain/interactions/InteractionService";
 import { InteractionId } from "../../../../domain/interactions/types";
-import { IdentityService } from "../../../../domain/identities/IdentityService";
-import { ConfirmConsentUseCase } from "../../../../domain/useCases/ConfirmConsentUseCase";
-import { AbortInteractionUseCase } from "../../../../domain/useCases/AbortInteractionUseCase";
+import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase";
+import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase";
+import { formatError } from "../../../../domain/types";
 import { grantToAdapterPayload } from "./adapters/grantAdapter";
 
 const interactionFinishedTE = (
@@ -47,13 +42,8 @@ const renderConsent = (res: express.Response, renderData: RequireConsent) =>
 const getInteractionHandler =
   (
     config: Config,
-    logger: Logger,
-    identityService: IdentityService,
-    interactionService: InteractionService,
-    clientService: ClientService,
-    grantService: GrantService,
+    processInteractionUseCase: ProcessInteractionUseCase,
     provider: oidc.Provider
-    // eslint-disable-next-line max-params
   ): express.Handler =>
   (req, res, next) => {
     const response = pipe(
@@ -66,13 +56,7 @@ const getInteractionHandler =
       ),
       TE.chain((interactionId) =>
         // process the interaction
-        ProcessInteractionUseCase(
-          logger,
-          identityService,
-          interactionService,
-          clientService,
-          grantService
-        )(
+        processInteractionUseCase(
           interactionId,
           () => req.cookies[config.server.authenticationCookieKey]
         )
@@ -115,10 +99,7 @@ const getInteractionHandler =
 
 const postInteractionHandler =
   (
-    config: Config,
-    logger: Logger,
-    interactionService: InteractionService,
-    grantService: GrantService,
+    confirmConsentUseCase: ConfirmConsentUseCase,
     provider: oidc.Provider
   ): express.Handler =>
   (req, res, next) => {
@@ -132,12 +113,7 @@ const postInteractionHandler =
       ),
       // run the logic to confirm the consent
       TE.chain((interactionId) =>
-        ConfirmConsentUseCase(
-          config.grantTTL,
-          logger,
-          interactionService,
-          grantService
-        )(interactionId, req.body.to_remember === "on")
+        confirmConsentUseCase(interactionId, req.body.to_remember === "on")
       ),
       // create the result
       TE.bimap(
@@ -158,8 +134,7 @@ const postInteractionHandler =
 
 const getInteractionAbortHandler =
   (
-    logger: Logger,
-    interactionService: InteractionService,
+    abortInteractionUseCase: AbortInteractionUseCase,
     provider: oidc.Provider
   ): express.Handler =>
   (req, res, next) =>
@@ -172,7 +147,7 @@ const getInteractionAbortHandler =
         )
       ),
       // run the abort interaction logic
-      TE.chain(AbortInteractionUseCase(logger, interactionService)),
+      TE.chainW(abortInteractionUseCase),
       // create the result
       TE.bimap(
         (errMsg) => ({
@@ -197,43 +172,26 @@ const getInteractionAbortHandler =
  */
 export const makeInteractionRouter = (
   config: Config,
-  logger: Logger,
-  identityService: IdentityService,
-  interactionService: InteractionService,
-  clientService: ClientService,
-  grantService: GrantService,
+  processInteractionUseCase: ProcessInteractionUseCase,
+  confirmConsentUseCase: ConfirmConsentUseCase,
+  abortInteractionUseCase: AbortInteractionUseCase,
   provider: oidc.Provider
-  // eslint-disable-next-line max-params
 ): express.Router => {
   const router = express.Router();
 
   router.get(
     "/interaction/:id",
-    getInteractionHandler(
-      config,
-      logger,
-      identityService,
-      interactionService,
-      clientService,
-      grantService,
-      provider
-    )
+    getInteractionHandler(config, processInteractionUseCase, provider)
   );
 
   router.post(
     "/interaction/:id/confirm",
-    postInteractionHandler(
-      config,
-      logger,
-      interactionService,
-      grantService,
-      provider
-    )
+    postInteractionHandler(confirmConsentUseCase, provider)
   );
 
   router.get(
     "/interaction/:id/abort",
-    getInteractionAbortHandler(logger, interactionService, provider)
+    getInteractionAbortHandler(abortInteractionUseCase, provider)
   );
 
   return router;

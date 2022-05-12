@@ -16,9 +16,7 @@ import {
   OrganizationId,
   ServiceId,
 } from "../../../domain/clients/types";
-import { ClientService } from "../../../domain/clients/ClientService";
-import { Logger } from "../../../domain/logger";
-import { ClientListUseCase } from "../../../domain/useCases/ClientListUseCase";
+import { ClientListUseCase } from "../../../useCases/ClientListUseCase";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   application_type: "web",
@@ -45,13 +43,13 @@ type GetClientListEndpointHandler =
   | responses.IResponseErrorInternal;
 
 const getClientListEndpointHandler =
-  (logger: Logger, clientService: ClientService) =>
+  (clientListUseCase: ClientListUseCase) =>
   (
     organizationId: O.Option<OrganizationId>,
     serviceId: O.Option<ServiceId>
   ): Promise<GetClientListEndpointHandler> =>
     pipe(
-      ClientListUseCase(logger, clientService)({ organizationId, serviceId }),
+      clientListUseCase({ organizationId, serviceId }),
       TE.bimap(
         (_) => responses.ResponseErrorInternal("Internal Error"),
         (r) => responses.ResponseSuccessJson(makeAPIClientList(r))
@@ -64,8 +62,7 @@ const getClientListEndpointHandler =
  * endpoint related to the clients
  */
 export const makeRouter = (
-  logger: Logger,
-  clientService: ClientService
+  clientListUseCase: ClientListUseCase
 ): express.Router => {
   const router = express.Router();
 
@@ -75,7 +72,7 @@ export const makeRouter = (
       withRequestMiddlewares(
         OptionalQueryParamMiddleware("organizationId", OrganizationId),
         OptionalQueryParamMiddleware("serviceId", ServiceId)
-      )(getClientListEndpointHandler(logger, clientService))
+      )(getClientListEndpointHandler(clientListUseCase))
     )
   );
 

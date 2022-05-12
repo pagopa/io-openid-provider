@@ -1,10 +1,10 @@
 import { constVoid, pipe } from "fp-ts/function";
 import * as TE from "fp-ts/TaskEither";
-import { InteractionService } from "../interactions/InteractionService";
-import { InteractionId } from "../interactions/types";
-import { Logger } from "../logger";
-import { DomainError } from "../types";
-import { fromTEOtoTE, show } from "../utils";
+import { InteractionService } from "../domain/interactions/InteractionService";
+import { InteractionId } from "../domain/interactions/types";
+import { Logger } from "../domain/logger";
+import { DomainError } from "../domain/types";
+import { fromTEOtoTE, show } from "../domain/utils";
 
 export type AbortInteractionUseCaseError = DomainError;
 
@@ -30,3 +30,6 @@ export const AbortInteractionUseCase =
         (_) => constVoid()
       )
     );
+export type AbortInteractionUseCase = ReturnType<
+  typeof AbortInteractionUseCase
+>;

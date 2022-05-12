@@ -2,20 +2,20 @@ import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../logger";
-import { GrantService } from "../../grants/GrantService";
-import { ClientService } from "../../clients/ClientService";
+import { Logger } from "../../domain/logger";
+import { GrantService } from "../../domain/grants/GrantService";
+import { ClientService } from "../../domain/clients/ClientService";
 import { ProcessInteractionUseCase } from "../ProcessInteractionUseCase";
 import {
   afterLoginInteraction,
   interaction,
-} from "../../interactions/__tests__/data";
-import { identity } from "../../identities/__tests__/data";
-import { client } from "../../clients/__tests__/data";
-import { grant } from "../../grants/__tests__/data";
-import { IdentityService } from "../../identities/IdentityService";
-import { InteractionService } from "../../interactions/InteractionService";
-import { makeNotFoundError } from "../../types";
+} from "../../domain/interactions/__tests__/data";
+import { identity } from "../../domain/identities/__tests__/data";
+import { client } from "../../domain/clients/__tests__/data";
+import { grant } from "../../domain/grants/__tests__/data";
+import { IdentityService } from "../../domain/identities/IdentityService";
+import { InteractionService } from "../../domain/interactions/InteractionService";
+import { makeNotFoundError } from "../../domain/types";
 
 const makeProcessInteractionUseCaseTest = () => {
   const logger = mock.mock<Logger>();

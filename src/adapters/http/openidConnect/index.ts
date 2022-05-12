@@ -13,9 +13,9 @@ import { makeInteractionRouter } from "./nodeOidcProvider/interactions";
 export const makeRouter = ({
   config,
   logger,
+  useCases,
   clientService,
   interactionService,
-  identityService,
   sessionService,
   grantService,
 }: AppEnv): express.Router => {
@@ -26,7 +26,7 @@ export const makeRouter = ({
     makeConfiguration(
       config,
       logger,
-      identityService,
+      useCases.authenticateUseCase,
       clientService,
       interactionService,
       sessionService,
@@ -37,11 +37,9 @@ export const makeRouter = ({
   router.use(
     makeInteractionRouter(
       config,
-      logger,
-      identityService,
-      interactionService,
-      clientService,
-      grantService,
+      useCases.processInteractionUseCase,
+      useCases.confirmConsentUseCase,
+      useCases.abortInteractionUseCase,
       provider
     )
   );

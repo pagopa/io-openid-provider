@@ -2,10 +2,10 @@ import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../logger";
+import { Logger } from "../../domain/logger";
 import { ClientListUseCase } from "../ClientListUseCase";
-import { ClientService } from "../../clients/ClientService";
-import { client } from "../../clients/__tests__/data";
+import { ClientService } from "../../domain/clients/ClientService";
+import { client } from "../../domain/clients/__tests__/data";
 
 const makeClientListUseCaseTest = () => {
   const logger = mock.mock<Logger>();

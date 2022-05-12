@@ -5,6 +5,7 @@ import { config } from "../../../__tests__/data";
 import * as inMemory from "../../inMemory";
 import { makeLogger } from "../../winston";
 import { Grant } from "../../../domain/grants/types";
+import { makeUseCases } from "../../../useCases";
 
 /**
  * Create and return a fake application and in memory services required by the system.
@@ -16,12 +17,21 @@ export const makeInMemoryApplication = (grants: ReadonlyArray<Grant> = []) => {
   const sessionService = inMemory.makeSessionService();
   const grantService = inMemory.makeGrantService(grants);
   const identityService = inMemory.makeIdentityService(identity);
+  // initialize UseCases
+  const useCases = makeUseCases(
+    config.grantTTL,
+    logger,
+    identityService,
+    interactionService,
+    clientService,
+    grantService
+  );
   const app = makeApplication({
+    useCases,
     config,
     logger,
     clientService,
     interactionService,
-    identityService,
     sessionService,
     grantService,
   });

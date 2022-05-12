@@ -8,7 +8,6 @@ import {
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import { responses } from "@pagopa/ts-commons";
 import { FiscalCode } from "../../../generated/definitions/FiscalCode";
-import { GrantService } from "../../../domain/grants/GrantService";
 import { Logger } from "../../../domain/logger";
 import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
 import { ServiceId } from "../../../generated/definitions/ServiceId";
@@ -18,14 +17,14 @@ import {
   RequiredHeaderMiddleware,
 } from "../utils";
 import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail";
-import { FindGrantUseCase } from "../../../domain/useCases/FindGrantUseCases";
+import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
 import {
   OrganizationId,
   ServiceId as DomainServiceId,
 } from "../../../domain/clients/types";
 import { IdentityId } from "../../../domain/identities/types";
 import { Grant } from "../../../domain/grants/types";
-import { RemoveGrantUseCase } from "../../../domain/useCases/RemoveGrantUseCase";
+import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
 import { DomainErrorTypes } from "../../../domain/types";
 import { show } from "../../../domain/utils";
 
@@ -36,14 +35,14 @@ type DeleteGrantEndpointHandler =
   | responses.IResponseErrorInternal;
 
 const deleteGrantEndpointHandler =
-  (logger: Logger, grantService: GrantService) =>
+  (logger: Logger, removeGrantUseCase: RemoveGrantUseCase) =>
   (
     organizationId: OrganizationFiscalCode,
     serviceId: ServiceId,
     identityId: FiscalCode
   ): Promise<DeleteGrantEndpointHandler> =>
     pipe(
-      RemoveGrantUseCase(logger, grantService)(
+      removeGrantUseCase(
         organizationId as OrganizationId,
         serviceId as DomainServiceId,
         identityId as IdentityId
@@ -91,14 +90,14 @@ type FindGrantEndpoint =
   | responses.IResponseErrorNotFound
   | responses.IResponseErrorInternal;
 const findGrantEndpoint =
-  (logger: Logger, grantService: GrantService) =>
+  (findGrantUseCase: FindGrantUseCase) =>
   (
     organizationId: OrganizationFiscalCode,
     serviceId: ServiceId,
     identityId: FiscalCode
   ): Promise<FindGrantEndpoint> =>
     pipe(
-      FindGrantUseCase(logger, grantService)(
+      findGrantUseCase(
         organizationId as OrganizationId,
         serviceId as DomainServiceId,
         identityId as IdentityId
@@ -123,7 +122,8 @@ const findGrantEndpoint =
 
 export const makeRouter = (
   logger: Logger,
-  grantService: GrantService
+  findGrantUseCase: FindGrantUseCase,
+  removeGrantUseCase: RemoveGrantUseCase
 ): express.Router => {
   const router = express.Router();
 
@@ -134,7 +134,7 @@ export const makeRouter = (
         RequiredParamMiddleware("organizationId", OrganizationFiscalCode),
         RequiredParamMiddleware("serviceId", ServiceId),
         RequiredHeaderMiddleware("identityId", FiscalCode)
-      )(findGrantEndpoint(logger, grantService))
+      )(findGrantEndpoint(findGrantUseCase))
     )
   );
 
@@ -145,7 +145,7 @@ export const makeRouter = (
         RequiredParamMiddleware("organizationId", OrganizationFiscalCode),
         RequiredParamMiddleware("serviceId", ServiceId),
         RequiredHeaderMiddleware("identityId", FiscalCode)
-      )(deleteGrantEndpointHandler(logger, grantService))
+      )(deleteGrantEndpointHandler(logger, removeGrantUseCase))
     )
   );
 

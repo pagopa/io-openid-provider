@@ -6,23 +6,27 @@ import * as cookies from "cookie-parser";
 import { Config } from "../../config";
 import { Logger } from "../../domain/logger";
 import { ClientService } from "../../domain/clients/ClientService";
+import { GrantService } from "../../domain/grants/GrantService";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { SessionService } from "../../domain/sessions/SessionService";
-import { GrantService } from "../../domain/grants/GrantService";
-import { IdentityService } from "../../domain/identities/IdentityService";
+import { UseCases } from "../../useCases";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
 
-/** This trait defined all the dependencies required by the Application */
+/**
+ * This trait defined all the dependencies required by the Application.
+ * Because of nodeOidcProvider, we need the services to wrap them into the
+ * library's adapters. The best is depend only on use-cases
+ */
 export interface AppEnv {
   readonly config: Config;
+  readonly useCases: UseCases;
   readonly logger: Logger;
-  readonly identityService: IdentityService;
   readonly clientService: ClientService;
+  readonly grantService: GrantService;
   readonly interactionService: InteractionService;
   readonly sessionService: SessionService;
-  readonly grantService: GrantService;
 }
 
 /**
@@ -32,10 +36,10 @@ export const makeApplication = ({
   config,
   logger,
   clientService,
-  identityService,
+  grantService,
   interactionService,
   sessionService,
-  grantService,
+  useCases,
 }: AppEnv): express.Application => {
   const application = express();
 
@@ -60,19 +64,25 @@ export const makeApplication = ({
 
   /* Mount the routes */
   // mount some custom client endpoints
-  application.use(clients.makeRouter(logger, clientService));
+  application.use(clients.makeRouter(useCases.clientListUseCase));
   // mount grant endpoints
-  application.use(grants.makeRouter(logger, grantService));
+  application.use(
+    grants.makeRouter(
+      logger,
+      useCases.findGrantUseCase,
+      useCases.removeGrantUseCase
+    )
+  );
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({
       clientService,
       config,
       grantService,
-      identityService,
       interactionService,
       logger,
       sessionService,
+      useCases,
     })
   );
 

@@ -1,11 +1,11 @@
 import { flow, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { IdentityService } from "../identities/IdentityService";
-import { AccessToken, Identity } from "../identities/types";
-import { Logger } from "../logger";
-import { show } from "../utils";
-import { unauthorizedError, UnauthorizedError } from "../types";
+import { IdentityService } from "../domain/identities/IdentityService";
+import { AccessToken, Identity } from "../domain/identities/types";
+import { Logger } from "../domain/logger";
+import { show } from "../domain/utils";
+import { unauthorizedError, UnauthorizedError } from "../domain/types";
 
 type AuthenticateUseCaseError = UnauthorizedError;
 
@@ -46,3 +46,4 @@ export const AuthenticateUseCase =
         )
       )
     );
+export type AuthenticateUseCase = ReturnType<typeof AuthenticateUseCase>;
