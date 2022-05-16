@@ -11,6 +11,7 @@ import { ConfirmConsentUseCase } from "./ConfirmConsentUseCase";
 import { FindGrantUseCase } from "./FindGrantUseCases";
 import { ProcessInteractionUseCase } from "./ProcessInteractionUseCase";
 import { RemoveGrantUseCase } from "./RemoveGrantUseCase";
+import { ListGrantUseCase } from "./ListGrantUseCase";
 
 export const makeUseCases = (
   grantTTL: Seconds,
@@ -42,12 +43,14 @@ export const makeUseCases = (
     grantService
   );
   const removeGrantUseCase = RemoveGrantUseCase(logger, grantService);
+  const listGrantUseCase = ListGrantUseCase(grantService);
   return {
     abortInteractionUseCase,
     authenticateUseCase,
     clientListUseCase,
     confirmConsentUseCase,
     findGrantUseCase,
+    listGrantUseCase,
     processInteractionUseCase,
     removeGrantUseCase,
   };
