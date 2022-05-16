@@ -25,7 +25,7 @@ yarn run start
 To create docker image, move to the directory that contains the Dockerfile and run the following command:
 
 ``` sh
-docker build -t openid-provider .
+make build.image
 ```
 
 To lint the code:

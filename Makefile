@@ -14,4 +14,4 @@ start.local:
 	yarn start
 
 build.image:
-	docker build --tag fim-oidc-provider .
+	docker build --tag fims-provider .
