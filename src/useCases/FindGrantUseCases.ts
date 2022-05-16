@@ -7,13 +7,9 @@ import { GrantService } from "../domain/grants/GrantService";
 import { Grant } from "../domain/grants/types";
 import { IdentityId } from "../domain/identities/types";
 import { OrganizationId, ServiceId } from "../domain/clients/types";
+import { DomainError, makeNotFoundError } from "../domain/types";
 
-export type NotFound = "NotFound";
-export const NotFound = (): FindGrantUseCaseError => "NotFound";
-export type InternalError = "InternalError";
-export const InternalError = (): FindGrantUseCaseError => "InternalError";
-
-export type FindGrantUseCaseError = NotFound | InternalError;
+export type FindGrantUseCaseError = DomainError;
 
 /**
  * Given a grant identifier return the detail
@@ -35,10 +31,10 @@ export const FindGrantUseCase =
       TE.fold(
         (error) => {
           logger.error("Some error during FindGrantUseCase", error.causedBy);
-          return TE.left(InternalError());
+          return TE.left(error);
         },
         O.fold(
-          () => TE.left(NotFound()),
+          () => TE.left(makeNotFoundError("Grant not found")),
           (grant) => TE.right(grant)
         )
       )
