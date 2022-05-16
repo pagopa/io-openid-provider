@@ -1,125 +1,18 @@
 import express from "express";
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
 } from "@pagopa/ts-commons/lib/request_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import { responses } from "@pagopa/ts-commons";
 import { FiscalCode } from "../../../generated/definitions/FiscalCode";
 import { Logger } from "../../../domain/logger";
 import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
 import { ServiceId } from "../../../generated/definitions/ServiceId";
-import {
-  IResponseNoContent,
-  ResponseNoContent,
-  RequiredHeaderMiddleware,
-} from "../utils";
-import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail";
+import { RequiredHeaderMiddleware } from "../utils";
 import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
-import {
-  OrganizationId,
-  ServiceId as DomainServiceId,
-} from "../../../domain/clients/types";
-import { IdentityId } from "../../../domain/identities/types";
-import { Grant } from "../../../domain/grants/types";
 import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
-import { DomainErrorTypes } from "../../../domain/types";
-import { show } from "../../../domain/utils";
-
-type DeleteGrantEndpointHandler =
-  | IResponseNoContent // TODO: Use NoContent instead Accepted
-  | responses.IResponseErrorValidation
-  | responses.IResponseErrorNotFound
-  | responses.IResponseErrorInternal;
-
-const deleteGrantEndpointHandler =
-  (logger: Logger, removeGrantUseCase: RemoveGrantUseCase) =>
-  (
-    organizationId: OrganizationFiscalCode,
-    serviceId: ServiceId,
-    identityId: FiscalCode
-  ): Promise<DeleteGrantEndpointHandler> =>
-    pipe(
-      removeGrantUseCase(
-        organizationId as OrganizationId,
-        serviceId as DomainServiceId,
-        identityId as IdentityId
-      ),
-      TE.bimap(
-        (error) => {
-          switch (error.kind) {
-            case DomainErrorTypes.NOT_FOUND:
-              return responses.ResponseErrorNotFound(
-                "Not Found",
-                "Grant not found"
-              );
-            case DomainErrorTypes.GENERIC_ERROR:
-            case DomainErrorTypes.NOT_IMPLEMENTED:
-              return responses.ResponseErrorInternal(
-                "Internal Error deleting grants"
-              );
-            default:
-              logger.error(
-                `Unexpected error type deleting grants; ${show(error)}`,
-                error
-              );
-              return responses.ResponseErrorInternal(
-                "Internal Error deleting grants"
-              );
-          }
-        },
-        () => ResponseNoContent("No Content")
-      ),
-      TE.toUnion
-    )();
-
-const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
-  expireAt: grant.expireAt,
-  id: grant.id,
-  identityId: grant.subjects.identityId,
-  issuedAt: grant.issuedAt,
-  organizationId: grant.subjects.clientId.organizationId,
-  scope: grant.scope.split(" "),
-  serviceId: grant.subjects.clientId.serviceId,
-});
-type FindGrantEndpoint =
-  | responses.IResponseSuccessJson<APIGrantDetail>
-  | responses.IResponseErrorValidation
-  | responses.IResponseErrorNotFound
-  | responses.IResponseErrorInternal;
-const findGrantEndpoint =
-  (findGrantUseCase: FindGrantUseCase) =>
-  (
-    organizationId: OrganizationFiscalCode,
-    serviceId: ServiceId,
-    identityId: FiscalCode
-  ): Promise<FindGrantEndpoint> =>
-    pipe(
-      findGrantUseCase(
-        organizationId as OrganizationId,
-        serviceId as DomainServiceId,
-        identityId as IdentityId
-      ),
-      TE.bimap(
-        (error) => {
-          switch (error.kind) {
-            case DomainErrorTypes.NOT_FOUND:
-              return responses.ResponseErrorNotFound(
-                "Not Found",
-                "Grant Not Found"
-              );
-            case DomainErrorTypes.GENERIC_ERROR:
-            case DomainErrorTypes.NOT_IMPLEMENTED:
-            default:
-              return responses.ResponseErrorInternal("Internal Error");
-          }
-        },
-        (grant) => responses.ResponseSuccessJson(makeAPIGrant(grant))
-      ),
-      TE.toUnion
-    )();
+import { deleteGrantEndpointHandler } from "./deleteGrantEndpoint";
+import { findGrantEndpoint } from "./findGrantEndpoint";
 
 export const makeRouter = (
   logger: Logger,
