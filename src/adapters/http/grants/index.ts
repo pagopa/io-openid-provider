@@ -104,13 +104,14 @@ const findGrantEndpoint =
       ),
       TE.bimap(
         (error) => {
-          switch (error) {
-            case "NotFound":
+          switch (error.kind) {
+            case DomainErrorTypes.NOT_FOUND:
               return responses.ResponseErrorNotFound(
                 "Not Found",
                 "Grant Not Found"
               );
-            case "InternalError":
+            case DomainErrorTypes.GENERIC_ERROR:
+            case DomainErrorTypes.NOT_IMPLEMENTED:
             default:
               return responses.ResponseErrorInternal("Internal Error");
           }
