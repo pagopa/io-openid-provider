@@ -124,6 +124,7 @@ describe("Application", () => {
         client_name: "This is the name of this client",
         scope: "profile openid",
         token_endpoint_auth_method: "none",
+        id_token_signed_response_alg: "ES256",
       });
 
     expect(createClientResponse.statusCode).toBe(201);

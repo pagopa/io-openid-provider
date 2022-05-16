@@ -26,7 +26,7 @@ const clientToAdapterPayload = (client: Client): oidc.AdapterPayload => ({
   client_name: client.name,
   client_secret: undefined,
   grant_types: client.grantTypes,
-  id_token_signed_response_alg: "RS256",
+  id_token_signed_response_alg: "ES256",
   organization_id: client.clientId.organizationId,
   post_logout_redirect_uris: [],
   redirect_uris: client.redirectUris.concat(),
