@@ -16,7 +16,7 @@ import { ListGrantUseCase } from "./ListGrantUseCase";
 export interface Features {
   readonly grant: {
     readonly grantTTL: Seconds;
-    readonly rememberGrantFeature: "enabled" | "disabled";
+    readonly enableRememberGrantFeature: boolean;
   };
 }
 

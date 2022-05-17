@@ -63,10 +63,9 @@ export const ConfirmConsentUseCase =
           // if no grant was found then create a new one
           TE.map(
             O.alt(() => {
-              const { grantTTL, rememberGrantFeature } = features.grant;
+              const { grantTTL, enableRememberGrantFeature } = features.grant;
               // Remember grant if the feature is enabled
-              const remember =
-                rememberGrantFeature === "enabled" && rememberGrant;
+              const remember = enableRememberGrantFeature && rememberGrant;
               return makeGrant(interaction, remember, grantTTL);
             })
           ),

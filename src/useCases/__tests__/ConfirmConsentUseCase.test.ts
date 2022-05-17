@@ -125,7 +125,7 @@ describe("ConfirmConsentUseCase", () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
       makeConfirmConsentUseCaseTest({
         ...config.features,
-        grant: { rememberGrantFeature: "enabled", grantTTL },
+        grant: { enableRememberGrantFeature: true, grantTTL },
       });
 
     interactionServiceMock.find.mockReturnValueOnce(
@@ -151,7 +151,7 @@ describe("ConfirmConsentUseCase", () => {
     const { useCase, interactionServiceMock, grantServiceMock } =
       makeConfirmConsentUseCaseTest({
         ...config.features,
-        grant: { rememberGrantFeature: "disabled", grantTTL },
+        grant: { enableRememberGrantFeature: false, grantTTL },
       });
 
     interactionServiceMock.find.mockReturnValueOnce(

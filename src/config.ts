@@ -33,11 +33,8 @@ const EnvType = t.type({
   APPLICATION_NAME: NonEmptyString,
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
   COOKIES_KEY: t.string,
+  ENABLE_FEATURE_REMEMBER_GRANT: tt.fromNullable(tt.BooleanFromString, false),
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
-  FEATURE_REMEMBER_GRANT: t.union([
-    t.literal("enabled"),
-    t.literal("disabled"),
-  ]),
   GRANT_TTL_IN_SECONDS: tt.IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
   ISSUER: UrlFromString,
@@ -66,8 +63,8 @@ const makeConfig = (envs: EnvType): Config => ({
   },
   features: {
     grant: {
+      enableRememberGrantFeature: envs.ENABLE_FEATURE_REMEMBER_GRANT,
       grantTTL: envs.GRANT_TTL_IN_SECONDS.valueOf() as Seconds,
-      rememberGrantFeature: envs.FEATURE_REMEMBER_GRANT,
     },
   },
   info: {

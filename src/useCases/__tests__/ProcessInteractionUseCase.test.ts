@@ -153,7 +153,7 @@ describe("ProcessInteractionUseCase", () => {
       interactionServiceMock,
     } = makeProcessInteractionUseCaseTest({
       ...config.features,
-      grant: { rememberGrantFeature: "disabled", grantTTL },
+      grant: { enableRememberGrantFeature: false, grantTTL },
     });
 
     interactionServiceMock.find.mockReturnValue(

@@ -17,8 +17,9 @@ export const config: Config = {
   },
   features: {
     grant: {
+      enableRememberGrantFeature:
+        envs["ENABLE_FEATURE_REMEMBER_GRANT"] === "true",
       grantTTL: 86400 as Seconds,
-      rememberGrantFeature: envs["FEATURE_REMEMBER_GRANT"] as any,
     },
   },
   mongodb: {

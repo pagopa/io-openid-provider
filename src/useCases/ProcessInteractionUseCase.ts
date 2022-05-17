@@ -118,7 +118,7 @@ export const ProcessInteractionUseCase =
                           ),
                         (client) => {
                           const allowRemembering =
-                            features.grant.rememberGrantFeature === "enabled";
+                            features.grant.enableRememberGrantFeature;
                           return TE.right(
                             makeCollectConsent(
                               allowRemembering,
