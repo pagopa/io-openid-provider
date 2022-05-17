@@ -11,15 +11,27 @@ import { ServiceId } from "../../../generated/definitions/ServiceId";
 import { RequiredHeaderMiddleware } from "../utils";
 import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
 import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
+import { ListGrantUseCase } from "../../../useCases/ListGrantUseCase";
 import { deleteGrantEndpointHandler } from "./deleteGrantEndpoint";
 import { findGrantEndpoint } from "./findGrantEndpoint";
+import { listGrantEndpoint } from "./listGrantEndpoint";
 
 export const makeRouter = (
   logger: Logger,
   findGrantUseCase: FindGrantUseCase,
-  removeGrantUseCase: RemoveGrantUseCase
+  removeGrantUseCase: RemoveGrantUseCase,
+  listGrantUseCase: ListGrantUseCase
 ): express.Router => {
   const router = express.Router();
+
+  router.get(
+    "/admin/grants",
+    wrapRequestHandler(
+      withRequestMiddlewares(
+        RequiredHeaderMiddleware("identityId", FiscalCode)
+      )(listGrantEndpoint(listGrantUseCase))
+    )
+  );
 
   router.get(
     "/admin/grants/:organizationId/:serviceId",

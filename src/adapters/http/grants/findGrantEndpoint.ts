@@ -14,7 +14,7 @@ import { IdentityId } from "../../../domain/identities/types";
 import { Grant } from "../../../domain/grants/types";
 import { DomainErrorTypes } from "../../../domain/types";
 
-const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
+export const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
   expireAt: grant.expireAt,
   id: grant.id,
   identityId: grant.subjects.identityId,

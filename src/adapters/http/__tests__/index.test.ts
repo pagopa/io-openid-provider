@@ -188,4 +188,14 @@ describe("Application", () => {
 
     expect(findGrantResponse.statusCode).toBe(204);
   });
+  it("should implement the grant list endpoint", async () => {
+    const { app } = makeInMemoryApplication([{ ...grant, remember: true }]);
+
+    const listGrantResponse = await request(app)
+      .get(`/admin/grants`)
+      .set({ identityId: grant.subjects.identityId })
+      .send();
+
+    expect(listGrantResponse.statusCode).toBe(200);
+  });
 });

@@ -81,6 +81,21 @@ paths:
         500:
           $ref: '#/responses/500InternalServerError'
 
+  /admin/grants:
+    parameters:
+      - $ref: '#/parameters/headerIdentityId'
+    get:
+      operationId: listGrant
+      summary: Return a list of grant
+      security:
+        - SubscriptionKey: []
+      responses:
+        200:
+          $ref: '#/responses/200GrantListResponse'
+        401:
+          $ref: "#/responses/401Unauthorized"
+        500:
+          $ref: '#/responses/500InternalServerError'
   /admin/grants/{organizationId}/{serviceId}:
     parameters:
       - $ref: '#/parameters/pathOrganizationId'
@@ -310,6 +325,16 @@ definitions:
       - serviceId
       - identityId
       - scope
+  APIGrantList:
+    description: List of grant
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/APIGrantDetail"
+    required:
+      - items
   APIClientDefinition:
     type: object
     required:
@@ -568,6 +593,10 @@ securityDefinitions:
     description: The API key obtained through the developer portal or the getService operation.
 
 responses:
+  200GrantListResponse:
+    description: List of grant
+    schema:
+      $ref: "#/definitions/APIGrantList"
   200GrantDetailResponse:
     description: Detail of a grant
     schema:
