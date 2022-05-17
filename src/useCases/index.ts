@@ -13,9 +13,16 @@ import { ProcessInteractionUseCase } from "./ProcessInteractionUseCase";
 import { RemoveGrantUseCase } from "./RemoveGrantUseCase";
 import { ListGrantUseCase } from "./ListGrantUseCase";
 
+export interface Features {
+  readonly grant: {
+    readonly grantTTL: Seconds;
+    readonly rememberGrantFeature: "enabled" | "disabled";
+  };
+}
+
 export const makeUseCases = (
-  grantTTL: Seconds,
   logger: Logger,
+  features: Features,
   identityService: IdentityService,
   interactionService: InteractionService,
   clientService: ClientService,
@@ -29,14 +36,15 @@ export const makeUseCases = (
   const authenticateUseCase = AuthenticateUseCase(logger, identityService);
   const clientListUseCase = ClientListUseCase(logger, clientService);
   const confirmConsentUseCase = ConfirmConsentUseCase(
-    grantTTL,
     logger,
+    features,
     interactionService,
     grantService
   );
   const findGrantUseCase = FindGrantUseCase(logger, grantService);
   const processInteractionUseCase = ProcessInteractionUseCase(
     logger,
+    features,
     identityService,
     interactionService,
     clientService,

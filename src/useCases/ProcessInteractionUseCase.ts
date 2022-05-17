@@ -19,6 +19,7 @@ import {
 } from "../domain/types";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
 import { findValidGrant } from "./utils";
+import { Features } from ".";
 
 export const LoginResult = t.type({
   identity: Identity,
@@ -33,6 +34,7 @@ export const ConsentResult = t.type({
 export type ConsentResult = t.TypeOf<typeof ConsentResult>;
 
 export const CollectConsent = t.type({
+  allowRemembering: t.boolean,
   client: Client,
   interactionId: InteractionId,
   kind: t.literal("CollectConsent"),
@@ -41,9 +43,11 @@ export const CollectConsent = t.type({
 export type CollectConsent = t.TypeOf<typeof CollectConsent>;
 
 const makeCollectConsent = (
+  allowRemembering: boolean,
   interaction: Interaction,
   client: Client
 ): ProcessResult => ({
+  allowRemembering,
   client,
   interactionId: interaction.id,
   kind: "CollectConsent",
@@ -70,10 +74,12 @@ export type ProcessInteractionUseCaseError = DomainError;
 export const ProcessInteractionUseCase =
   (
     logger: Logger,
+    features: Features,
     identityService: IdentityService,
     interactionService: InteractionService,
     clientService: ClientService,
     grantService: GrantService
+    // eslint-disable-next-line max-params
   ) =>
   (
     interactionId: InteractionId,
@@ -110,8 +116,17 @@ export const ProcessInteractionUseCase =
                               DomainErrorTypes.NOT_FOUND
                             )
                           ),
-                        (client) =>
-                          TE.right(makeCollectConsent(interaction, client))
+                        (client) => {
+                          const allowRemembering =
+                            features.grant.rememberGrantFeature === "enabled";
+                          return TE.right(
+                            makeCollectConsent(
+                              allowRemembering,
+                              interaction,
+                              client
+                            )
+                          );
+                        }
                       )
                     )
                   ),

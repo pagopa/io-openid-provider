@@ -157,7 +157,7 @@ export const makeConfiguration = (
     scopes: ["openid"],
     tokenEndpointAuthMethods: ["none"],
     ttl: {
-      Grant: config.grantTTL,
+      Grant: config.features.grant.grantTTL,
       Interaction: 60 * 5,
       Session: 60,
     },

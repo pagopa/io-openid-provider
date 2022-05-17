@@ -9,6 +9,7 @@ import { LogConfig } from "./adapters/winston";
 import { MongoDBConfig } from "./adapters/mongodb";
 import { IOClientConfig } from "./adapters/ioBackend";
 import { Seconds } from "./domain/types";
+import { Features } from "./useCases";
 
 interface ServerConfig {
   readonly hostname: string;
@@ -33,6 +34,10 @@ const EnvType = t.type({
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
   COOKIES_KEY: t.string,
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
+  FEATURE_REMEMBER_GRANT: t.union([
+    t.literal("enabled"),
+    t.literal("disabled"),
+  ]),
   GRANT_TTL_IN_SECONDS: tt.IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
   ISSUER: UrlFromString,
@@ -59,7 +64,12 @@ const makeConfig = (envs: EnvType): Config => ({
   IOClient: {
     baseURL: new URL(envs.IO_BACKEND_BASE_URL.href),
   },
-  grantTTL: envs.GRANT_TTL_IN_SECONDS.valueOf() as Seconds,
+  features: {
+    grant: {
+      grantTTL: envs.GRANT_TTL_IN_SECONDS.valueOf() as Seconds,
+      rememberGrantFeature: envs.FEATURE_REMEMBER_GRANT,
+    },
+  },
   info: {
     name: envs.APPLICATION_NAME,
     version: envs.VERSION,
@@ -88,12 +98,12 @@ const makeConfig = (envs: EnvType): Config => ({
  * Represent the configurations of the application
  */
 export interface Config {
+  readonly features: Features;
   readonly info: Info;
   readonly IOClient: IOClientConfig;
   readonly logger: LogConfig;
   readonly server: ServerConfig;
   readonly mongodb: MongoDBConfig;
-  readonly grantTTL: Seconds;
   readonly issuer: URL;
 }
 

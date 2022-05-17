@@ -34,6 +34,7 @@ const renderConsent = (res: express.Response, renderData: CollectConsent) =>
         p_abortUrl: `/interaction/${renderData.interactionId}/abort`,
         p_client: renderData.client,
         p_missingScope: renderData.missingScope,
+        p_showRememberMeFeature: renderData.allowRemembering,
         p_submitUrl: `/interaction/${renderData.interactionId}/confirm`,
       }),
     E.toError

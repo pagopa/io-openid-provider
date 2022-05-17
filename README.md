@@ -50,6 +50,7 @@ Those are all Environment variables needed by the application:
 | AUTHENTICATION_COOKIE_KEY | The cookie key where the authentication token is expected                                                                                                                 | string |
 | GRANT_TTL_IN_SECONDS      | The seconds after which the grant expires                                                                                                                                 | string |
 | ISSUER                    | The Issuer Identifier defined by Open-ID Connect standard: URL using the `https:` scheme with no query or fragment component that the OP asserts as its Issuer Identifier | string |
+| FEATURE_REMEMBER_GRANT    | Enable or disable the feature that allows a user to remember a grant, valid values `enabled` or `disabled`                                                                | string |
 
 
 ## Example
