@@ -78,7 +78,8 @@ curl --request POST 'http://localhost:3001/admin/clients' \
   "application_type": "web",
   "client_name": "This is the name of this client",
   "scope": "profile openid",
-  "token_endpoint_auth_method": "none"
+  "token_endpoint_auth_method": "none",
+  "id_token_signed_response_alg": "ES256"
 }'```
 
 2. Copy from the output the value of `client_id` key.
