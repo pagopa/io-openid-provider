@@ -38,19 +38,19 @@ yarn run lint
 
 Those are all Environment variables needed by the application:
 
-| Variable name             | Description                                                                                                                                                               | type   |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
-| SERVER_HOSTNAME           | The HOSTNAME the Express server is listening to                                                                                                                           | string |
-| PORT                      | The HTTP port the Express server is listening to                                                                                                                          | string |
-| LOG_LEVEL                 | The level of the logger                                                                                                                                                   | string |
-| APPLICATION_NAME          | The name of the application, used as prefix for the logger                                                                                                                | string |
-| VERSION                   | The version of the service, it should be populated automatically                                                                                                          | string |
-| IO_BACKEND_BASE_URL       | The base URL of IO back-end used as identity provider                                                                                                                     | string |
-| MONGODB_URL               | The URL used to connect to MongoDB 4.2 compatible                                                                                                                         | string |
-| AUTHENTICATION_COOKIE_KEY | The cookie key where the authentication token is expected                                                                                                                 | string |
-| GRANT_TTL_IN_SECONDS      | The seconds after which the grant expires                                                                                                                                 | string |
-| ISSUER                    | The Issuer Identifier defined by Open-ID Connect standard: URL using the `https:` scheme with no query or fragment component that the OP asserts as its Issuer Identifier | string |
-
+| Variable name                 | Description                                                                                                                                                               | type    |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| SERVER_HOSTNAME               | The HOSTNAME the Express server is listening to                                                                                                                           | string  |
+| PORT                          | The HTTP port the Express server is listening to                                                                                                                          | string  |
+| LOG_LEVEL                     | The level of the logger                                                                                                                                                   | string  |
+| APPLICATION_NAME              | The name of the application, used as prefix for the logger                                                                                                                | string  |
+| VERSION                       | The version of the service, it should be populated automatically                                                                                                          | string  |
+| IO_BACKEND_BASE_URL           | The base URL of IO back-end used as identity provider                                                                                                                     | string  |
+| MONGODB_URL                   | The URL used to connect to MongoDB 4.2 compatible                                                                                                                         | string  |
+| AUTHENTICATION_COOKIE_KEY     | The cookie key where the authentication token is expected                                                                                                                 | string  |
+| GRANT_TTL_IN_SECONDS          | The seconds after which the grant expires                                                                                                                                 | string  |
+| ISSUER                        | The Issuer Identifier defined by Open-ID Connect standard: URL using the `https:` scheme with no query or fragment component that the OP asserts as its Issuer Identifier | string  |
+| ENABLE_FEATURE_REMEMBER_GRANT | (Optional, default `false`) Enable or disable the feature that allows a user to remember a grant, valid values `true` or `false`                                          | boolean |
 
 ## Example
 Start the server locally:

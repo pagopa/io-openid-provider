@@ -19,6 +19,7 @@ import {
 } from "../domain/types";
 import { AuthenticateUseCase } from "./AuthenticateUseCase";
 import { findValidGrant } from "./utils";
+import { Features } from ".";
 
 export const LoginResult = t.type({
   identity: Identity,
@@ -32,21 +33,24 @@ export const ConsentResult = t.type({
 });
 export type ConsentResult = t.TypeOf<typeof ConsentResult>;
 
-export const RequireConsent = t.type({
+export const CollectConsent = t.type({
+  allowRemembering: t.boolean,
   client: Client,
   interactionId: InteractionId,
-  kind: t.literal("RequireConsent"),
+  kind: t.literal("CollectConsent"),
   missingScope: t.array(t.string),
 });
-export type RequireConsent = t.TypeOf<typeof RequireConsent>;
+export type CollectConsent = t.TypeOf<typeof CollectConsent>;
 
-const makeRequireConsent = (
+const makeCollectConsent = (
+  allowRemembering: boolean,
   interaction: Interaction,
   client: Client
 ): ProcessResult => ({
+  allowRemembering,
   client,
   interactionId: interaction.id,
-  kind: "RequireConsent",
+  kind: "CollectConsent",
   // TODO: Compare the required scope with the grant (if any) scope.
   // The system should ask the diff
   missingScope: (interaction.params.scope || client.scope).split(" "),
@@ -55,7 +59,7 @@ const makeRequireConsent = (
 export const ProcessResult = t.union([
   LoginResult,
   ConsentResult,
-  RequireConsent,
+  CollectConsent,
 ]);
 export type ProcessResult = t.TypeOf<typeof ProcessResult>;
 
@@ -70,10 +74,12 @@ export type ProcessInteractionUseCaseError = DomainError;
 export const ProcessInteractionUseCase =
   (
     logger: Logger,
+    features: Features,
     identityService: IdentityService,
     interactionService: InteractionService,
     clientService: ClientService,
     grantService: GrantService
+    // eslint-disable-next-line max-params
   ) =>
   (
     interactionId: InteractionId,
@@ -110,8 +116,17 @@ export const ProcessInteractionUseCase =
                               DomainErrorTypes.NOT_FOUND
                             )
                           ),
-                        (client) =>
-                          TE.right(makeRequireConsent(interaction, client))
+                        (client) => {
+                          const allowRemembering =
+                            features.grant.enableRememberGrantFeature;
+                          return TE.right(
+                            makeCollectConsent(
+                              allowRemembering,
+                              interaction,
+                              client
+                            )
+                          );
+                        }
                       )
                     )
                   ),

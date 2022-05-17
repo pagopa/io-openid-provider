@@ -10,6 +10,7 @@ import { Logger } from "../domain/logger";
 import { DomainError, makeDomainError, Seconds } from "../domain/types";
 import { fromTEOtoTE, show } from "../domain/utils";
 import { findValidGrant } from "./utils";
+import { Features } from ".";
 
 type ConfirmConsentUseCaseError = DomainError;
 
@@ -43,8 +44,8 @@ const makeGrant = (
  */
 export const ConfirmConsentUseCase =
   (
-    grantTTL: Seconds,
     logger: Logger,
+    features: Features,
     interactionService: InteractionService,
     grantService: GrantService
   ) =>
@@ -60,7 +61,14 @@ export const ConfirmConsentUseCase =
           // find a valid grant
           findValidGrant(grantService)(interaction),
           // if no grant was found then create a new one
-          TE.map(O.alt(() => makeGrant(interaction, rememberGrant, grantTTL))),
+          TE.map(
+            O.alt(() => {
+              const { grantTTL, enableRememberGrantFeature } = features.grant;
+              // Remember grant if the feature is enabled
+              const remember = enableRememberGrantFeature && rememberGrant;
+              return makeGrant(interaction, remember, grantTTL);
+            })
+          ),
           // update the interaction and the grant instance persisting them
           TE.chain(
             O.fold(

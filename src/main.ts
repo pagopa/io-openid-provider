@@ -44,8 +44,8 @@ void pipe(
 
     // initialize UseCases
     const useCases = makeUseCases(
-      config.grantTTL,
       logger,
+      config.features,
       identityService,
       interactionService,
       clientService,

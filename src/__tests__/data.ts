@@ -15,7 +15,13 @@ export const config: Config = {
   IOClient: {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
-  grantTTL: 86400 as Seconds,
+  features: {
+    grant: {
+      enableRememberGrantFeature:
+        envs["ENABLE_FEATURE_REMEMBER_GRANT"] === "true",
+      grantTTL: 86400 as Seconds,
+    },
+  },
   mongodb: {
     connectionString: new URL(envs["MONGODB_URL"] as string),
   },

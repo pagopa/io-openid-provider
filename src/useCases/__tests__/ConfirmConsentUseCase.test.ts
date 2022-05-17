@@ -6,22 +6,25 @@ import { Logger } from "../../domain/logger";
 import { GrantService } from "../../domain/grants/GrantService";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
-import { makeNotFoundError, Seconds } from "../../domain/types";
+import { makeNotFoundError } from "../../domain/types";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
   interaction,
 } from "../../domain/interactions/__tests__/data";
+import { config } from "../../__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
+import { Features } from "..";
 
-const makeConfirmConsentUseCaseTest = () => {
-  const grantTTL = 86400 as Seconds;
+const makeConfirmConsentUseCaseTest = (
+  features: Features = config.features
+) => {
   const logger = mock.mock<Logger>();
   const interactionServiceMock = mock.mock<InteractionService>();
   const grantServiceMock = mock.mock<GrantService>();
   const useCase = ConfirmConsentUseCase(
-    grantTTL,
     logger,
+    features,
     interactionServiceMock,
     grantServiceMock
   );
@@ -116,5 +119,57 @@ describe("ConfirmConsentUseCase", () => {
 
     const actual = await useCase(afterConsentInteraction.id, false)();
     expect(actual).toStrictEqual(E.right(grant));
+  });
+  it("should save the grant as to remember", async () => {
+    const { grantTTL } = config.features.grant;
+    const { useCase, interactionServiceMock, grantServiceMock } =
+      makeConfirmConsentUseCaseTest({
+        ...config.features,
+        grant: { enableRememberGrantFeature: true, grantTTL },
+      });
+
+    interactionServiceMock.find.mockReturnValueOnce(
+      TE.right(O.some(afterLoginInteraction))
+    );
+    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
+    grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
+    const grantUpsert = grantServiceMock.upsert.mockImplementationOnce((_) =>
+      TE.right(grant)
+    );
+
+    const actual = await useCase(afterLoginInteraction.id, true)();
+    expect(actual).toStrictEqual(E.right(grant));
+    expect(grantUpsert).toBeCalledTimes(1);
+    expect(grantUpsert).toBeCalledWith(
+      expect.objectContaining({
+        remember: true,
+      })
+    );
+  });
+  it("should ignore the rememberGrant if the feature is disabled", async () => {
+    const { grantTTL } = config.features.grant;
+    const { useCase, interactionServiceMock, grantServiceMock } =
+      makeConfirmConsentUseCaseTest({
+        ...config.features,
+        grant: { enableRememberGrantFeature: false, grantTTL },
+      });
+
+    interactionServiceMock.find.mockReturnValueOnce(
+      TE.right(O.some(afterLoginInteraction))
+    );
+    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
+    grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
+    const grantUpsert = grantServiceMock.upsert.mockImplementationOnce((_) =>
+      TE.right(grant)
+    );
+
+    const actual = await useCase(afterLoginInteraction.id, true)();
+    expect(actual).toStrictEqual(E.right(grant));
+    expect(grantUpsert).toBeCalledTimes(1);
+    expect(grantUpsert).toBeCalledWith(
+      expect.objectContaining({
+        remember: false,
+      })
+    );
   });
 });

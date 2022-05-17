@@ -21,11 +21,13 @@
     </div>
 
     <form autocomplete="off" action="<%= p_submitUrl %>" method="post" class="fixed-bottom mt-5 px-3">
-        <div class="form-check form-check-group">
-            <input id="checkbox10" type="checkbox" name="to_remember" aria-labelledby="checkbox10-help">
-            <label for="checkbox10">Non richiedere più il consenso per questo servizio</label>
-            <small id="checkbox10-help" class="form-text">Alla prossima occasione di richiesta accesso da parte di questo servizio non ti verrà più richiesto il consenso. Chiaramente se il servizio avrà bisogno di più informazioni allora ti verrà richiesto</small>
-        </div>
+        <% if (p_showRememberMeFeature) { %>
+            <div class="form-check form-check-group">
+                <input id="checkbox10" type="checkbox" name="to_remember" aria-labelledby="checkbox10-help">
+                <label for="checkbox10">Non richiedere più il consenso per questo servizio</label>
+                <small id="checkbox10-help" class="form-text">Alla prossima occasione di richiesta accesso da parte di questo servizio non ti verrà più richiesto il consenso. Chiaramente se il servizio avrà bisogno di più informazioni allora ti verrà richiesto</small>
+            </div>
+        <% } %>
         <div class="form-row">
             <div class="form-group col-4">
               <a class="btn btn-block btn-sm btn-outline-primary" href="<%= p_abortUrl %>">Annulla</a>
