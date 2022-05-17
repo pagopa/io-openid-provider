@@ -96,7 +96,7 @@ describe("ProcessInteractionUseCase", () => {
     const expected = E.right({
       client: client,
       interactionId: interaction.id,
-      kind: "RequireConsent",
+      kind: "CollectConsent",
       missingScope: interaction.params.scope?.split(" "),
     });
     expect(actual).toStrictEqual(expected);
@@ -125,7 +125,7 @@ describe("ProcessInteractionUseCase", () => {
     const expected = E.right({
       client: client,
       interactionId: interaction.id,
-      kind: "RequireConsent",
+      kind: "CollectConsent",
       missingScope: interaction.params.scope?.split(" "),
     });
     expect(actual).toStrictEqual(expected);

@@ -32,21 +32,21 @@ export const ConsentResult = t.type({
 });
 export type ConsentResult = t.TypeOf<typeof ConsentResult>;
 
-export const RequireConsent = t.type({
+export const CollectConsent = t.type({
   client: Client,
   interactionId: InteractionId,
-  kind: t.literal("RequireConsent"),
+  kind: t.literal("CollectConsent"),
   missingScope: t.array(t.string),
 });
-export type RequireConsent = t.TypeOf<typeof RequireConsent>;
+export type CollectConsent = t.TypeOf<typeof CollectConsent>;
 
-const makeRequireConsent = (
+const makeCollectConsent = (
   interaction: Interaction,
   client: Client
 ): ProcessResult => ({
   client,
   interactionId: interaction.id,
-  kind: "RequireConsent",
+  kind: "CollectConsent",
   // TODO: Compare the required scope with the grant (if any) scope.
   // The system should ask the diff
   missingScope: (interaction.params.scope || client.scope).split(" "),
@@ -55,7 +55,7 @@ const makeRequireConsent = (
 export const ProcessResult = t.union([
   LoginResult,
   ConsentResult,
-  RequireConsent,
+  CollectConsent,
 ]);
 export type ProcessResult = t.TypeOf<typeof ProcessResult>;
 
@@ -111,7 +111,7 @@ export const ProcessInteractionUseCase =
                             )
                           ),
                         (client) =>
-                          TE.right(makeRequireConsent(interaction, client))
+                          TE.right(makeCollectConsent(interaction, client))
                       )
                     )
                   ),
