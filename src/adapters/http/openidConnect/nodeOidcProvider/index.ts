@@ -98,6 +98,9 @@ export const makeConfiguration = (
       profile: ["family_name", "given_name", "name"],
       sub: ["sub"],
     },
+    cookies: {
+      keys: [config.server.cookiesKey],
+    },
     extraClientMetadata: {
       properties: ["bypass_consent", "organization_id", "service_id"],
     },
@@ -139,6 +142,13 @@ export const makeConfiguration = (
       logger,
       authenticateUseCase
     ),
+    jwks: {
+      keys: [JSON.parse(config.server.jwkPrimary)].concat(
+        config.server.jwkSecondary
+          ? [JSON.parse(config.server.jwkSecondary)]
+          : []
+      ),
+    },
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",

@@ -1,8 +1,15 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Config } from "../config";
 import { Seconds } from "../domain/types";
+import * as jose2 from "jose2";
 
-export const envs = process.env;
+const jwk = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);
+
+export const envs: NodeJS.ProcessEnv = {
+  ...process.env,
+  JWK_PRIMARY: JSON.stringify(jwk),
+  JWK_SECONDARY: undefined,
+};
 
 export const config: Config = {
   IOClient: {
@@ -27,5 +34,8 @@ export const config: Config = {
     enableProxy: false,
     hostname: envs["SERVER_HOSTNAME"] as string,
     port: envs["PORT"] as string,
+    cookiesKey: envs["COOKIES_KEY"] as string,
+    jwkPrimary: envs["JWK_PRIMARY"] as string,
+    jwkSecondary: envs["JWK_SECONDARY"] as string,
   },
 };
