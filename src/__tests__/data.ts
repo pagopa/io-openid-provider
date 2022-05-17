@@ -3,13 +3,12 @@ import { Config } from "../config";
 import { Seconds } from "../domain/types";
 import * as jose2 from "jose2";
 
-const jwk0 = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);
-const jwk1 = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);
+const jwk = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);
 
 export const envs: NodeJS.ProcessEnv = {
   ...process.env,
-  JWK_PRIMARY: JSON.stringify(jwk0),
-  JWK_SECONDARY: JSON.stringify(jwk1),
+  JWK_PRIMARY: JSON.stringify(jwk),
+  JWK_SECONDARY: undefined,
 };
 
 export const config: Config = {

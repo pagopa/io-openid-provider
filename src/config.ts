@@ -17,7 +17,7 @@ interface ServerConfig {
   readonly enableHelmet: boolean;
   readonly authenticationCookieKey: string;
   readonly jwkPrimary: string;
-  readonly jwkSecondary: string;
+  readonly jwkSecondary: undefined | string;
   readonly cookiesKey: string;
 }
 
@@ -37,8 +37,8 @@ const EnvType = t.type({
   IO_BACKEND_BASE_URL: UrlFromString,
   ISSUER: UrlFromString,
   // TODO: Make better typing
-  JWK_PRIMARY: t.string,
-  JWK_SECONDARY: t.string,
+  JWK_PRIMARY: NonEmptyString,
+  JWK_SECONDARY: t.union([t.undefined, NonEmptyString]),
   LOG_LEVEL: t.keyof({
     debug: null,
     error: null,

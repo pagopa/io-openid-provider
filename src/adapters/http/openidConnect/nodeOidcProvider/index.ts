@@ -143,10 +143,11 @@ export const makeConfiguration = (
       authenticateUseCase
     ),
     jwks: {
-      keys: [
-        JSON.parse(config.server.jwkPrimary),
-        JSON.parse(config.server.jwkSecondary),
-      ],
+      keys: [JSON.parse(config.server.jwkPrimary)].concat(
+        config.server.jwkSecondary
+          ? [JSON.parse(config.server.jwkSecondary)]
+          : []
+      ),
     },
     responseTypes: ["id_token"],
     routes: {
