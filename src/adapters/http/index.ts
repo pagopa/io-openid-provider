@@ -11,7 +11,6 @@ import { InteractionService } from "../../domain/interactions/InteractionService
 import { SessionService } from "../../domain/sessions/SessionService";
 import { UseCases } from "../../useCases";
 import * as openidConnect from "./openidConnect";
-import * as clients from "./clients";
 import * as grants from "./grants";
 
 /**
@@ -63,8 +62,6 @@ export const makeApplication = ({
   application.set("view engine", "ejs");
 
   /* Mount the routes */
-  // mount some custom client endpoints
-  application.use(clients.makeRouter(useCases.clientListUseCase));
   // mount grant endpoints
   application.use(
     grants.makeRouter(
