@@ -1,4 +1,4 @@
-# IO OpenID Provider
+# FIMS
 
 ## Install all the dependencies
 
@@ -51,13 +51,31 @@ Those are all Environment variables needed by the application:
 | GRANT_TTL_IN_SECONDS          | The seconds after which the grant expires                                                                                                                                 | string  |
 | ISSUER                        | The Issuer Identifier defined by Open-ID Connect standard: URL using the `https:` scheme with no query or fragment component that the OP asserts as its Issuer Identifier | string  |
 | ENABLE_FEATURE_REMEMBER_GRANT | (Optional, default `false`) Enable or disable the feature that allows a user to remember a grant, valid values `true` or `false`                                          | boolean |
+| JWK_PRIMARY                   | The JSON Web Key as string                                                                                                                                                | string  |
+| JWK_SECONDARY                 | (Optional) A second JSON Web Key as string, this field is useful to rotate the keys                                                                                       | string  |
 
 ## Example
-Start the server locally:
+
+The first thing to do before starting the server locally is create a valid JSON Web Key and assign it to the `JWK_PRIMARY` environment variable, you can do it using the following command:
 
 ``` sh
-make start.dev
+curl https://mkjwk.org/jwk/ec\?alg\=ES256\&use\=sig\&gen\=timestamp\&crv\=P-256 | jq -c '.jwk'
+
+// The following command append the JSON Web Key to the end of .env.default file
+echo JWK_PRIMARY=$(curl https://mkjwk.org/jwk/ec\?alg\=ES256\&use\=sig\&gen\=timestamp\&crv\=P-256 | jq -c '.jwk') >> .env.default
 ```
+
+After that the server can be started locally with the following command:
+
+``` sh
+// this command starts two container, the database and the server
+make start.dev
+
+// this command starts just the database, the server is run with local node
+make start.local
+```
+### Test the flow
+
 1. Add a new client:
 
 ``` sh
@@ -65,9 +83,9 @@ curl --request POST 'http://localhost:3001/admin/clients' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "redirect_uris": [
-    "https://callback.io/callback"
+    "https://callback.pagopa.it/callback"
   ],
-  "organization_id": "my-org",
+  "organization_id": "00000000000",
   "service_id": "my-service",
   "response_types": [
     "id_token"
@@ -77,18 +95,31 @@ curl --request POST 'http://localhost:3001/admin/clients' \
   ],
   "application_type": "web",
   "client_name": "This is the name of this client",
-  "scope": "profile openid",
+  "scope": "openid name",
   "token_endpoint_auth_method": "none",
   "id_token_signed_response_alg": "ES256"
-}'```
+}'
+```
 
-2. Copy from the output the value of `client_id` key.
+2. Copy from the output the value of the `client_id` key.
 3. Open the browser on the following endpoint `http://localhost:3001`, and add the following cookie:
 
 ```
-X-IO-Federation-Token=<any-value>
+X-IO-Federation-Token=<the-token>
 ```
 
-4. In the same browser session paste the following endpoint replacing the `<client_id>` with copied `client_id` value and then :
+4. In the same browser session paste the following endpoint replacing the `<client_id>` with copied `client_id` value and then:
 
 ```
+http://localhost:3001/oauth/authorize?client_id=<client_id>&response_type=id_token&redirect_uri=https://callback.pagopa.it/callback&scope=openid name&response_mode=form_post&state=<state>&nonce=<nonce>
+```
+
+## Project structure
+
+The project follows the **Ports and Adapters** architecture pattern (also know as Hexagonal architecture). There are three main folders: *adapters*, *useCases* and *domain*.
+
+* *Domain*: Contains the structure and the interfaces, this folder doesn't import any code from other folder.
+* *UseCases*: Contains the use-cases of the system, it depends only on *domain*.
+* *Adapters*: Contains the implementations of the interfaces defined into the *domain* folder, moreover, contains the code that adapts the use-cases to external delivery channel (http).
+
+The OpenID Connect features are implemented through the [`node-oidc-provider`](https://github.com/panva/node-oidc-provider/tree/main) library, all the stuff related to it is encapsulated as adapter in [`src/adapters/http/openidConnect/nodeOidcProvider`](https://github.com/pagopa/io-openid-provider/tree/main/src/adapters/http/openidConnect/nodeOidcProvider) folder.
