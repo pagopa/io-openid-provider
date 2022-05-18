@@ -48,6 +48,34 @@ const followRedirect = (
 };
 
 describe("Application", () => {
+  it("should redirect to rp callback with unauthorized error", async () => {
+    const { app, client } = makeInMemoryApplication();
+
+    // start the implicit flow without the cookie
+    const authorizeResponse = await initImplicitFlow(app, client);
+    const authorizeResponseCookies = [
+      ...Array.from<string>(authorizeResponse.headers["set-cookie"] || []),
+    ];
+    // follow the redirect and perform the login
+    const loginResponse = await followRedirect(
+      app,
+      authorizeResponse,
+      authorizeResponseCookies
+    );
+    // follow the redirect of loginResponse (the flow land you to /oauth/authorize/:interaction-id)
+    const authorizeRedirectResponse = await followRedirect(
+      app,
+      loginResponse,
+      authorizeResponseCookies
+    );
+
+    expect(authorizeResponse.statusCode).toBe(303);
+    expect(loginResponse.statusCode).toBe(303);
+    expect(authorizeRedirectResponse.statusCode).toBe(400);
+    expect(authorizeRedirectResponse.text).toContain(
+      '<input type="hidden" name="error" value="UNAUTHORIZED"'
+    );
+  });
   it("should implement the implicit flow", async () => {
     const { app, client } = makeInMemoryApplication();
     const authenticationCookie = "X-IO-Federation-Token=1234567";

@@ -64,12 +64,8 @@ const getInteractionHandler =
       ),
       // render the result
       TE.fold(
-        (errorMessage) =>
-          TE.tryCatch(
-            () =>
-              provider.interactionFinished(req, res, { error: errorMessage }),
-            E.toError
-          ),
+        (error) =>
+          interactionFinishedTE(provider, req, res, { error: error.kind }),
         (result) => {
           switch (result.kind) {
             case "LoginResult":
