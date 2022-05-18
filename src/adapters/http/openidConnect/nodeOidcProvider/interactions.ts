@@ -10,7 +10,7 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import {
   ProcessInteractionUseCase,
-  RequireConsent,
+  CollectConsent,
 } from "../../../../useCases/ProcessInteractionUseCase";
 import { Config } from "../../../../config";
 import { InteractionId } from "../../../../domain/interactions/types";
@@ -27,13 +27,14 @@ const interactionFinishedTE = (
 ) =>
   TE.tryCatch(() => provider.interactionFinished(req, res, result), E.toError);
 
-const renderConsent = (res: express.Response, renderData: RequireConsent) =>
+const renderConsent = (res: express.Response, renderData: CollectConsent) =>
   E.tryCatch(
     () =>
       res.render("interaction", {
         p_abortUrl: `/interaction/${renderData.interactionId}/abort`,
         p_client: renderData.client,
         p_missingScope: renderData.missingScope,
+        p_showRememberMeFeature: renderData.allowRemembering,
         p_submitUrl: `/interaction/${renderData.interactionId}/confirm`,
       }),
     E.toError
@@ -81,7 +82,7 @@ const getInteractionHandler =
                   grantId: grantToAdapterPayload(result.grant).jti,
                 },
               });
-            case "RequireConsent":
+            case "CollectConsent":
               return TE.fromEither(renderConsent(res, result));
             default:
               return interactionFinishedTE(provider, req, res, {

@@ -13,11 +13,15 @@ import {
 import { identity } from "../../domain/identities/__tests__/data";
 import { client } from "../../domain/clients/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
+import { config } from "../../__tests__/data";
 import { IdentityService } from "../../domain/identities/IdentityService";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { makeNotFoundError } from "../../domain/types";
+import { Features } from "..";
 
-const makeProcessInteractionUseCaseTest = () => {
+const makeProcessInteractionUseCaseTest = (
+  features: Features = config.features
+) => {
   const logger = mock.mock<Logger>();
   const interactionServiceMock = mock.mock<InteractionService>();
   const identityServiceMock = mock.mock<IdentityService>();
@@ -25,6 +29,7 @@ const makeProcessInteractionUseCaseTest = () => {
   const grantServiceMock = mock.mock<GrantService>();
   const useCase = ProcessInteractionUseCase(
     logger,
+    features,
     identityServiceMock,
     interactionServiceMock,
     clientServiceMock,
@@ -94,9 +99,10 @@ describe("ProcessInteractionUseCase", () => {
 
     const actual = await useCase(afterLoginInteraction.id, () => "")();
     const expected = E.right({
+      allowRemembering: true,
       client: client,
       interactionId: interaction.id,
-      kind: "RequireConsent",
+      kind: "CollectConsent",
       missingScope: interaction.params.scope?.split(" "),
     });
     expect(actual).toStrictEqual(expected);
@@ -123,9 +129,10 @@ describe("ProcessInteractionUseCase", () => {
 
     const actual = await useCase(afterLoginInteraction.id, () => "")();
     const expected = E.right({
+      allowRemembering: true,
       client: client,
       interactionId: interaction.id,
-      kind: "RequireConsent",
+      kind: "CollectConsent",
       missingScope: interaction.params.scope?.split(" "),
     });
     expect(actual).toStrictEqual(expected);
@@ -136,6 +143,34 @@ describe("ProcessInteractionUseCase", () => {
       remember: true,
     });
     expect(grantList).toBeCalledTimes(1);
+  });
+  it("should return the information about the consent", async () => {
+    const { grantTTL } = config.features.grant;
+    const {
+      useCase,
+      clientServiceMock,
+      grantServiceMock,
+      interactionServiceMock,
+    } = makeProcessInteractionUseCaseTest({
+      ...config.features,
+      grant: { enableRememberGrantFeature: false, grantTTL },
+    });
+
+    interactionServiceMock.find.mockReturnValue(
+      TE.right(O.some(afterLoginInteraction))
+    );
+    clientServiceMock.find.mockReturnValueOnce(TE.right(O.some(client)));
+    grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
+
+    const actual = await useCase(afterLoginInteraction.id, () => "")();
+    const expected = E.right({
+      allowRemembering: false,
+      client: client,
+      interactionId: interaction.id,
+      kind: "CollectConsent",
+      missingScope: interaction.params.scope?.split(" "),
+    });
+    expect(actual).toStrictEqual(expected);
   });
   it("should return the grant remembered if any", async () => {
     const {

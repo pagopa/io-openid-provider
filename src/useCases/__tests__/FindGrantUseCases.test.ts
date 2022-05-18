@@ -4,15 +4,11 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { GrantService } from "../../domain/grants/GrantService";
 import { Logger } from "../../domain/logger";
-import {
-  FindGrantUseCase,
-  InternalError,
-  NotFound,
-} from "../FindGrantUseCases";
+import { FindGrantUseCase } from "../FindGrantUseCases";
 import { client } from "../../domain/clients/__tests__/data";
 import { identity } from "../../domain/identities/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
-import { makeDomainError } from "../../domain/types";
+import { makeDomainError, makeNotFoundError } from "../../domain/types";
 
 const makeFindGrantUseCaseTest = () => {
   const logger = mock.mock<Logger>();
@@ -54,7 +50,7 @@ describe("FindGrantUseCase", () => {
       identity.id
     )();
 
-    expect(actual).toStrictEqual(E.left(NotFound()));
+    expect(actual).toStrictEqual(E.left(makeNotFoundError("Grant not found")));
     expect(grantFindMock).toBeCalledTimes(1);
   });
   it("should map Error with InternalError", async () => {
@@ -69,7 +65,7 @@ describe("FindGrantUseCase", () => {
       identity.id
     )();
 
-    expect(actual).toStrictEqual(E.left(InternalError()));
+    expect(actual).toStrictEqual(E.left(makeDomainError("error")));
     expect(grantFindMock).toBeCalledTimes(1);
   });
 });

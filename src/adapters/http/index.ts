@@ -67,7 +67,8 @@ export const makeApplication = ({
     grants.makeRouter(
       logger,
       useCases.findGrantUseCase,
-      useCases.removeGrantUseCase
+      useCases.removeGrantUseCase,
+      useCases.listGrantUseCase
     )
   );
   // mount openid-connect endpoints

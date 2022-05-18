@@ -19,8 +19,8 @@ export const makeInMemoryApplication = (grants: ReadonlyArray<Grant> = []) => {
   const identityService = inMemory.makeIdentityService(identity);
   // initialize UseCases
   const useCases = makeUseCases(
-    config.grantTTL,
     logger,
+    config.features,
     identityService,
     interactionService,
     clientService,
