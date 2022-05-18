@@ -10,16 +10,20 @@ import { IdentityId } from "../../domain/identities/types";
 import { runAsTE, runAsTEO } from "./utils";
 
 const toRecord = (entity: Session): prisma.Session => ({
-  ...entity,
+  expireAt: entity.expireAt,
+  id: entity.id,
   identityId: entity.identityId || null,
+  issuedAt: entity.issuedAt,
+  uid: entity.uid,
 });
 
 const fromRecord = (record: prisma.Session): t.Validation<Session> =>
   pipe(
     E.of((id: SessionId) => (identityId: null | IdentityId) => (uid: Uid) => ({
-      ...record,
+      expireAt: record.expireAt,
       id,
       identityId: identityId || undefined,
+      issuedAt: record.issuedAt,
       uid,
     })),
     E.ap(SessionId.decode(record.id)),

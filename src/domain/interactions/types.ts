@@ -55,3 +55,18 @@ export const Interaction = t.type({
   result: t.union([t.undefined, LoginResult, ConsentResult, ErrorResult]),
 });
 export type Interaction = t.TypeOf<typeof Interaction>;
+
+export const makeResult =
+  (grantId: GrantId | undefined) =>
+  (identityId: IdentityId | undefined) =>
+  (error: string | undefined): Interaction["result"] => {
+    if (grantId && identityId) {
+      return { grantId, identityId };
+    } else if (identityId) {
+      return { identityId };
+    } else if (error) {
+      return { error };
+    } else {
+      return undefined;
+    }
+  };

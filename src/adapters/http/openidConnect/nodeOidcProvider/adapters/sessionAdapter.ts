@@ -28,19 +28,24 @@ const adapterPayloadToSession = (
 ): t.Validation<Session> =>
   pipe(
     E.of(
-      (exp: Date) => (iat: Date) =>
-        Session.decode({
+      (id: SessionId) =>
+        (identityId: Session["identityId"]) =>
+        (uid: Session["uid"]) =>
+        (exp: Date) =>
+        (iat: Date) => ({
           expireAt: exp,
-          id: payload.jti,
-          identityId: payload.accountId,
+          id,
+          identityId,
           issuedAt: iat,
           kind: payload.kind,
-          uid: payload.uid,
+          uid,
         })
     ),
+    E.ap(SessionId.decode(payload.jti)),
+    E.ap(Session.props.identityId.decode(payload.accountId)),
+    E.ap(Session.props.uid.decode(payload.uid)),
     E.ap(DateFromNumericDate.decode(payload.exp)),
-    E.ap(DateFromNumericDate.decode(payload.iat)),
-    E.flatten
+    E.ap(DateFromNumericDate.decode(payload.iat))
   );
 
 export const makeSessionAdapter = (
