@@ -11,7 +11,7 @@ import { IdentityId } from "../../domain/identities/types";
 import { ClientId } from "../../domain/clients/types";
 import { runAsTE, runAsTEO } from "./utils";
 
-const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
+export const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
   clientId: Grant.props.subjects.props.clientId.encode(
     entity.subjects.clientId
   ),
@@ -23,7 +23,7 @@ const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
   scope: entity.scope,
 });
 
-const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
+export const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
   pipe(
     E.of(
       (grantId: GrantId) => (identityId: IdentityId) => (clientId: ClientId) => ({

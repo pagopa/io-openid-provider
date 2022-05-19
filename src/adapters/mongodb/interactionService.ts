@@ -10,7 +10,7 @@ import { GrantId } from "../../domain/grants/types";
 import { IdentityId } from "../../domain/identities/types";
 import { runAsTE, runAsTEO } from "./utils";
 
-const toRecord = (
+export const toRecord = (
   entity: Interaction
 ): prisma.Prisma.InteractionCreateInput => ({
   error: entity.result && "error" in entity.result ? entity.result.error : null,
@@ -27,7 +27,9 @@ const toRecord = (
   payload: entity.payload,
 });
 
-const fromRecord = (record: prisma.Interaction): t.Validation<Interaction> =>
+export const fromRecord = (
+  record: prisma.Interaction
+): t.Validation<Interaction> =>
   pipe(
     E.of(
       (id: Interaction["id"]) =>

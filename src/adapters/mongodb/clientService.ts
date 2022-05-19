@@ -15,7 +15,7 @@ import {
 } from "../../domain/clients/types";
 import { runAsTE, runAsTEO } from "./utils";
 
-const fromRecord = (record: prisma.Client): t.Validation<Client> =>
+export const fromRecord = (record: prisma.Client): t.Validation<Client> =>
   pipe(
     E.of(
       (serviceId: ServiceId) =>
@@ -38,7 +38,7 @@ const fromRecord = (record: prisma.Client): t.Validation<Client> =>
     E.ap(ResponseTypes.decode(record.responseTypes))
   );
 
-const toRecord = (entity: Client): prisma.Client => ({
+export const toRecord = (entity: Client): prisma.Client => ({
   grantTypes: entity.grantTypes,
   issuedAt: entity.issuedAt,
   name: entity.name,

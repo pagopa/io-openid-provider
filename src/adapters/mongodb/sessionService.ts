@@ -9,7 +9,7 @@ import { Session, SessionId, Uid } from "../../domain/sessions/types";
 import { IdentityId } from "../../domain/identities/types";
 import { runAsTE, runAsTEO } from "./utils";
 
-const toRecord = (entity: Session): prisma.Session => ({
+export const toRecord = (entity: Session): prisma.Session => ({
   expireAt: entity.expireAt,
   id: entity.id,
   identityId: entity.identityId || null,
@@ -17,7 +17,7 @@ const toRecord = (entity: Session): prisma.Session => ({
   uid: entity.uid,
 });
 
-const fromRecord = (record: prisma.Session): t.Validation<Session> =>
+export const fromRecord = (record: prisma.Session): t.Validation<Session> =>
   pipe(
     E.of((id: SessionId) => (identityId: null | IdentityId) => (uid: Uid) => ({
       expireAt: record.expireAt,
