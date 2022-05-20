@@ -1,19 +1,23 @@
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { strings } from "@pagopa/ts-commons";
-import { DomainErrorTypes, makeDomainError } from "../../domain/types";
+import {
+  DomainError,
+  DomainErrorTypes,
+  makeDomainError,
+} from "../../domain/types";
 import { IdentityService } from "../../domain/identities/IdentityService";
 import * as authClient from "../../generated/clients/io-auth/client";
-import { AccessToken, IdentityId } from "../../domain/identities/types";
+import { AccessToken, Identity } from "../../domain/identities/types";
 import { Logger } from "../../domain/logger";
 import { show } from "../../domain/utils";
 
 const authenticate =
-  (logger: Logger, client: authClient.Client) => (token: AccessToken) =>
+  (logger: Logger, client: authClient.Client) =>
+  (token: AccessToken): TE.TaskEither<DomainError, Identity> =>
     pipe(
       TE.tryCatch(
-        () => client.getUserIdentity({ Bearer: `Bearer ${token}` }),
+        () => client.getUserForFIMS({ Bearer: `Bearer ${token}` }),
         (_) => makeDomainError("Unexpected", DomainErrorTypes.GENERIC_ERROR)
       ),
       TE.chainEitherK(
@@ -33,15 +37,15 @@ const authenticate =
         switch (response.status) {
           case 200:
             return E.right({
-              acr: undefined,
-              authTime: undefined,
-              dateOfBirth: undefined,
-              email: undefined,
+              acr: response.value.acr,
+              authTime: new Date(response.value.auth_time * 1000),
+              dateOfBirth: response.value.date_of_birth,
+              email: response.value.email,
               familyName: response.value.family_name,
               fiscalCode: response.value
-                .fiscal_code as unknown as strings.NonEmptyString,
+                .fiscal_code as unknown as Identity["fiscalCode"],
               givenName: response.value.name,
-              id: response.value.fiscal_code as unknown as IdentityId,
+              id: response.value.fiscal_code as unknown as Identity["id"],
             });
           case 400:
             return E.left(
