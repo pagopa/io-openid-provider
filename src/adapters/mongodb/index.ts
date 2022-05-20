@@ -1,6 +1,6 @@
 export * from "./prisma";
 export * from "./types";
-export * from "./clientService";
-export * from "./sessionService";
-export * from "./interactionService";
-export * from "./grantService";
+export { makeClientService } from "./clientService";
+export { makeSessionService } from "./sessionService";
+export { makeInteractionService } from "./interactionService";
+export { makeGrantService } from "./grantService";
