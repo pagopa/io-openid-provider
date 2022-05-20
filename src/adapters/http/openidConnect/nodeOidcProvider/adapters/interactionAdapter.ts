@@ -4,9 +4,12 @@ import * as E from "fp-ts/Either";
 import * as oidc from "oidc-provider";
 import { Logger } from "../../../../../domain/logger";
 import { InteractionService } from "../../../../../domain/interactions/InteractionService";
+import { GrantId } from "../../../../../domain/grants/types";
+import { IdentityId } from "../../../../../domain/identities/types";
 import {
   InteractionId,
   Interaction,
+  makeResult,
 } from "../../../../../domain/interactions/types";
 import {
   DateFromNumericDate,
@@ -30,30 +33,36 @@ export const adapterPayloadToInteraction = (
 ): t.Validation<Interaction> =>
   pipe(
     E.of(
-      (exp: Date) => (iat: Date) =>
-        Interaction.decode({
+      (id: Interaction["id"]) =>
+        (grantId: GrantId | undefined) =>
+        (identityId: IdentityId | undefined) =>
+        (error: string | undefined) =>
+        (params: Interaction["params"]) =>
+        (fullPayload: Interaction["payload"]) =>
+        (exp: Date) =>
+        (iat: Date) => ({
           expireAt: exp,
-          id: payload.jti,
+          id,
           issuedAt: iat,
-          params: payload.params,
-          payload: { ...payload },
-          result:
-            payload.result?.consent ||
-            payload.result?.login ||
-            payload.session?.accountId
-              ? {
-                  grantId: payload.result?.consent?.grantId,
-                  identityId:
-                    payload.result?.login?.accountId ||
-                    payload.session?.accountId,
-                }
-              : undefined,
-          returnTo: payload.returnTo,
+          params,
+          payload: { ...fullPayload },
+          result: makeResult(grantId)(identityId)(error),
         })
     ),
+    E.ap(Interaction.props.id.decode(payload.jti)),
+    E.ap(
+      t.union([t.undefined, GrantId]).decode(payload.result?.consent?.grantId)
+    ),
+    E.ap(
+      t
+        .union([t.undefined, IdentityId])
+        .decode(payload.result?.login?.accountId || payload.session?.accountId)
+    ),
+    E.ap(t.union([t.undefined, t.string]).decode(payload.result?.error)),
+    E.ap(Interaction.props.params.decode(payload.params)),
+    E.ap(Interaction.props.payload.decode(payload)),
     E.ap(DateFromNumericDate.decode(payload.exp)),
-    E.ap(DateFromNumericDate.decode(payload.iat)),
-    E.flatten
+    E.ap(DateFromNumericDate.decode(payload.iat))
   );
 
 export const makeInteractionAdapter = (
