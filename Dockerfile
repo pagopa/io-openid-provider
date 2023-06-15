@@ -1,5 +1,5 @@
 # Step 1 - Compile code
-FROM node:14.17.6-alpine as build
+FROM node:18.16.0-alpine as build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY --chown=node:node . /app
 RUN yarn --frozen-lockfile && yarn run build
 
 # Step 2 - Prepare production image
-FROM node:14.17.6-alpine
+FROM node:18.16.0-alpine
 
 USER node
 WORKDIR /app
