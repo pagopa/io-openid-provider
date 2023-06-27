@@ -63,6 +63,8 @@ export const makeApplication = ({
   application.set("views", path.join(__dirname, "views"));
   application.set("view engine", "ejs");
 
+  application.use(info.makeRouter(config));
+
   /* Mount the routes */
   // mount some custom client endpoints
   application.use(clients.makeRouter(useCases.clientListUseCase));
@@ -75,6 +77,7 @@ export const makeApplication = ({
       useCases.listGrantUseCase
     )
   );
+
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({
@@ -87,8 +90,6 @@ export const makeApplication = ({
       useCases,
     })
   );
-
-  application.use(info.makeRouter(config));
 
   const { port, hostname } = config.server;
   application.set("port", port);
