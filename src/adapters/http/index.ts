@@ -13,6 +13,7 @@ import { UseCases } from "../../useCases";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
+import * as info from "./info";
 
 /**
  * This trait defined all the dependencies required by the Application.
@@ -86,6 +87,8 @@ export const makeApplication = ({
       useCases,
     })
   );
+
+  application.use(info.makeRouter(config));
 
   const { port, hostname } = config.server;
   application.set("port", port);
