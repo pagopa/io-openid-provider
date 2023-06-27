@@ -16,6 +16,8 @@
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
     "prepare": "husky install",
+    "predeploy": "npm-run-all build dist:modules",
+    "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "postinstall": "patch-package"
   },
   "author": "",
@@ -61,6 +63,7 @@
     "jest-each": "^27.5.1",
     "jest-mock-extended": "^2.0.4",
     "jose2": "npm:jose@^2.0.5",
+    "modclean": "^3.0.0-beta.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.4.1",
     "prisma": "^4.15.0",
