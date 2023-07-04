@@ -9,7 +9,7 @@ describe("Config", () => {
       const envs = {
         ...data.envs,
         LOG_LEVEL: undefined,
-        SERVER_HOSTNAME: undefined,
+        EXPRESS_SERVER_HOSTNAME: undefined,
       };
 
       const actual = C.parseConfig(envs);

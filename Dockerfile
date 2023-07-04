@@ -16,7 +16,7 @@ COPY --chown=node:node --from=build /app/dist /app/prisma /app/package.json /app
 ENV NODE_ENV=production
 ENV LOG_LEVEL=silly
 ENV PORT=3000
-ENV SERVER_HOSTNAME=0.0.0.0
+ENV EXPRESS_SERVER_HOSTNAME=0.0.0.0
 ENV APPLICATION_NAME=openid-provider
 # TODO: Review version node -p "require('./app/package.json').version"
 ENV VERSION=0.0.0
