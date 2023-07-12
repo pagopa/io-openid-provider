@@ -14,15 +14,8 @@ const authenticate =
     pipe(
       TE.tryCatch(
         () => client.getUserIdentity({ Bearer: `Bearer ${token}` }),
-        (_) => {
-          logger.debug(`authenticate getUserIdentity: ${_}`);
-          return makeDomainError("Unexpected", DomainErrorTypes.GENERIC_ERROR);
-        }
+        (_) => makeDomainError("Unexpected", DomainErrorTypes.GENERIC_ERROR)
       ),
-      TE.map((response) => {
-        logger.debug(`authenticate getUserIdentity: ${show(response)}`);
-        return response;
-      }),
       TE.chainEitherK(
         flow(
           E.mapLeft((_) =>
