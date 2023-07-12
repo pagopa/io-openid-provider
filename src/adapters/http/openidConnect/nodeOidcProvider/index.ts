@@ -41,9 +41,6 @@ const findAccountAdapter =
   ): oidc.FindAccount =>
   (ctx, _sub, _token) => {
     const accountId = ctx.oidc.session?.accountId;
-    logger.debug(
-      `Authentication cookie: ${ctx.cookies.get(authenticationCookieKey)}`
-    );
     const accessToken = ctx.cookies.get(authenticationCookieKey);
     if (accountId && accessToken) {
       return {
