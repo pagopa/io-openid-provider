@@ -13,6 +13,7 @@ import { UseCases } from "../../useCases";
 import * as openidConnect from "./openidConnect";
 import * as clients from "./clients";
 import * as grants from "./grants";
+import * as info from "./info";
 
 /**
  * This trait defined all the dependencies required by the Application.
@@ -62,6 +63,8 @@ export const makeApplication = ({
   application.set("views", path.join(__dirname, "views"));
   application.set("view engine", "ejs");
 
+  application.use(info.makeRouter(config));
+
   /* Mount the routes */
   // mount some custom client endpoints
   application.use(clients.makeRouter(useCases.clientListUseCase));
@@ -74,6 +77,7 @@ export const makeApplication = ({
       useCases.listGrantUseCase
     )
   );
+
   // mount openid-connect endpoints
   application.use(
     openidConnect.makeRouter({

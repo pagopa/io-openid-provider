@@ -38,7 +38,7 @@ export const config: Config = {
     authenticationCookieKey: envs["AUTHENTICATION_COOKIE_KEY"] as string,
     enableHelmet: false,
     enableProxy: false,
-    hostname: envs["SERVER_HOSTNAME"] as string,
+    hostname: envs["EXPRESS_SERVER_HOSTNAME"] as string,
     port: envs["PORT"] as string,
     cookiesKey: envs["COOKIES_KEY"] as string,
     jwkPrimary: envs["JWK_PRIMARY"] as string,

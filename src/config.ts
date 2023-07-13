@@ -35,6 +35,7 @@ const EnvType = t.type({
   COOKIES_KEY: t.string,
   ENABLE_FEATURE_REMEMBER_GRANT: tt.fromNullable(tt.BooleanFromString, false),
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
+  EXPRESS_SERVER_HOSTNAME: t.string,
   GRANT_TTL_IN_SECONDS: tt.IntFromString,
   IO_BACKEND_BASE_URL: UrlFromString,
   ISSUER: UrlFromString,
@@ -52,7 +53,6 @@ const EnvType = t.type({
   }),
   MONGODB_URL: UrlFromString,
   PORT: t.string,
-  SERVER_HOSTNAME: t.string,
   VERSION: NonEmptyString,
 });
 type EnvType = t.TypeOf<typeof EnvType>;
@@ -84,7 +84,7 @@ const makeConfig = (envs: EnvType): Config => ({
     cookiesKey: envs.COOKIES_KEY,
     enableHelmet: false,
     enableProxy: envs.ENABLE_PROXY,
-    hostname: envs.SERVER_HOSTNAME,
+    hostname: envs.EXPRESS_SERVER_HOSTNAME,
     jwkPrimary: envs.JWK_PRIMARY,
     jwkSecondary: envs.JWK_SECONDARY,
     port: envs.PORT,

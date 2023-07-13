@@ -4,7 +4,7 @@ import { pipe } from "fp-ts/lib/function";
 import { makeApplication, startApplication } from "./adapters/http";
 import * as ioBackend from "./adapters/ioBackend";
 import * as mongodb from "./adapters/mongodb";
-import { makeLogger } from "./adapters/winston";
+import { makeLogger, makeAppInsightsLogger } from "./adapters/winston";
 import { parseConfig } from "./config";
 import { makeUseCases } from "./useCases";
 
@@ -21,7 +21,16 @@ void pipe(
   // parse configuraiton
   TE.apS("config", TE.fromEither(parseConfig(process.env))),
   // create the main logger
-  TE.bind("logger", (env) => TE.of(makeLogger(env.config.logger))),
+  TE.bind("logger", (env) =>
+    TE.of(
+      process.env.APPINSIGHTS_INSTRUMENTATIONKEY
+        ? makeAppInsightsLogger(
+            process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+            env.config.logger
+          )
+        : makeLogger(env.config.logger)
+    )
+  ),
   // create connection with db
   TE.bind("prisma", (env) =>
     mongodb.makePrismaClient(env.config.mongodb, env.logger)
