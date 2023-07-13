@@ -2,17 +2,20 @@ import each from "jest-each";
 import * as mock from "jest-mock-extended";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
-import { UserIdentity } from "../../../generated/clients/io-auth/UserIdentity";
+import { FIMSUser } from "../../../generated/clients/io-auth/FIMSUser";
 import * as authClient from "../../../generated/clients/io-auth/client";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { identity as fakeIdentity } from "../../../domain/identities/__tests__/data";
 import { makeDomainError, DomainErrorTypes } from "../../../domain/types";
 import { makeIdentityService } from "../identityService";
 import { Logger } from "../../../domain/logger";
+import { SpidLevelEnum } from "../../../generated/clients/io-auth/SpidLevel";
 
 const identity = { ...fakeIdentity, id: fakeIdentity.fiscalCode };
 
-const userIdentity: UserIdentity = {
+const userIdentity: FIMSUser = {
+  acr: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+  auth_time: 1648474413,
   name: identity.givenName,
   family_name: identity.familyName,
   fiscal_code: identity.fiscalCode as unknown as FiscalCode,
@@ -48,10 +51,10 @@ describe("IdentityService", () => {
         },
         expected: E.right({
           ...identity,
-          acr: undefined,
-          authTime: undefined,
-          dateOfBirth: undefined,
-          email: undefined,
+          acr: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+          authTime: new Date("2022-03-28T13:33:33.000Z"),
+          dateOfBirth: userIdentity.date_of_birth,
+          email: userIdentity.email,
         }),
       },
       {
@@ -112,7 +115,7 @@ describe("IdentityService", () => {
         const { getUserIdentityResp } = responses;
 
         const functionRecorded =
-          mockAuthClient.getUserIdentity.mockReturnValueOnce(
+          mockAuthClient.getUserForFIMS.mockReturnValueOnce(
             getUserIdentityResp
           );
 
