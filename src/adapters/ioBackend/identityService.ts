@@ -17,7 +17,7 @@ const authenticate =
   (token: AccessToken): TE.TaskEither<DomainError, Identity> =>
     pipe(
       TE.tryCatch(
-        () => client.getUserIdentity({ Bearer: `Bearer ${token}` }),
+        () => client.getUserForFIMS({ Bearer: `Bearer ${token}` }),
         (_) => {
           logger.debug(`authenticate getUserIdentity: ${_}`);
           return makeDomainError("Unexpected", DomainErrorTypes.GENERIC_ERROR);
