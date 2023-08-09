@@ -7,15 +7,8 @@ import {
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 
-interface ServiceIdBrand {
-  readonly ServiceId: unique symbol;
-}
 // ServiceId is just a string
-export const ServiceId = t.brand(
-  NonEmptyString,
-  (s): s is t.Branded<NonEmptyString, ServiceIdBrand> => NonEmptyString.is(s),
-  "ServiceId"
-);
+export const ServiceId = NonEmptyString;
 export type ServiceId = t.TypeOf<typeof ServiceId>;
 
 interface OrganizationIdBrand {

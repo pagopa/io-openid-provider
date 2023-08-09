@@ -1,3 +1,4 @@
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import * as t from "io-ts";
 import * as PR from "io-ts/PathReporter";
 
@@ -74,5 +75,38 @@ export const makeDomainError = (
       causedBy: new Error(PR.failure(e).join("\n")),
       kind,
     };
+  }
+};
+
+export const cosmosErrorsToDomainError = (
+  e: Error | CosmosErrors
+): DomainError => {
+  if (e instanceof Error) {
+    return {
+      causedBy: e,
+      kind: DomainErrorTypes.GENERIC_ERROR,
+    };
+  }
+  switch (e.kind) {
+    case "COSMOS_EMPTY_RESPONSE":
+      return {
+        causedBy: new Error(),
+        kind: DomainErrorTypes.NOT_FOUND,
+      };
+    case "COSMOS_DECODING_ERROR":
+      return {
+        causedBy: new Error(PR.failure(e.error).join("\n")),
+        kind: DomainErrorTypes.FORMAT_ERROR,
+      };
+    case "COSMOS_ERROR_RESPONSE":
+      return {
+        causedBy: e.error,
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      };
+    default:
+      return {
+        causedBy: new Error(),
+        kind: DomainErrorTypes.GENERIC_ERROR,
+      };
   }
 };

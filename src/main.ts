@@ -7,6 +7,8 @@ import * as mongodb from "./adapters/mongodb";
 import { makeLogger, makeAppInsightsLogger } from "./adapters/winston";
 import { parseConfig } from "./config";
 import { makeUseCases } from "./useCases";
+import { CLIENT_COLLECTION_NAME, ClientModel } from "./adapters/model/client";
+import { makeCosmosDbClient } from "./adapters/mongodb/cosmosdb";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {
@@ -35,15 +37,21 @@ void pipe(
   TE.bind("prisma", (env) =>
     mongodb.makePrismaClient(env.config.mongodb, env.logger)
   ),
+  TE.bind("cosmosdb", (env) =>
+    makeCosmosDbClient(env.config.cosmosdb, env.logger)
+  ),
   // create the application
-  TE.map(({ config, logger, prisma }) => {
+  TE.map(({ config, logger, prisma, cosmosdb }) => {
     const { ioAuthClient } = ioBackend.makeIOClients(
       config.IOClient,
       ioBackend.timeoutFetch
     );
     const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);
 
-    const clientService = mongodb.makeClientService(logger, prisma.client);
+    const clientModel = new ClientModel(
+      cosmosdb.container(CLIENT_COLLECTION_NAME)
+    );
+    const clientService = mongodb.makeClientService(logger, clientModel);
     const interactionService = mongodb.makeInteractionService(
       logger,
       prisma.interaction
