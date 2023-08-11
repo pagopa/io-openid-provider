@@ -11,7 +11,7 @@ import {
   CLIENT_COLLECTION_NAME,
   ClientModel,
 } from "./adapters/cosmosdb/model/client";
-import { makeCosmosDbClient } from "./adapters/cosmosdb/cosmosdb";
+import { makeCosmosDbClient } from "./adapters/cosmosdb/client";
 import {
   GRANT_COLLECTION_NAME,
   GrantModel,
