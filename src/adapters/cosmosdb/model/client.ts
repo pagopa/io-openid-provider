@@ -60,8 +60,8 @@ export class ClientModel extends CosmosdbModel<
   /**
    * Returns the Client object associated to the serviceId and organizationId.
    *
-   * @param serviceId The Id of the message
-   * @param organizationId The organizationId of the message
+   * @param serviceId The Id of the client
+   * @param organizationId The organizationId of the client
    */
   public findClientByServiceIdAndOrganizationdId(
     serviceId: NonEmptyString,
@@ -96,41 +96,41 @@ export class ClientModel extends CosmosdbModel<
       parameters: [],
       query: `SELECT * FROM m`,
     };
-    const emptyMessageParameter = {
+    const emptyParameter = {
       condition: "",
       param: [],
     };
     return pipe(
       TE.of({
-        nextMessagesParams: pipe(
-          maybeServiceId,
-          O.foldW(
-            () => emptyMessageParameter,
-            (serviceId) => ({
-              condition: ` AND n.${CLIENT_MODEL_PK_FIELD} = @serviceId`,
-              param: [{ name: "@serviceId", value: serviceId }],
-            })
-          )
-        ),
-        prevMessagesParams: pipe(
+        organizationIdParams: pipe(
           maybeOrganizationId,
           O.foldW(
-            () => emptyMessageParameter,
+            () => emptyParameter,
             (organizationId) => ({
               condition: ` AND n.organizationId = @organizationId`,
               param: [{ name: "@organizationId", value: organizationId }],
             })
           )
         ),
+        serviceIdParams: pipe(
+          maybeServiceId,
+          O.foldW(
+            () => emptyParameter,
+            (serviceId) => ({
+              condition: ` AND n.${CLIENT_MODEL_PK_FIELD} = @serviceId`,
+              param: [{ name: "@serviceId", value: serviceId }],
+            })
+          )
+        ),
       }),
       TE.mapLeft(toCosmosErrorResponse),
-      TE.map(({ nextMessagesParams, prevMessagesParams }) => ({
+      TE.map(({ serviceIdParams, organizationIdParams }) => ({
         parameters: [
           ...commonQuerySpec.parameters,
-          ...nextMessagesParams.param,
-          ...prevMessagesParams.param,
+          ...serviceIdParams.param,
+          ...organizationIdParams.param,
         ],
-        query: `${commonQuerySpec.query}${nextMessagesParams.condition}${prevMessagesParams.condition}`,
+        query: `${commonQuerySpec.query}${serviceIdParams.condition}${organizationIdParams.condition}`,
       })),
       TE.chain((querySpec) =>
         TE.tryCatch(
@@ -146,8 +146,8 @@ export class ClientModel extends CosmosdbModel<
   /**
    * Delete the Client associated to the serviceId and organizationId
    *
-   * @param serviceId The Id of the message
-   * @param organizationId The organizationId of the message
+   * @param serviceId The Id of the client
+   * @param organizationId The organizationId of the client
    */
   public delete(
     serviceId: NonEmptyString,

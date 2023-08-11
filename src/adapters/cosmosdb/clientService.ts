@@ -10,8 +10,8 @@ import {
   ResponseTypes,
   ServiceId,
 } from "../../domain/clients/types";
-import { ClientModel, CosmosClient, RetrievedClient } from "../model/client";
-import { newRunAsTE, newRunAsTEO } from "./utils";
+import { ClientModel, CosmosClient, RetrievedClient } from "./model/client";
+import { makeTE, makeTEOption } from "./utils";
 
 export const fromRecord = (record: RetrievedClient): t.Validation<Client> =>
   pipe(
@@ -53,26 +53,24 @@ export const makeClientService = (
   clientModel: ClientModel
 ): ClientService => ({
   find: (id) =>
-    newRunAsTEO(logger)("find", fromRecord, () =>
+    makeTEOption(logger)("find", fromRecord, () =>
       clientModel.findClientByServiceIdAndOrganizationdId(
         id.serviceId,
         id.organizationId
       )
     ),
   list: (selector) =>
-    newRunAsTE(logger)("list", E.traverseArray(fromRecord), () =>
+    makeTE(logger)("list", E.traverseArray(fromRecord), () =>
       clientModel.findAllByQuery(selector.serviceId, selector.organizationId)
     ),
   remove: (id) =>
-    newRunAsTE(logger)(
+    makeTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
       () => clientModel.delete(id.serviceId, id.organizationId)
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
-    return newRunAsTE(logger)("upsert", fromRecord, () =>
-      clientModel.upsert(obj)
-    );
+    return makeTE(logger)("upsert", fromRecord, () => clientModel.upsert(obj));
   },
 });

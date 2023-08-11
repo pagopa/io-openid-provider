@@ -6,10 +6,7 @@ import { Logger } from "../../../domain/logger";
 import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
 import { ServiceId } from "../../../generated/definitions/ServiceId";
 import { IResponseNoContent, ResponseNoContent } from "../utils";
-import {
-  OrganizationId,
-  ServiceId as DomainServiceId,
-} from "../../../domain/clients/types";
+import { OrganizationId } from "../../../domain/clients/types";
 import { IdentityId } from "../../../domain/identities/types";
 import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
 import { DomainErrorTypes } from "../../../domain/types";
@@ -31,7 +28,7 @@ export const deleteGrantEndpointHandler =
     pipe(
       removeGrantUseCase(
         organizationId as OrganizationId,
-        serviceId as DomainServiceId,
+        serviceId,
         identityId as IdentityId
       ),
       TE.bimap(

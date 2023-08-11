@@ -1,5 +1,6 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IdentityId } from "../identities/types";
 import { Client } from "../clients/types";
 import { GrantId } from "../grants/types";
@@ -9,8 +10,9 @@ interface InteractionIdBrand {
 }
 // InteractionId is just a string
 export const InteractionId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, InteractionIdBrand> => t.string.is(s),
+  NonEmptyString,
+  (s): s is t.Branded<NonEmptyString, InteractionIdBrand> =>
+    NonEmptyString.is(s),
   "InteractionId"
 );
 export type InteractionId = t.TypeOf<typeof InteractionId>;

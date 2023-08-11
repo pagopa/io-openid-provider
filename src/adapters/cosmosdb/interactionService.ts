@@ -1,34 +1,38 @@
 import * as t from "io-ts";
 import { pipe, constVoid } from "fp-ts/function";
 import * as E from "fp-ts/Either";
-import * as prisma from "@prisma/client";
-import { Prisma } from "@prisma/client";
 import { Interaction, makeResult } from "../../domain/interactions/types";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { Logger } from "../../domain/logger";
 import { GrantId } from "../../domain/grants/types";
 import { IdentityId } from "../../domain/identities/types";
-import { runAsTE, runAsTEO } from "./utils";
+import { makeTE, makeTEOption } from "./utils";
+import {
+  CosmosInteraction,
+  InteractionModel,
+  RetrievedInteraction,
+} from "./model/interaction";
 
-export const toRecord = (
-  entity: Interaction
-): prisma.Prisma.InteractionCreateInput => ({
-  error: entity.result && "error" in entity.result ? entity.result.error : null,
+export const toRecord = (entity: Interaction): CosmosInteraction => ({
+  error:
+    entity.result && "error" in entity.result ? entity.result.error : undefined,
   expireAt: entity.expireAt,
   grantId:
-    entity.result && "grantId" in entity.result ? entity.result.grantId : null,
+    entity.result && "grantId" in entity.result
+      ? entity.result.grantId
+      : undefined,
   id: entity.id,
   identityId:
     entity.result && "identityId" in entity.result
       ? entity.result.identityId
-      : null,
+      : undefined,
   issuedAt: entity.issuedAt,
-  params: Interaction.props.params.encode(entity.params),
+  params: entity.params,
   payload: entity.payload,
 });
 
 export const fromRecord = (
-  record: prisma.Interaction
+  record: RetrievedInteraction
 ): t.Validation<Interaction> =>
   pipe(
     E.of(
@@ -56,28 +60,24 @@ export const fromRecord = (
     E.ap(Interaction.props.payload.decode(record.payload))
   );
 
-export const makeInteractionService = <T>(
+export const makeInteractionService = (
   logger: Logger,
-  client: Prisma.InteractionDelegate<T>
+  interactionModel: InteractionModel
 ): InteractionService => ({
   find: (id) =>
-    runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({ where: { id } })
+    makeTEOption(logger)("find", fromRecord, () =>
+      interactionModel.findOne(id)
     ),
   remove: (id) =>
-    runAsTE(logger)(
+    makeTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.delete({ where: { id } })
+      () => interactionModel.delete(id)
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
-    return runAsTE(logger)("upsert", fromRecord, () =>
-      client.upsert({
-        create: obj,
-        update: { ...{ ...obj, id: undefined } },
-        where: { id: definition.id },
-      })
+    return makeTE(logger)("upsert", fromRecord, () =>
+      interactionModel.upsert(obj)
     );
   },
 });

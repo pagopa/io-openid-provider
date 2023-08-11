@@ -6,7 +6,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
 import { LogConfig } from "./adapters/winston";
-import { CosmosDBConfig, MongoDBConfig } from "./adapters/mongodb";
+import { CosmosDBConfig, MongoDBConfig } from "./adapters/cosmosdb";
 import { IOClientConfig } from "./adapters/ioBackend";
 import { Seconds } from "./domain/types";
 import { Features } from "./useCases";

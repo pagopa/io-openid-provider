@@ -1,5 +1,6 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IdentityId } from "../identities/types";
 
 interface UidBrand {
@@ -7,8 +8,8 @@ interface UidBrand {
 }
 // Uid is just a string
 export const Uid = t.brand(
-  t.string,
-  (s): s is t.Branded<string, UidBrand> => t.string.is(s),
+  NonEmptyString,
+  (s): s is t.Branded<NonEmptyString, UidBrand> => NonEmptyString.is(s),
   "Uid"
 );
 export type Uid = t.TypeOf<typeof Uid>;
@@ -18,8 +19,8 @@ interface SessionIdBrand {
 }
 // SessionId is just a string
 export const SessionId = t.brand(
-  t.string,
-  (s): s is t.Branded<string, SessionIdBrand> => t.string.is(s),
+  NonEmptyString,
+  (s): s is t.Branded<NonEmptyString, SessionIdBrand> => NonEmptyString.is(s),
   "SessionId"
 );
 export type SessionId = t.TypeOf<typeof SessionId>;

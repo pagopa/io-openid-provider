@@ -3,12 +3,27 @@ import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { makeApplication, startApplication } from "./adapters/http";
 import * as ioBackend from "./adapters/ioBackend";
-import * as mongodb from "./adapters/mongodb";
+import * as adapter from "./adapters/cosmosdb";
 import { makeLogger, makeAppInsightsLogger } from "./adapters/winston";
 import { parseConfig } from "./config";
 import { makeUseCases } from "./useCases";
-import { CLIENT_COLLECTION_NAME, ClientModel } from "./adapters/model/client";
-import { makeCosmosDbClient } from "./adapters/mongodb/cosmosdb";
+import {
+  CLIENT_COLLECTION_NAME,
+  ClientModel,
+} from "./adapters/cosmosdb/model/client";
+import { makeCosmosDbClient } from "./adapters/cosmosdb/cosmosdb";
+import {
+  GRANT_COLLECTION_NAME,
+  GrantModel,
+} from "./adapters/cosmosdb/model/grant";
+import {
+  INTERACTION_COLLECTION_NAME,
+  InteractionModel,
+} from "./adapters/cosmosdb/model/interaction";
+import {
+  SESSION_COLLECTION_NAME,
+  SessionModel,
+} from "./adapters/cosmosdb/model/session";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {
@@ -34,14 +49,11 @@ void pipe(
     )
   ),
   // create connection with db
-  TE.bind("prisma", (env) =>
-    mongodb.makePrismaClient(env.config.mongodb, env.logger)
-  ),
   TE.bind("cosmosdb", (env) =>
     makeCosmosDbClient(env.config.cosmosdb, env.logger)
   ),
   // create the application
-  TE.map(({ config, logger, prisma, cosmosdb }) => {
+  TE.map(({ config, logger, cosmosdb }) => {
     const { ioAuthClient } = ioBackend.makeIOClients(
       config.IOClient,
       ioBackend.timeoutFetch
@@ -51,13 +63,25 @@ void pipe(
     const clientModel = new ClientModel(
       cosmosdb.container(CLIENT_COLLECTION_NAME)
     );
-    const clientService = mongodb.makeClientService(logger, clientModel);
-    const interactionService = mongodb.makeInteractionService(
-      logger,
-      prisma.interaction
+    const clientService = adapter.makeClientService(logger, clientModel);
+
+    const interactionModel = new InteractionModel(
+      cosmosdb.container(INTERACTION_COLLECTION_NAME)
     );
-    const sessionService = mongodb.makeSessionService(logger, prisma.session);
-    const grantService = mongodb.makeGrantService(logger, prisma.grant);
+    const interactionService = adapter.makeInteractionService(
+      logger,
+      interactionModel
+    );
+
+    const sessionModel = new SessionModel(
+      cosmosdb.container(SESSION_COLLECTION_NAME)
+    );
+    const sessionService = adapter.makeSessionService(logger, sessionModel);
+
+    const grantModel = new GrantModel(
+      cosmosdb.container(GRANT_COLLECTION_NAME)
+    );
+    const grantService = adapter.makeGrantService(logger, grantModel);
 
     // initialize UseCases
     const useCases = makeUseCases(
