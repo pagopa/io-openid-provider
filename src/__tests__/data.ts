@@ -27,9 +27,6 @@ export const config: Config = {
       grantTTL: 86400 as Seconds,
     },
   },
-  mongodb: {
-    connectionString: new URL(envs["MONGODB_URL"] as string),
-  },
   info: {
     name: envs["APPLICATION_NAME"] as NonEmptyString,
     version: envs["VERSION"] as NonEmptyString,
