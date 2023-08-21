@@ -14,10 +14,32 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { RequestParams } from "src/domain/interactions/types";
+import { GrantId } from "src/domain/grants/types";
+import { IdentityId } from "src/domain/identities/types";
 
 export const INTERACTION_COLLECTION_NAME = "interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
+
+const RequestParamsBaseR = t.interface({
+  client_id: t.string,
+  redirect_uri: t.string,
+  response_type: t.string,
+  scope: t.string,
+  state: t.string,
+});
+const RequestParamsBaseO = t.partial({
+  nonce: t.string,
+  response_mode: t.union([
+    t.literal("query"),
+    t.literal("fragment"),
+    t.literal("form_post"),
+  ]),
+});
+const RequestParams = t.intersection(
+  [RequestParamsBaseR, RequestParamsBaseO],
+  "RequestParams"
+);
+type RequestParams = t.TypeOf<typeof RequestParams>;
 
 const InteractionBaseR = t.interface({
   expireAt: Timestamp,
@@ -28,8 +50,8 @@ const InteractionBaseR = t.interface({
 });
 const InteractionBaseO = t.partial({
   error: t.string,
-  grantId: t.string,
-  identityId: t.string,
+  grantId: GrantId,
+  identityId: IdentityId,
 });
 const CosmosInteraction = t.intersection(
   [InteractionBaseR, InteractionBaseO],
