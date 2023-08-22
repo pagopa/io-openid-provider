@@ -3,37 +3,20 @@ import { constVoid, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import { Logger } from "../../domain/logger";
 import { ClientService } from "../../domain/clients/ClientService";
-import {
-  Client,
-  GrantTypes,
-  OrganizationId,
-  ResponseTypes,
-  ServiceId,
-} from "../../domain/clients/types";
+import { Client, ServiceId } from "../../domain/clients/types";
 import { ClientModel, CosmosClient, RetrievedClient } from "./model/client";
 import { makeTE, makeTEOption } from "./utils";
 
 export const fromRecord = (record: RetrievedClient): t.Validation<Client> =>
   pipe(
-    E.of(
-      (serviceId: ServiceId) =>
-        (organizationId: OrganizationId) =>
-        (grantTypes: GrantTypes) =>
-        (responseTypes: ResponseTypes) => ({
-          ...record,
-          clientId: {
-            organizationId,
-            serviceId,
-          },
-          grantTypes,
-          organizationId,
-          responseTypes,
-        })
-    ),
-    E.ap(ServiceId.decode(record.id)),
-    E.ap(OrganizationId.decode(record.organizationId)),
-    E.ap(GrantTypes.decode(record.grantTypes)),
-    E.ap(ResponseTypes.decode(record.responseTypes))
+    E.of((serviceId: ServiceId) => ({
+      ...record,
+      clientId: {
+        organizationId: record.organizationId,
+        serviceId,
+      },
+    })),
+    E.ap(ServiceId.decode(record.id))
   );
 
 export const toRecord = (entity: Client): CosmosClient => ({
