@@ -7,7 +7,6 @@ import { Option } from "fp-ts/lib/Option";
 import {
   CosmosErrors,
   CosmosResource,
-  CosmosdbModel,
   toCosmosErrorResponse,
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -16,6 +15,10 @@ import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { GrantId } from "src/domain/grants/types";
 import { IdentityId } from "src/domain/identities/types";
+import {
+  CosmosdbModelTTL,
+  Ttl,
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 
 export const INTERACTION_COLLECTION_NAME = "interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
@@ -52,6 +55,7 @@ const InteractionBaseO = t.partial({
   error: t.string,
   grantId: GrantId,
   identityId: IdentityId,
+  ttl: Ttl,
 });
 const CosmosInteraction = t.intersection(
   [InteractionBaseR, InteractionBaseO],
@@ -65,7 +69,7 @@ export const RetrievedInteraction = t.intersection([
 ]);
 export type RetrievedInteraction = t.TypeOf<typeof RetrievedInteraction>;
 
-export class InteractionModel extends CosmosdbModel<
+export class InteractionModel extends CosmosdbModelTTL<
   CosmosInteraction,
   CosmosInteraction,
   RetrievedInteraction,

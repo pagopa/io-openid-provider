@@ -4,7 +4,7 @@ import * as E from "fp-ts/Either";
 import { Interaction, makeResult } from "../../domain/interactions/types";
 import { InteractionService } from "../../domain/interactions/InteractionService";
 import { Logger } from "../../domain/logger";
-import { makeTE, makeTEOption } from "./utils";
+import { getTTL, makeTE, makeTEOption } from "./utils";
 import {
   CosmosInteraction,
   InteractionModel,
@@ -27,6 +27,7 @@ export const toRecord = (entity: Interaction): CosmosInteraction => ({
   issuedAt: entity.issuedAt,
   params: Interaction.props.params.encode(entity.params),
   payload: entity.payload,
+  ttl: getTTL(entity.expireAt, entity.issuedAt),
 });
 
 export const fromRecord = (

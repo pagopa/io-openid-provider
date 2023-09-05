@@ -7,7 +7,7 @@ import { GrantService } from "../../domain/grants/GrantService";
 import { Logger } from "../../domain/logger";
 import { IdentityId } from "../../domain/identities/types";
 import { ClientId } from "../../domain/clients/types";
-import { makeTE, makeTEOption } from "./utils";
+import { getTTL, makeTE, makeTEOption } from "./utils";
 import { CosmosGrant, GrantModel, RetrievedGrant } from "./model/grant";
 
 export const toRecord = (entity: Grant): CosmosGrant => ({
@@ -20,6 +20,7 @@ export const toRecord = (entity: Grant): CosmosGrant => ({
   issuedAt: entity.issuedAt,
   remember: entity.remember || false,
   scope: entity.scope,
+  ttl: getTTL(entity.expireAt, entity.issuedAt),
 });
 
 export const fromRecord = (record: RetrievedGrant): t.Validation<Grant> =>

@@ -5,7 +5,7 @@ import { Logger } from "../../domain/logger";
 import { SessionService } from "../../domain/sessions/SessionService";
 import { Session, SessionId, Uid } from "../../domain/sessions/types";
 import { IdentityId } from "../../domain/identities/types";
-import { makeTE, makeTEOption } from "./utils";
+import { getTTL, makeTE, makeTEOption } from "./utils";
 import { CosmosSession, RetrievedSession, SessionModel } from "./model/session";
 
 export const toRecord = (entity: Session): CosmosSession => ({
@@ -13,6 +13,7 @@ export const toRecord = (entity: Session): CosmosSession => ({
   id: entity.id,
   identityId: entity.identityId || undefined,
   issuedAt: entity.issuedAt,
+  ttl: getTTL(entity.expireAt, entity.issuedAt),
   uid: entity.uid,
 });
 

@@ -6,9 +6,12 @@ import { Option } from "fp-ts/lib/Option";
 import {
   CosmosErrors,
   CosmosResource,
-  CosmosdbModel,
   toCosmosErrorResponse,
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import {
+  CosmosdbModelTTL,
+  Ttl,
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as TE from "fp-ts/TaskEither";
@@ -25,6 +28,7 @@ const SessionBaseR = t.interface({
 });
 const SessionBaseO = t.partial({
   identityId: t.string,
+  ttl: Ttl,
 });
 const CosmosSession = t.intersection(
   [SessionBaseR, SessionBaseO],
@@ -35,7 +39,7 @@ export type CosmosSession = t.TypeOf<typeof CosmosSession>;
 export const RetrievedSession = t.intersection([CosmosSession, CosmosResource]);
 export type RetrievedSession = t.TypeOf<typeof RetrievedSession>;
 
-export class SessionModel extends CosmosdbModel<
+export class SessionModel extends CosmosdbModelTTL<
   CosmosSession,
   CosmosSession,
   RetrievedSession,

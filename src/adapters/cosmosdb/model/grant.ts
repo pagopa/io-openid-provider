@@ -17,12 +17,13 @@ import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { IdentityId } from "src/domain/identities/types";
+import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 
 export const GRANT_COLLECTION_NAME = "grant";
 const GRANT_MODEL_PK_FIELD = "id";
 const GRANT_PARTITION_KEY_FIELD = "identityId";
 
-export const CosmosGrant = t.interface({
+const GrantBaseR = t.interface({
   clientId: t.string,
   expireAt: Timestamp,
   id: NonEmptyString,
@@ -31,6 +32,13 @@ export const CosmosGrant = t.interface({
   remember: t.boolean,
   scope: t.string,
 });
+const GrantBaseO = t.partial({
+  ttl: Ttl,
+});
+const CosmosGrant = t.intersection(
+  [GrantBaseR, GrantBaseO],
+  "CosmosInteraction"
+);
 export type CosmosGrant = t.TypeOf<typeof CosmosGrant>;
 
 export const RetrievedGrant = t.intersection([CosmosGrant, CosmosResource]);

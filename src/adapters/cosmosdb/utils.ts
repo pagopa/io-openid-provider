@@ -6,6 +6,7 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as PR from "io-ts/PathReporter";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 import { Logger } from "../../domain/logger";
 import { DomainError, cosmosErrorsToDomainError } from "../../domain/types";
 import { show } from "../../domain/utils";
@@ -49,3 +50,6 @@ export const makeTEOption =
       );
     return makeTE(logger)(operationName, decodeOpt, fn);
   };
+
+export const getTTL = (expireData: Date, createdDate: Date): Ttl =>
+  Math.floor((expireData.getTime() - createdDate.getTime()) / 1000) as Ttl;
