@@ -16,8 +16,8 @@ import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
-import { IdentityId } from "src/domain/identities/types";
 import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
+import { IdentityId } from "../../../../src/domain/identities/types";
 
 export const GRANT_COLLECTION_NAME = "grant";
 const GRANT_MODEL_PK_FIELD = "id";
