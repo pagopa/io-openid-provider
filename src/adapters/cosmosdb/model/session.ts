@@ -102,7 +102,7 @@ export class SessionModel extends CosmosdbModelTTL<
   public delete(sessionId: NonEmptyString): TaskEither<CosmosErrors, string> {
     return pipe(
       TE.tryCatch(
-        () => this.container.item(sessionId).delete(),
+        () => this.container.item(sessionId, sessionId).delete(),
         toCosmosErrorResponse
       ),
       TE.map((_) => _.item.id)

@@ -115,7 +115,7 @@ export class InteractionModel extends CosmosdbModelTTL<
   ): TaskEither<CosmosErrors, string> {
     return pipe(
       TE.tryCatch(
-        () => this.container.item(interactionId).delete(),
+        () => this.container.item(interactionId, interactionId).delete(),
         toCosmosErrorResponse
       ),
       TE.map((_) => _.item.id)
