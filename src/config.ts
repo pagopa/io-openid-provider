@@ -6,7 +6,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
 import { LogConfig } from "./adapters/winston";
-import { MongoDBConfig } from "./adapters/mongodb";
+import { CosmosDBConfig } from "./adapters/cosmosdb";
 import { IOClientConfig } from "./adapters/ioBackend";
 import { Seconds } from "./domain/types";
 import { Features } from "./useCases";
@@ -33,6 +33,10 @@ const EnvType = t.type({
   APPLICATION_NAME: NonEmptyString,
   AUTHENTICATION_COOKIE_KEY: NonEmptyString,
   COOKIES_KEY: t.string,
+  COSMOSDB_CONNECTION_STRING: NonEmptyString,
+  COSMOSDB_KEY: NonEmptyString,
+  COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_URI: NonEmptyString,
   ENABLE_FEATURE_REMEMBER_GRANT: tt.fromNullable(tt.BooleanFromString, false),
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
   EXPRESS_SERVER_HOSTNAME: t.string,
@@ -51,7 +55,6 @@ const EnvType = t.type({
     verbose: null,
     warn: null,
   }),
-  MONGODB_URL: UrlFromString,
   PORT: t.string,
   VERSION: NonEmptyString,
 });
@@ -60,6 +63,11 @@ type EnvType = t.TypeOf<typeof EnvType>;
 const makeConfig = (envs: EnvType): Config => ({
   IOClient: {
     baseURL: new URL(envs.IO_BACKEND_BASE_URL.href),
+  },
+  cosmosdb: {
+    cosmosDbName: envs.COSMOSDB_NAME,
+    cosmosDbUri: envs.COSMOSDB_URI,
+    masterKey: envs.COSMOSDB_KEY,
   },
   features: {
     grant: {
@@ -75,9 +83,6 @@ const makeConfig = (envs: EnvType): Config => ({
   logger: {
     logLevel: envs.LOG_LEVEL,
     logName: envs.APPLICATION_NAME,
-  },
-  mongodb: {
-    connectionString: new URL(envs.MONGODB_URL.href),
   },
   server: {
     authenticationCookieKey: envs.AUTHENTICATION_COOKIE_KEY,
@@ -100,7 +105,7 @@ export interface Config {
   readonly IOClient: IOClientConfig;
   readonly logger: LogConfig;
   readonly server: ServerConfig;
-  readonly mongodb: MongoDBConfig;
+  readonly cosmosdb: CosmosDBConfig;
   readonly issuer: URL;
 }
 

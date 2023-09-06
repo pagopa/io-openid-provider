@@ -1,23 +1,23 @@
 import { constVoid, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import * as prisma from "@prisma/client";
-import { Prisma } from "@prisma/client";
 import * as E from "fp-ts/Either";
 import { Logger } from "../../domain/logger";
 import { SessionService } from "../../domain/sessions/SessionService";
 import { Session, SessionId, Uid } from "../../domain/sessions/types";
 import { IdentityId } from "../../domain/identities/types";
-import { runAsTE, runAsTEO } from "./utils";
+import { getTTL, makeTE, makeTEOption } from "./utils";
+import { CosmosSession, RetrievedSession, SessionModel } from "./model/session";
 
-export const toRecord = (entity: Session): prisma.Session => ({
+export const toRecord = (entity: Session): CosmosSession => ({
   expireAt: entity.expireAt,
   id: entity.id,
-  identityId: entity.identityId || null,
+  identityId: entity.identityId || undefined,
   issuedAt: entity.issuedAt,
+  ttl: getTTL(entity.expireAt, entity.issuedAt),
   uid: entity.uid,
 });
 
-export const fromRecord = (record: prisma.Session): t.Validation<Session> =>
+export const fromRecord = (record: RetrievedSession): t.Validation<Session> =>
   pipe(
     E.of((id: SessionId) => (identityId: null | IdentityId) => (uid: Uid) => ({
       expireAt: record.expireAt,
@@ -31,32 +31,24 @@ export const fromRecord = (record: prisma.Session): t.Validation<Session> =>
     E.ap(Uid.decode(record.uid))
   );
 
-export const makeSessionService = <T>(
+export const makeSessionService = (
   logger: Logger,
-  client: Prisma.SessionDelegate<T>
+  sessionModel: SessionModel
 ): SessionService => ({
   find: (id) =>
-    runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({ where: { id } })
-    ),
+    makeTEOption(logger)("find", fromRecord, () => sessionModel.findOne(id)),
   findByUid: (uid) =>
-    runAsTEO(logger)("findByUid", fromRecord, () =>
-      client.findUnique({ where: { uid } })
+    makeTEOption(logger)("findByUid", fromRecord, () =>
+      sessionModel.findOneByUid(uid)
     ),
   remove: (id) =>
-    runAsTE(logger)(
+    makeTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () => client.delete({ where: { id } })
+      () => sessionModel.delete(id)
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
-    return runAsTE(logger)("upsert", fromRecord, () =>
-      client.upsert({
-        create: obj,
-        update: { ...{ ...obj, id: undefined } },
-        where: { id: definition.id },
-      })
-    );
+    return makeTE(logger)("upsert", fromRecord, () => sessionModel.upsert(obj));
   },
 });

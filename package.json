@@ -5,7 +5,7 @@
   "scripts": {
     "copy-assets": "gulp",
     "validate": "swagger-cli validate ./openapi/index.yaml",
-    "generate": "npm-run-all generate:** && prisma generate",
+    "generate": "npm-run-all generate:**",
     "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --no-strict --out-dir ./src/generated/definitions",
     "generate:clients:io-auth": "rimraf ./src/generated/clients/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v13.0.0/openapi/generated/api_fims.yaml --no-strict --out-dir ./src/generated/clients/io-auth --request-types --response-decoders --client",
     "start": "node dist/main.js",
@@ -24,9 +24,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@pagopa/io-functions-commons": "^22.2.1",
+    "@pagopa/io-functions-commons": "26.2.1",
     "@pagopa/ts-commons": "^10.2.1",
-    "@prisma/client": "4.2.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.1",
     "fp-ts": "^2.11.4",
@@ -67,7 +66,6 @@
     "modclean": "^3.0.0-beta.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.4.1",
-    "prisma": "4.2.1",
     "shx": "^0.3.3",
     "supertest": "^6.1.6",
     "swagger-cli": "^4.0.4",

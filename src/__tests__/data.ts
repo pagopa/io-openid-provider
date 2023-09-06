@@ -15,15 +15,17 @@ export const config: Config = {
   IOClient: {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
+  cosmosdb: {
+    cosmosDbName: envs["COSMOSDB_NAME"] as NonEmptyString,
+    cosmosDbUri: envs["COSMOSDB_URI"] as NonEmptyString,
+    masterKey: envs["COSMOSDB_KEY"] as NonEmptyString,
+  },
   features: {
     grant: {
       enableRememberGrantFeature:
         envs["ENABLE_FEATURE_REMEMBER_GRANT"] === "true",
       grantTTL: 86400 as Seconds,
     },
-  },
-  mongodb: {
-    connectionString: new URL(envs["MONGODB_URL"] as string),
   },
   info: {
     name: envs["APPLICATION_NAME"] as NonEmptyString,

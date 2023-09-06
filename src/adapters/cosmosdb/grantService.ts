@@ -2,16 +2,15 @@ import * as t from "io-ts";
 import { constVoid, pipe } from "fp-ts/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
-import * as prisma from "@prisma/client";
-import { Prisma } from "@prisma/client";
 import { Grant, GrantId } from "../../domain/grants/types";
 import { GrantService } from "../../domain/grants/GrantService";
 import { Logger } from "../../domain/logger";
 import { IdentityId } from "../../domain/identities/types";
 import { ClientId } from "../../domain/clients/types";
-import { runAsTE, runAsTEO } from "./utils";
+import { getTTL, makeTE, makeTEOption } from "./utils";
+import { CosmosGrant, GrantModel, RetrievedGrant } from "./model/grant";
 
-export const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
+export const toRecord = (entity: Grant): CosmosGrant => ({
   clientId: Grant.props.subjects.props.clientId.encode(
     entity.subjects.clientId
   ),
@@ -21,9 +20,10 @@ export const toRecord = (entity: Grant): prisma.Prisma.GrantCreateInput => ({
   issuedAt: entity.issuedAt,
   remember: entity.remember || false,
   scope: entity.scope,
+  ttl: getTTL(entity.expireAt, entity.issuedAt),
 });
 
-export const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
+export const fromRecord = (record: RetrievedGrant): t.Validation<Grant> =>
   pipe(
     E.of(
       (grantId: GrantId) => (identityId: IdentityId) => (clientId: ClientId) => ({
@@ -43,51 +43,36 @@ export const fromRecord = (record: prisma.Grant): t.Validation<Grant> =>
     E.ap(Grant.props.subjects.props.clientId.decode(record.clientId))
   );
 
-export const makeGrantService = <T>(
+export const makeGrantService = (
   logger: Logger,
-  client: Prisma.GrantDelegate<T>
+  grantModel: GrantModel
 ): GrantService => ({
   find: (identityId, grantId) =>
-    runAsTEO(logger)("find", fromRecord, () =>
-      client.findUnique({
-        where: { identityId_id: { id: grantId, identityId } },
-      })
+    makeTEOption(logger)("find", fromRecord, () =>
+      grantModel.findOne(grantId, identityId)
     ),
-  findBy: (selector) =>
-    runAsTE(logger)("findBy", E.traverseArray(fromRecord), () =>
-      client.findMany({
-        where: {
-          AND: [
-            { identityId: selector.identityId },
-            { remember: selector.remember },
-            {
-              clientId: pipe(
-                selector.clientId,
-                O.map(Grant.props.subjects.props.clientId.encode),
-                O.toUndefined
-              ),
-            },
-          ],
-        },
-      })
-    ),
+  findBy: (selector) => {
+    const clientId = pipe(
+      selector.clientId,
+      O.map(Grant.props.subjects.props.clientId.encode),
+      O.toUndefined
+    );
+    return makeTE(logger)("findBy", E.traverseArray(fromRecord), () =>
+      grantModel.findAllByQuery(
+        selector.identityId,
+        selector.remember,
+        clientId
+      )
+    );
+  },
   remove: (identityId, grantId) =>
-    runAsTE(logger)(
+    makeTE(logger)(
       "remove",
       (_) => E.right(constVoid()),
-      () =>
-        client.delete({
-          where: { identityId_id: { id: grantId, identityId } },
-        })
+      () => grantModel.delete(grantId, identityId)
     ),
   upsert: (definition) => {
     const obj = { ...toRecord(definition) };
-    return runAsTE(logger)("upsert", fromRecord, () =>
-      client.upsert({
-        create: obj,
-        update: { ...{ ...obj, id: undefined } },
-        where: { id: definition.id },
-      })
-    );
+    return makeTE(logger)("upsert", fromRecord, () => grantModel.upsert(obj));
   },
 });
