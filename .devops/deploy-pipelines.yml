@@ -27,7 +27,7 @@ parameters:
     type: object
     default:
       fims:
-        appname: io-p-citizen-auth-weu-prod01-app-fims-plus
+        appname: io-p-citizen-auth-weu-prod01-app-fims
         rg: io-p-weu-fims-rg
 
 trigger: none
