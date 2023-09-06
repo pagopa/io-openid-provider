@@ -17,7 +17,7 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-export const SESSION_COLLECTION_NAME = "session";
+export const SESSION_COLLECTION_NAME = "Session";
 const SESSION_MODEL_PK_FIELD = "id";
 
 const SessionBaseR = t.interface({
