@@ -13,12 +13,12 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { GrantId } from "src/domain/grants/types";
-import { IdentityId } from "src/domain/identities/types";
 import {
   CosmosdbModelTTL,
   Ttl,
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
+import { GrantId } from "../../../domain/grants/types";
+import { IdentityId } from "../../../domain/identities/types";
 
 export const INTERACTION_COLLECTION_NAME = "interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";

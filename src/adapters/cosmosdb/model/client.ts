@@ -11,16 +11,16 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { asyncIterableToArray } from "@pagopa/io-functions-commons/dist/src/utils/async";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import {
-  GrantTypes,
-  OrganizationId,
-  ResponseTypes,
-} from "src/domain/clients/types";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
+import {
+  GrantTypes,
+  OrganizationId,
+  ResponseTypes,
+} from "../../../domain/clients/types";
 
 export const CLIENT_COLLECTION_NAME = "client";
 const CLIENT_MODEL_PK_FIELD = "id";
