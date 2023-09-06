@@ -19,6 +19,7 @@ import { pipe } from "fp-ts/lib/function";
 
 export const SESSION_COLLECTION_NAME = "Session";
 const SESSION_MODEL_PK_FIELD = "id";
+const SESSION_PARTITION_KEY_FIELD = "id";
 
 const SessionBaseR = t.interface({
   expireAt: Timestamp,
@@ -43,7 +44,8 @@ export class SessionModel extends CosmosdbModelTTL<
   CosmosSession,
   CosmosSession,
   RetrievedSession,
-  typeof SESSION_MODEL_PK_FIELD
+  typeof SESSION_MODEL_PK_FIELD,
+  typeof SESSION_PARTITION_KEY_FIELD
 > {
   /**
    * Creates a new Session model
@@ -100,7 +102,7 @@ export class SessionModel extends CosmosdbModelTTL<
   public delete(sessionId: NonEmptyString): TaskEither<CosmosErrors, string> {
     return pipe(
       TE.tryCatch(
-        () => this.container.item(sessionId).delete(),
+        () => this.container.item(sessionId, sessionId).delete(),
         toCosmosErrorResponse
       ),
       TE.map((_) => _.item.id)

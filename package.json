@@ -19,7 +19,9 @@
     "prepare": "husky install",
     "predeploy": "npm-run-all build dist:modules",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
+    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
   "author": "",
   "license": "MIT",
