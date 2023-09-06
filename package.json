@@ -1,6 +1,6 @@
 {
   "name": "io-openid-provider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "OpenID Provider service",
   "scripts": {
     "copy-assets": "gulp",
