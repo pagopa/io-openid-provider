@@ -5,8 +5,8 @@ import { CosmosClient, Database } from "@azure/cosmos";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { Logger } from "../../../src/domain/logger";
-import { show } from "../../../src/domain/utils";
+import { Logger } from "../../domain/logger";
+import { show } from "../../domain/utils";
 import { CosmosDBConfig } from "./types";
 
 /**

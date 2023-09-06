@@ -20,7 +20,7 @@ import {
   GrantTypes,
   OrganizationId,
   ResponseTypes,
-} from "../../../../src/domain/clients/types";
+} from "../../../domain/clients/types";
 
 export const CLIENT_COLLECTION_NAME = "client";
 const CLIENT_MODEL_PK_FIELD = "id";
