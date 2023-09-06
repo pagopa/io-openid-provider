@@ -6,7 +6,6 @@ import { Option } from "fp-ts/lib/Option";
 import {
   CosmosErrors,
   CosmosResource,
-  CosmosdbModel,
   toCosmosErrorResponse,
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { asyncIterableToArray } from "@pagopa/io-functions-commons/dist/src/utils/async";
@@ -16,7 +15,10 @@ import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
-import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
+import {
+  CosmosdbModelTTL,
+  Ttl,
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 import { IdentityId } from "../../../domain/identities/types";
 
 export const GRANT_COLLECTION_NAME = "Grant";
@@ -44,10 +46,11 @@ export type CosmosGrant = t.TypeOf<typeof CosmosGrant>;
 export const RetrievedGrant = t.intersection([CosmosGrant, CosmosResource]);
 export type RetrievedGrant = t.TypeOf<typeof RetrievedGrant>;
 
-export class GrantModel extends CosmosdbModel<
+export class GrantModel extends CosmosdbModelTTL<
   CosmosGrant,
   CosmosGrant,
   RetrievedGrant,
+  typeof GRANT_MODEL_PK_FIELD,
   typeof GRANT_PARTITION_KEY_FIELD
 > {
   /**

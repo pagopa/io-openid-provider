@@ -22,6 +22,7 @@ import { IdentityId } from "../../../domain/identities/types";
 
 export const INTERACTION_COLLECTION_NAME = "Interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
+const INTERACTION_PARTITION_KEY_FIELD = "id";
 
 const RequestParamsBaseR = t.interface({
   client_id: t.string,
@@ -73,7 +74,8 @@ export class InteractionModel extends CosmosdbModelTTL<
   CosmosInteraction,
   CosmosInteraction,
   RetrievedInteraction,
-  typeof INTERACTION_MODEL_PK_FIELD
+  typeof INTERACTION_MODEL_PK_FIELD,
+  typeof INTERACTION_PARTITION_KEY_FIELD
 > {
   /**
    * Creates a new Interaction model
