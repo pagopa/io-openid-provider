@@ -19,7 +19,7 @@ import { pipe } from "fp-ts/lib/function";
 import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
 import { IdentityId } from "../../../domain/identities/types";
 
-export const GRANT_COLLECTION_NAME = "grant";
+export const GRANT_COLLECTION_NAME = "Grant";
 const GRANT_MODEL_PK_FIELD = "id";
 const GRANT_PARTITION_KEY_FIELD = "identityId";
 

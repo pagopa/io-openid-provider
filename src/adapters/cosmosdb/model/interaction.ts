@@ -20,7 +20,7 @@ import {
 import { GrantId } from "../../../domain/grants/types";
 import { IdentityId } from "../../../domain/identities/types";
 
-export const INTERACTION_COLLECTION_NAME = "interaction";
+export const INTERACTION_COLLECTION_NAME = "Interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
 
 const RequestParamsBaseR = t.interface({

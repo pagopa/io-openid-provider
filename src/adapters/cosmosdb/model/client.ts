@@ -22,7 +22,7 @@ import {
   ResponseTypes,
 } from "../../../domain/clients/types";
 
-export const CLIENT_COLLECTION_NAME = "client";
+export const CLIENT_COLLECTION_NAME = "Client";
 const CLIENT_MODEL_PK_FIELD = "id";
 const CLIENT_PARTITION_KEY_FIELD = "organizationId";
 
