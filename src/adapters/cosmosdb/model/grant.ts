@@ -110,7 +110,7 @@ export class GrantModel extends CosmosdbModelTTL<
           value: remember,
         },
       ],
-      query: `SELECT * FROM m WHERE m.identityId = @identityId AND m.remember = @remember`,
+      query: `SELECT * FROM n WHERE n.identityId = @identityId AND n.remember = @remember`,
     };
     const emptyParameter = {
       condition: "",
