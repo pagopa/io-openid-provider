@@ -52,4 +52,4 @@ export const makeTEOption =
   };
 
 export const getTTL = (expireData: Date, createdDate: Date): Ttl =>
-  Math.floor((expireData.getTime() - createdDate.getTime()) / 1000) as Ttl;
+  Math.ceil((expireData.getTime() - createdDate.getTime()) / 1000) as Ttl;
