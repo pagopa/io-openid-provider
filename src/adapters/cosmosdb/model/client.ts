@@ -94,7 +94,7 @@ export class ClientModel extends CosmosdbModel<
   ): TaskEither<CosmosErrors, ReadonlyArray<RetrievedClient>> {
     const commonQuerySpec = {
       parameters: [],
-      query: `SELECT * FROM m`,
+      query: `SELECT * FROM n`,
     };
     const emptyParameter = {
       condition: "",
