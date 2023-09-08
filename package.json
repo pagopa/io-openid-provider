@@ -1,6 +1,6 @@
 {
   "name": "io-openid-provider",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "OpenID Provider service",
   "scripts": {
     "copy-assets": "gulp",
@@ -21,7 +21,8 @@
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "postinstall": "patch-package",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
+    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md",
+    "postversion": "git push && git push --tags"
   },
   "author": "",
   "license": "MIT",
