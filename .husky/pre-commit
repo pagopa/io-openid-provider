@@ -2,4 +2,5 @@
 
 yarn run validate
 yarn run lint
+yarn run generate
 yarn run test
