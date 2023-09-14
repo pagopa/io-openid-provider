@@ -1,0 +1,62 @@
+swagger: '2.0'
+info:
+  title: OpenID Provider
+  description: OpenID Provider service
+  version: 0.0.1
+host: api.openid-provider.io.italia.it
+
+schemes:
+  - https
+
+paths:
+  /oauth/authorize:
+    get:
+      operationId: authorize
+      summary: Initialize an OAuth 2.0 flow
+      description: >-
+        Initializes an OAuth 2.0 flow using a response_type.
+        See RFC 6749 (https://tools.ietf.org/html/rfc6749) for more details.
+      parameters:
+        - $ref: './definitions.yaml#/parameters/queryResponseType'
+        - $ref: './definitions.yaml#/parameters/queryClientId'
+        - $ref: './definitions.yaml#/parameters/queryResponseMode'
+        - $ref: './definitions.yaml#/parameters/queryRedirectUri'
+        - $ref: './definitions.yaml#/parameters/queryScope'
+        - $ref: './definitions.yaml#/parameters/queryState'
+        - $ref: './definitions.yaml#/parameters/queryNonce'
+      responses:
+        200:
+          $ref: "./definitions.yaml#/responses/200AuthenticationResponse"
+        302:
+          $ref: './definitions.yaml#/responses/302AuthenticationResponse'
+        400:
+          $ref: './definitions.yaml#/responses/400HtmlBadRequest'
+
+  /.well-known/openid-configuration:
+    get:
+      operationId: openidConfiguration
+      summary: OpenID Connect Discovery endpoint
+      description: >-
+        This endpoint follows the specification defined at http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata. It provides a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+      responses:
+        200:
+          $ref: './definitions.yaml#/responses/200OpenIDDiscoveryResponse'
+        500:
+          $ref: './definitions.yaml#/responses/500InternalServerError'
+
+  /info:
+    get:
+      operationId: "getInfo"
+      summary: "Get info of the service"
+      description: |
+        Return the information of the service, this endpoint
+        can be used as health check.
+      responses:
+        200:
+          description: "Return the information of the service"
+          schema:
+            $ref: './definitions.yaml#/definitions/GetInfo'
+        500:
+          description: "An error occurred"
+          schema:
+            $ref: './definitions.yaml#/definitions/ProblemJson'

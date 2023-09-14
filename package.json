@@ -5,8 +5,9 @@
   "scripts": {
     "copy-assets": "gulp",
     "validate": "swagger-cli validate ./openapi/index.yaml",
-    "generate": "npm-run-all generate:**",
-    "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --no-strict --out-dir ./src/generated/definitions",
+    "openapi:bundle": "./openapi/bundle.sh $npm_package_version",
+    "generate": "yarn openapi:bundle && npm-run-all generate:**",
+    "generate:definitions": "rimraf ./src/generated/definitions && shx mkdir -p ./src/generated/definitions && gen-api-models --api-spec ./openapi/definitions.yaml --no-strict --out-dir ./src/generated/definitions",
     "generate:clients:io-auth": "rimraf ./src/generated/clients/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v13.0.0/openapi/generated/api_fims.yaml --no-strict --out-dir ./src/generated/clients/io-auth --request-types --response-decoders --client",
     "start": "node dist/main.js",
     "dev": "tsc && node -r dotenv/config dist/main.js dotenv_config_path=.env.default",
