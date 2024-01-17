@@ -10,7 +10,7 @@ schemes:
 
 paths:
 
-  /admin/clients:
+  /clients:
     post:
       operationId: createClients
       summary: Create a client
@@ -39,7 +39,7 @@ paths:
         500:
           $ref: '#/responses/500InternalServerError'
 
-  /admin/clients/{clientId}:
+  /clients/{clientId}:
     parameters:
       - $ref: '#/parameters/pathClientId'
     get:
@@ -67,7 +67,7 @@ paths:
         500:
           $ref: '#/responses/500InternalServerError'
 
-  /admin/grants:
+  /grants:
     parameters:
       - $ref: '#/parameters/headerIdentityId'
     get:
@@ -82,7 +82,7 @@ paths:
           $ref: "#/responses/401Unauthorized"
         500:
           $ref: '#/responses/500InternalServerError'
-  /admin/grants/{organizationId}/{serviceId}:
+  /grants/{organizationId}/{serviceId}:
     parameters:
       - $ref: '#/parameters/pathOrganizationId'
       - $ref: '#/parameters/pathServiceId'
