@@ -152,7 +152,7 @@ export const makeConfiguration = (
     responseTypes: ["id_token"],
     routes: {
       authorization: "/oauth/authorize",
-      registration: "/admin/clients",
+      registration: "/clients",
     },
     scopes: ["openid"],
     tokenEndpointAuthMethods: ["none"],

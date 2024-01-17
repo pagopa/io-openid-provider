@@ -21,7 +21,7 @@ const getInfoEndpointHandler =
 const makeRouter = (config: Config): express.Router => {
   const router = express.Router();
 
-  router.get("/api/info", wrapRequestHandler(getInfoEndpointHandler(config)));
+  router.get("/info", wrapRequestHandler(getInfoEndpointHandler(config)));
 
   return router;
 };

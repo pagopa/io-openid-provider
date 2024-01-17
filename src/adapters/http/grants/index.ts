@@ -25,7 +25,7 @@ export const makeRouter = (
   const router = express.Router();
 
   router.get(
-    "/admin/grants",
+    "/grants",
     wrapRequestHandler(
       withRequestMiddlewares(
         RequiredHeaderMiddleware("identityId", FiscalCode)
@@ -34,7 +34,7 @@ export const makeRouter = (
   );
 
   router.get(
-    "/admin/grants/:organizationId/:serviceId",
+    "/grants/:organizationId/:serviceId",
     wrapRequestHandler(
       withRequestMiddlewares(
         RequiredParamMiddleware("organizationId", OrganizationFiscalCode),
@@ -45,7 +45,7 @@ export const makeRouter = (
   );
 
   router.delete(
-    "/admin/grants/:organizationId/:serviceId",
+    "/grants/:organizationId/:serviceId",
     wrapRequestHandler(
       withRequestMiddlewares(
         RequiredParamMiddleware("organizationId", OrganizationFiscalCode),

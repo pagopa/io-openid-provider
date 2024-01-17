@@ -141,7 +141,7 @@ describe("Application", () => {
     const { app } = makeInMemoryApplication();
 
     const createClientResponse = await request(app)
-      .post(`/admin/clients`)
+      .post(`/clients`)
       .send({
         redirect_uris: ["https://callback.io/callback"],
         organization_id: "00000000001",
@@ -165,7 +165,7 @@ describe("Application", () => {
     const clientId = Client.props.clientId.encode(client.clientId);
 
     const findClientResponse = await request(app)
-      .get(`/admin/clients/${clientId}`)
+      .get(`/clients/${clientId}`)
       .send();
 
     expect(findClientResponse.statusCode).toBe(200);
@@ -198,7 +198,7 @@ describe("Application", () => {
     const { organizationId, serviceId } = grant.subjects.clientId;
 
     const findGrantResponse = await request(app)
-      .get(`/admin/grants/${organizationId}/${serviceId}`)
+      .get(`/grants/${organizationId}/${serviceId}`)
       .set({ identityId: grant.subjects.identityId })
       .send();
 
@@ -210,7 +210,7 @@ describe("Application", () => {
     const { organizationId, serviceId } = grant.subjects.clientId;
 
     const findGrantResponse = await request(app)
-      .delete(`/admin/grants/${organizationId}/${serviceId}`)
+      .delete(`/grants/${organizationId}/${serviceId}`)
       .set({ identityId: grant.subjects.identityId })
       .send();
 
@@ -220,7 +220,7 @@ describe("Application", () => {
     const { app } = makeInMemoryApplication([{ ...grant, remember: true }]);
 
     const listGrantResponse = await request(app)
-      .get(`/admin/grants`)
+      .get(`/grants`)
       .set({ identityId: grant.subjects.identityId })
       .send();
 
