@@ -63,7 +63,7 @@ export const makeRouter = (
   const router = express.Router();
 
   router.get(
-    "/admin/clients",
+    "/clients",
     wrapRequestHandler(
       withRequestMiddlewares(
         OptionalQueryParamMiddleware("organizationId", OrganizationId),
