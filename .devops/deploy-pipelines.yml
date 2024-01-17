@@ -5,7 +5,7 @@ variables:
   HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
   HEALTHCHECK_CONTAINER_VNET: 'io-p-vnet-common'
   HEALTHCHECK_CONTAINER_SUBNET: 'azure-devops' 
-  HEALTHCHECK_PATH: '/api/info' 
+  HEALTHCHECK_PATH: '/info' 
 
 parameters:
   - name: 'RELEASE_SEMVER'
