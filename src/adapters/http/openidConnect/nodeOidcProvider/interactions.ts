@@ -8,6 +8,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
+import Provider from "oidc-provider";
 import {
   ProcessInteractionUseCase,
   CollectConsent,
@@ -20,7 +21,7 @@ import { formatError } from "../../../../domain/types";
 import { grantToAdapterPayload } from "./adapters/grantAdapter";
 
 const interactionFinishedTE = (
-  provider: oidc.Provider,
+  provider: Provider,
   req: express.Request,
   res: express.Response,
   result: oidc.InteractionResults & { readonly error?: string }
@@ -44,7 +45,7 @@ const getInteractionHandler =
   (
     config: Config,
     processInteractionUseCase: ProcessInteractionUseCase,
-    provider: oidc.Provider
+    provider: Provider
   ): express.Handler =>
   (req, res, next) => {
     const response = pipe(
@@ -97,7 +98,7 @@ const getInteractionHandler =
 const postInteractionHandler =
   (
     confirmConsentUseCase: ConfirmConsentUseCase,
-    provider: oidc.Provider
+    provider: Provider
   ): express.Handler =>
   (req, res, next) => {
     const response = pipe(
@@ -132,7 +133,7 @@ const postInteractionHandler =
 const getInteractionAbortHandler =
   (
     abortInteractionUseCase: AbortInteractionUseCase,
-    provider: oidc.Provider
+    provider: Provider
   ): express.Handler =>
   (req, res, next) =>
     pipe(
@@ -172,7 +173,7 @@ export const makeInteractionRouter = (
   processInteractionUseCase: ProcessInteractionUseCase,
   confirmConsentUseCase: ConfirmConsentUseCase,
   abortInteractionUseCase: AbortInteractionUseCase,
-  provider: oidc.Provider
+  provider: Provider
 ): express.Router => {
   const router = express.Router();
 

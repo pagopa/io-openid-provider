@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import * as oidc from "oidc-provider";
+import Provider, * as oidc from "oidc-provider";
 import { ClientService } from "../../../../domain/clients/ClientService";
 import { Config } from "../../../../config";
 import { Logger } from "../../../../domain/logger";
@@ -124,7 +124,6 @@ export const makeConfiguration = (
             })
           ),
         initialAccessToken: false,
-        issueRegistrationAccessToken: false,
       },
       registrationManagement: {
         enabled: true,
@@ -155,7 +154,6 @@ export const makeConfiguration = (
       registration: "/clients",
     },
     scopes: ["openid"],
-    tokenEndpointAuthMethods: ["none"],
     ttl: {
       Grant: config.features.grant.grantTTL,
       Interaction: 60 * 5,
@@ -175,7 +173,7 @@ export const makeProvider = (
   config: Config,
   providerConfig: oidc.Configuration
 ) => {
-  const provider = new oidc.Provider(config.issuer.href, providerConfig);
+  const provider = new Provider(config.issuer.href, providerConfig);
   // Add the middleware that disable the authorization on the
   // clients management endpoints.
   // This middleware toghether with a fake RegistrationAccessTokenAdapter disable
