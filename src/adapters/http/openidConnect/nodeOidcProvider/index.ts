@@ -1,7 +1,8 @@
 import { pipe } from "fp-ts/function";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import Provider, * as oidc from "oidc-provider";
+import Provider from "oidc-provider";
+import * as oidc from "oidc-provider";
 import { ClientService } from "../../../../domain/clients/ClientService";
 import { Config } from "../../../../config";
 import { Logger } from "../../../../domain/logger";
