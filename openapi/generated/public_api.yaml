@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: OpenID Provider
   description: OpenID Provider service
-  version: 1.0.7
+  version: 2.0.0
 host: api.openid-provider.io.italia.it
 schemes:
   - https
@@ -29,6 +29,97 @@ paths:
           $ref: '#/responses/302AuthenticationResponse'
         '400':
           $ref: '#/responses/400HtmlBadRequest'
+  /clients:
+    get:
+      operationId: getClients
+      summary: List relying parties
+      description: List relying parties
+      responses:
+        '200':
+          $ref: '#/responses/200ClientListResponse'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+  /grants:
+    get:
+      operationId: getGrants
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '200':
+          $ref: '#/responses/200GrantListResponse'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+  /grants/{organizationId}/{serviceId}:
+    get:
+      operationId: getGrant
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '200':
+          $ref: '#/responses/200GrantDetailResponse'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '404':
+          $ref: '#/responses/404NotFound'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+    delete:
+      operationId: deleteGrant
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '204':
+          $ref: '#/responses/204NoContent'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '404':
+          $ref: '#/responses/404NotFound'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+  /interaction/{id}:
+    get:
+      operationId: getInteraction
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '200':
+          $ref: '#/responses/200GenericObject'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '404':
+          $ref: '#/responses/404NotFound'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+  /interaction/{id}/confirm:
+    post:
+      operationId: confirmInteraction
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '200':
+          $ref: '#/responses/200GenericObject'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '404':
+          $ref: '#/responses/404NotFound'
+        '500':
+          $ref: '#/responses/500InternalServerError'
+  /interaction/{id}/abort:
+    get:
+      operationId: abortInteraction
+      summary: OpenID Connect Discovery endpoint
+      description: description
+      responses:
+        '200':
+          $ref: '#/responses/200GenericObject'
+        '400':
+          $ref: '#/responses/400BadRequest'
+        '404':
+          $ref: '#/responses/404NotFound'
+        '500':
+          $ref: '#/responses/500InternalServerError'
   /.well-known/openid-configuration:
     get:
       operationId: openidConfiguration
@@ -178,6 +269,9 @@ parameters:
     schema:
       $ref: '#/definitions/APIClientDefinition'
 definitions:
+  GenericObject:
+    type: object
+    additionalProperties: true
   APIScope:
     type: string
     enum:
@@ -563,6 +657,10 @@ securityDefinitions:
       The API key obtained through the developer portal or the getService
       operation.
 responses:
+  200GenericObject:
+    description: A generic response for interaction endpoints
+    schema:
+      $ref: '#/definitions/GenericObject'
   200GrantListResponse:
     description: List of grant
     schema:
