@@ -31,59 +31,49 @@ paths:
           $ref: '#/responses/302AuthenticationResponse'
         400:
           $ref: '#/responses/400HtmlBadRequest'
-  
-  /clients:
-    get:
-      operationId: getClients
-      summary: List relying parties
-      description: >-
-        List relying parties
-      responses:
-        200:
-          $ref: '#/responses/200ClientListResponse'
-        500:
-          $ref: '#/responses/500InternalServerError'
 
   /grants:
+    parameters:
+      - $ref: '#/parameters/headerIdentityId'
     get:
-      operationId: getGrants
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      operationId: listGrant
+      summary: Return a list of grant
       responses:
         200:
           $ref: '#/responses/200GrantListResponse'
-        400:
-          $ref: '#/responses/400BadRequest'
+        401:
+          $ref: "#/responses/401Unauthorized"
         500:
           $ref: '#/responses/500InternalServerError'
-
   /grants/{organizationId}/{serviceId}:
+    parameters:
+      - $ref: '#/parameters/pathOrganizationId'
+      - $ref: '#/parameters/pathServiceId'
+      - $ref: '#/parameters/headerIdentityId'
     get:
-      operationId: getGrant
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      operationId: detailGrant
+      summary: Return a grant detail
       responses:
         200:
           $ref: '#/responses/200GrantDetailResponse'
-        400:
-          $ref: '#/responses/400BadRequest'
         404:
           $ref: '#/responses/404NotFound'
+        400:
+          $ref: "#/responses/400BadRequest"
+        401:
+          $ref: "#/responses/401Unauthorized"
         500:
           $ref: '#/responses/500InternalServerError'
-          
     delete:
       operationId: deleteGrant
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      summary: Delete a grant
       responses:
         204:
           $ref: '#/responses/204NoContent'
         400:
-          $ref: '#/responses/400BadRequest'
+          $ref: "#/responses/400BadRequest"
+        401:
+          $ref: "#/responses/401Unauthorized"
         404:
           $ref: '#/responses/404NotFound'
         500:
@@ -92,9 +82,7 @@ paths:
   /interaction/{id}:
     get:
       operationId: getInteraction
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      summary: Get an interaction
       responses:
         200:
           $ref: '#/responses/200GenericObject'
@@ -108,9 +96,7 @@ paths:
   /interaction/{id}/confirm:
     post:
       operationId: confirmInteraction
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      summary: Confirm an interaction
       responses:
         200:
           $ref: '#/responses/200GenericObject'
@@ -124,9 +110,7 @@ paths:
   /interaction/{id}/abort:
     get:
       operationId: abortInteraction
-      summary: OpenID Connect Discovery endpoint
-      description: >-
-        description
+      summary: Abort an interaction
       responses:
         200:
           $ref: '#/responses/200GenericObject'
