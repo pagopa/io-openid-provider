@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
-  title: OpenID Provider
-  description: OpenID Provider service
+  title: OpenID Provider Public
+  description: OpenID Provider Public API
   version: 0.0.1
 host: api.openid-provider.io.italia.it
 
