@@ -75,7 +75,9 @@ paths:
           $ref: '#/responses/404NotFound'
         '500':
           $ref: '#/responses/500InternalServerError'
-  /interaction/{id}:
+  /interaction/{interactionId}:
+    parameters:
+      - $ref: '#/parameters/pathInteractionId'
     get:
       operationId: getInteraction
       summary: Get an interaction
@@ -88,7 +90,9 @@ paths:
           $ref: '#/responses/404NotFound'
         '500':
           $ref: '#/responses/500InternalServerError'
-  /interaction/{id}/confirm:
+  /interaction/{interactionId}/confirm:
+    parameters:
+      - $ref: '#/parameters/pathInteractionId'
     post:
       operationId: confirmInteraction
       summary: Confirm an interaction
@@ -101,7 +105,9 @@ paths:
           $ref: '#/responses/404NotFound'
         '500':
           $ref: '#/responses/500InternalServerError'
-  /interaction/{id}/abort:
+  /interaction/{interactionId}/abort:
+    parameters:
+      - $ref: '#/parameters/pathInteractionId'
     get:
       operationId: abortInteraction
       summary: Abort an interaction
@@ -167,6 +173,12 @@ parameters:
   pathServiceId:
     name: serviceId
     description: The service identifier
+    in: path
+    required: true
+    type: string
+  pathInteractionId:
+    name: interactionId
+    description: The interaction identifier
     in: path
     required: true
     type: string
