@@ -5,6 +5,7 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { pipe } from "fp-ts/lib/function";
+import { NumberFromString } from "io-ts-types";
 import { LogConfig } from "./adapters/winston";
 import { CosmosDBConfig } from "./adapters/cosmosdb";
 import { IOClientConfig } from "./adapters/ioBackend";
@@ -20,6 +21,7 @@ interface ServerConfig {
   readonly jwkPrimary: string;
   readonly jwkSecondary: undefined | string;
   readonly cookiesKey: string;
+  readonly defaultRequestTimeoutMs: number;
 }
 
 interface Info {
@@ -37,6 +39,7 @@ const EnvType = t.type({
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
+  DEFAULT_REQUEST_TIMEOUT_MS: NumberFromString,
   ENABLE_FEATURE_REMEMBER_GRANT: tt.fromNullable(tt.BooleanFromString, false),
   ENABLE_PROXY: tt.fromNullable(tt.BooleanFromString, false),
   EXPRESS_SERVER_HOSTNAME: t.string,
@@ -87,6 +90,7 @@ const makeConfig = (envs: EnvType): Config => ({
   server: {
     authenticationCookieKey: envs.AUTHENTICATION_COOKIE_KEY,
     cookiesKey: envs.COOKIES_KEY,
+    defaultRequestTimeoutMs: envs.DEFAULT_REQUEST_TIMEOUT_MS,
     enableHelmet: false,
     enableProxy: envs.ENABLE_PROXY,
     hostname: envs.EXPRESS_SERVER_HOSTNAME,
