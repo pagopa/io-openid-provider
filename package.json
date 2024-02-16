@@ -13,8 +13,7 @@
     "dev": "tsc && node -r dotenv/config dist/main.js dotenv_config_path=.env.default",
     "prebuild": "shx rm -rf dist && yarn generate && yarn copy-assets",
     "build": "tsc",
-    "test": "DOTENV_CONFIG_PATH=./.env.default jest --setupFiles dotenv/config -i",
-    "test:coverage": "DOTENV_CONFIG_PATH=./.env.default jest --setupFiles dotenv/config -i --coverage",
+    "test": "vitest --config ./vite.config.ts",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
     "prepare": "husky install",
@@ -39,10 +38,11 @@
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
     "node-fetch": "^2.6.1",
-    "oidc-provider": "^7.13.0",
+    "oidc-provider": "^8.4.5",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prom-client": "^14.0.0",
+    "vitest": "^1.2.2",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -50,7 +50,6 @@
     "@pagopa/openapi-codegen-ts": "^10.0.6",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.13",
-    "@types/jest": "^27.0.2",
     "@types/node-fetch": "^2.5.12",
     "@types/oidc-provider": "^8.4.3",
     "@types/supertest": "^2.0.11",
@@ -64,9 +63,6 @@
     "fast-check-io-ts": "^0.5.0",
     "gulp": "^4.0.2",
     "husky": "^7.0.2",
-    "jest": "^27.2.2",
-    "jest-each": "^27.5.1",
-    "jest-mock-extended": "^2.0.4",
     "jose2": "npm:jose@^2.0.5",
     "modclean": "^3.0.0-beta.1",
     "npm-run-all": "^4.1.5",
@@ -74,7 +70,6 @@
     "shx": "^0.3.3",
     "supertest": "^6.1.6",
     "swagger-cli": "^4.0.4",
-    "ts-jest": "^27.0.5",
     "typescript": "^4.4.3"
   }
 }
