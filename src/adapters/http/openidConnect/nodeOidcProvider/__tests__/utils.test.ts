@@ -1,7 +1,5 @@
 import * as fc from "fast-check";
-import * as mock from "jest-mock-extended";
 import * as E from "fp-ts/Either";
-import { Logger } from "../../../../../domain/logger";
 import { identity } from "../../../../../domain/identities/__tests__/data";
 import { grant } from "../../../../../domain/grants/__tests__/data";
 import {
@@ -10,11 +8,12 @@ import {
   notImplementedError,
   IdentityIdAndGrantId,
 } from "../utils";
+import { describe, it, expect } from "vitest";
+import { loggerMock } from "../../../../../__mock__/logger";
 
 describe("makeNotImplementedAdapter", () => {
   it("should implements all functions", async () => {
     const id = "id";
-    const loggerMock = mock.mock<Logger>();
     const adapter = makeNotImplementedAdapter("Test", loggerMock);
 
     await expect(adapter.consume(id)).rejects.toThrowError(notImplementedError);

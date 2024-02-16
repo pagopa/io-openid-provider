@@ -1,22 +1,22 @@
-import * as mock from "jest-mock-extended";
 import { constVoid } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../../domain/grants/GrantService";
-import { Logger } from "../../domain/logger";
 import { RemoveGrantUseCase } from "../RemoveGrantUseCase";
 import { client } from "../../domain/clients/__tests__/data";
 import { identity } from "../../domain/identities/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
 import { makeDomainError, makeNotFoundError } from "../../domain/types";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { loggerMock } from "../../__mock__/logger";
+import { grantServiceMock } from "../../__mock__/grant";
 
 const makeRemoveGrantUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const grantServiceMock = mock.mock<GrantService>();
-  const useCase = RemoveGrantUseCase(logger, grantServiceMock);
-  return { logger, grantServiceMock, useCase };
+  const useCase = RemoveGrantUseCase(loggerMock, grantServiceMock);
+  return { loggerMock, grantServiceMock, useCase };
 };
+
+beforeEach(() => vi.restoreAllMocks);
 
 describe("RemoveGrantUseCase", () => {
   it("should call find and then the remove for each one", async () => {

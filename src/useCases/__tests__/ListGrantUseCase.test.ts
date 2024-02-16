@@ -1,17 +1,15 @@
-import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
 import { ListGrantUseCase } from "../ListGrantUseCase";
 import { grant } from "../../domain/grants/__tests__/data";
-import { GrantService } from "../../domain/grants/GrantService";
+import { describe, it, expect } from "vitest";
+import { grantServiceMock } from "../../__mock__/grant";
+import { loggerMock } from "../../__mock__/logger";
 
 const makeListGrantUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const grantServiceMock = mock.mock<GrantService>();
   const useCase = ListGrantUseCase(grantServiceMock);
-  return { logger, grantServiceMock, useCase };
+  return { loggerMock, grantServiceMock, useCase };
 };
 
 describe("ListGrantUseCase", () => {

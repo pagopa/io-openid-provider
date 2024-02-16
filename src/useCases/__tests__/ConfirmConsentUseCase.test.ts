@@ -1,11 +1,6 @@
-import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
-import { GrantService } from "../../domain/grants/GrantService";
-import { InteractionService } from "../../domain/interactions/InteractionService";
-import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
 import { makeNotFoundError } from "../../domain/types";
 import {
   afterConsentInteraction,
@@ -15,20 +10,24 @@ import {
 import { config } from "../../__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
 import { Features } from "..";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { loggerMock } from "../../__mock__/logger";
+import { interactionServiceMock } from "../../__mock__/interaction";
+import { grantServiceMock } from "../../__mock__/grant";
+import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const makeConfirmConsentUseCaseTest = (
   features: Features = config.features
 ) => {
-  const logger = mock.mock<Logger>();
-  const interactionServiceMock = mock.mock<InteractionService>();
-  const grantServiceMock = mock.mock<GrantService>();
   const useCase = ConfirmConsentUseCase(
-    logger,
+    loggerMock,
     features,
     interactionServiceMock,
     grantServiceMock
   );
-  return { logger, interactionServiceMock, grantServiceMock, useCase };
+  return { loggerMock, interactionServiceMock, grantServiceMock, useCase };
 };
 
 describe("ConfirmConsentUseCase", () => {

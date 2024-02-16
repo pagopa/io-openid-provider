@@ -1,20 +1,20 @@
-import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../../domain/grants/GrantService";
-import { Logger } from "../../domain/logger";
 import { FindGrantUseCase } from "../FindGrantUseCases";
 import { client } from "../../domain/clients/__tests__/data";
 import { identity } from "../../domain/identities/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
 import { makeDomainError, makeNotFoundError } from "../../domain/types";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { grantServiceMock } from "../../__mock__/grant";
+import { loggerMock } from "../../__mock__/logger";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const makeFindGrantUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const grantServiceMock = mock.mock<GrantService>();
-  const useCase = FindGrantUseCase(logger, grantServiceMock);
-  return { logger, grantServiceMock, useCase };
+  const useCase = FindGrantUseCase(loggerMock, grantServiceMock);
+  return { loggerMock, grantServiceMock, useCase };
 };
 
 describe("FindGrantUseCase", () => {

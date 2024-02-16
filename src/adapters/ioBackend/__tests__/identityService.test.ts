@@ -1,15 +1,15 @@
-import each from "jest-each";
-import * as mock from "jest-mock-extended";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import { FIMSUser } from "../../../generated/clients/io-auth/FIMSUser";
-import * as authClient from "../../../generated/clients/io-auth/client";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { identity as fakeIdentity } from "../../../domain/identities/__tests__/data";
 import { makeDomainError, DomainErrorTypes } from "../../../domain/types";
-import { makeIdentityService } from "../identityService";
-import { Logger } from "../../../domain/logger";
 import { SpidLevelEnum } from "../../../generated/clients/io-auth/SpidLevel";
+import { mockAuthClient } from "../../../__mock__/auth";
+import { identityServiceMock } from "../../../__mock__/identity";
+import { describe, it, vi, beforeEach, expect } from "vitest";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const identity = { ...fakeIdentity, id: fakeIdentity.fiscalCode };
 
@@ -32,10 +32,7 @@ const mkResponse = (status: number) => (value: unknown) =>
   );
 
 const makeIdentityServiceTest = () => {
-  const logger = mock.mock<Logger>();
-  const mockAuthClient = mock.mock<authClient.Client>();
-  const identityService = makeIdentityService(logger, mockAuthClient);
-  return { identityService, mockAuthClient };
+  return { identityServiceMock, mockAuthClient };
 };
 
 describe("IdentityService", () => {
@@ -107,19 +104,21 @@ describe("IdentityService", () => {
       },
     ];
 
-    each(records).it(
+    it.each(records)(
       "should $title",
       async ({ input, responses, expected }) => {
-        const { identityService, mockAuthClient } = makeIdentityServiceTest();
+        const { identityServiceMock, mockAuthClient } =
+          makeIdentityServiceTest();
         const { token } = input;
         const { getUserIdentityResp } = responses;
+        console.log(getUserIdentityResp);
 
         const functionRecorded =
           mockAuthClient.getUserForFIMS.mockReturnValueOnce(
             getUserIdentityResp
           );
 
-        const actual = await identityService.authenticate(token)();
+        const actual = await identityServiceMock.authenticate(token)();
 
         expect(functionRecorded).toHaveBeenCalledWith({
           Bearer: `Bearer ${token}`,

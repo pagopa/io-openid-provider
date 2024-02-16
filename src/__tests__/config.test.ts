@@ -2,6 +2,7 @@ import * as C from "../config";
 import * as E from "fp-ts/Either";
 import * as f from "fp-ts/function";
 import * as data from "./data";
+import { describe, it, expect } from "vitest";
 
 describe("Config", () => {
   describe("given an invalid configuration", () => {

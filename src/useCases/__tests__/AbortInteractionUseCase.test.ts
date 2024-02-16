@@ -1,19 +1,19 @@
-import * as mock from "jest-mock-extended";
 import { constVoid } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
 import { AbortInteractionUseCase } from "../AbortInteractionUseCase";
 import { interaction } from "../../domain/interactions/__tests__/data";
-import { InteractionService } from "../../domain/interactions/InteractionService";
 import { DomainErrorTypes, makeDomainError } from "../../domain/types";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { loggerMock } from "../../__mock__/logger";
+import { interactionServiceMock } from "../../__mock__/interaction";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const makeAbortInteractionUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const interactionServiceMock = mock.mock<InteractionService>();
-  const useCase = AbortInteractionUseCase(logger, interactionServiceMock);
-  return { logger, interactionServiceMock, useCase };
+  const useCase = AbortInteractionUseCase(loggerMock, interactionServiceMock);
+  return { loggerMock, interactionServiceMock, useCase };
 };
 
 describe("AbortInteractionUseCase", () => {

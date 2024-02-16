@@ -1,10 +1,6 @@
-import * as mock from "jest-mock-extended";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
-import { GrantService } from "../../domain/grants/GrantService";
-import { ClientService } from "../../domain/clients/ClientService";
 import { ProcessInteractionUseCase } from "../ProcessInteractionUseCase";
 import {
   afterLoginInteraction,
@@ -14,21 +10,22 @@ import { identity } from "../../domain/identities/__tests__/data";
 import { client } from "../../domain/clients/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
 import { config } from "../../__tests__/data";
-import { IdentityService } from "../../domain/identities/IdentityService";
-import { InteractionService } from "../../domain/interactions/InteractionService";
 import { makeNotFoundError } from "../../domain/types";
 import { Features } from "..";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { grantServiceMock } from "../../__mock__/grant";
+import { interactionServiceMock } from "../../__mock__/interaction";
+import { identityServiceMock } from "../../__mock__/identity";
+import { clientServiceMock } from "../../__mock__/client";
+import { loggerMock } from "../../__mock__/logger";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const makeProcessInteractionUseCaseTest = (
   features: Features = config.features
 ) => {
-  const logger = mock.mock<Logger>();
-  const interactionServiceMock = mock.mock<InteractionService>();
-  const identityServiceMock = mock.mock<IdentityService>();
-  const clientServiceMock = mock.mock<ClientService>();
-  const grantServiceMock = mock.mock<GrantService>();
   const useCase = ProcessInteractionUseCase(
-    logger,
+    loggerMock,
     features,
     identityServiceMock,
     interactionServiceMock,
@@ -36,7 +33,7 @@ const makeProcessInteractionUseCaseTest = (
     grantServiceMock
   );
   return {
-    logger,
+    loggerMock,
     identityServiceMock,
     interactionServiceMock,
     clientServiceMock,

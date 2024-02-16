@@ -1,21 +1,21 @@
-import * as mock from "jest-mock-extended";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
 import { AuthenticateUseCase } from "../AuthenticateUseCase";
 import {
   DomainErrorTypes,
   makeDomainError,
   unauthorizedError,
 } from "../../domain/types";
-import { IdentityService } from "../../domain/identities/IdentityService";
 import { identity } from "../../domain/identities/__tests__/data";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { loggerMock } from "../../__mock__/logger";
+import { identityServiceMock } from "../../__mock__/identity";
+
+beforeEach(() => vi.restoreAllMocks);
 
 const makeAuthenticateUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const identityServiceMock = mock.mock<IdentityService>();
-  const useCase = AuthenticateUseCase(logger, identityServiceMock);
-  return { logger, identityServiceMock, useCase };
+  const useCase = AuthenticateUseCase(loggerMock, identityServiceMock);
+  return { loggerMock, identityServiceMock, useCase };
 };
 
 describe("AuthenticateUseCase", () => {

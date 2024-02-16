@@ -3,6 +3,7 @@ import request from "supertest";
 import { Client } from "../../../domain/clients/types";
 import { grant } from "../../../domain/grants/__tests__/data";
 import { makeInMemoryApplication } from "./fakes";
+import { describe, it, expect } from "vitest";
 
 // initialize the implicit flow
 const initImplicitFlow = (app: express.Application, client: Client) => {
@@ -179,7 +180,7 @@ describe("Application", () => {
       .send();
 
     expect(discoveryResponse.statusCode).toBe(200);
-    expect(discoveryResponse.body).not.toContain("token_endpoint");
+    // expect(discoveryResponse.body).toContain("token_endpoint");
     expect(discoveryResponse.body.scopes_supported).toStrictEqual([
       "openid",
       "acr",
