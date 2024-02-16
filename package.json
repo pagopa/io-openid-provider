@@ -13,7 +13,7 @@
     "dev": "tsc && node -r dotenv/config dist/main.js dotenv_config_path=.env.default",
     "prebuild": "shx rm -rf dist && yarn generate && yarn copy-assets",
     "build": "tsc",
-    "test": "vitest --config ./vite.config.ts",
+    "test": "vitest --config ./vitest.config.ts",
     "prettify": "prettier --write \"./**/*.ts\"",
     "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix && yarn run prettify",
     "prepare": "husky install",
