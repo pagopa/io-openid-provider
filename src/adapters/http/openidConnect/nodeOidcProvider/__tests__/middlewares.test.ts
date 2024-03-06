@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import * as middlewares from "../middlewares";
 import { configuration } from "./data";
 

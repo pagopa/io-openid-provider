@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import * as E from "fp-ts/Either";
 import * as s from "../clientService";
 import { client } from "../../../domain/clients/__tests__/data";

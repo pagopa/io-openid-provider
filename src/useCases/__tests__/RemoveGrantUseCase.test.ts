@@ -1,31 +1,33 @@
-import * as mock from "jest-mock-extended";
+import { vi, describe, it, expect } from "vitest";
+
 import { constVoid } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../../domain/grants/GrantService";
-import { Logger } from "../../domain/logger";
+
 import { RemoveGrantUseCase } from "../RemoveGrantUseCase";
 import { client } from "../../domain/clients/__tests__/data";
 import { identity } from "../../domain/identities/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
 import { makeDomainError, makeNotFoundError } from "../../domain/types";
+import { makeLogger } from "../../adapters/winston";
 
-const makeRemoveGrantUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const grantServiceMock = mock.mock<GrantService>();
-  const useCase = RemoveGrantUseCase(logger, grantServiceMock);
-  return { logger, grantServiceMock, useCase };
+import { grantService } from "../../adapters/vitest";
+
+const mocks = {
+  logger: makeLogger({ logLevel: "info", logName: "RemoveGrantUseCase.test" }),
+  grantService,
 };
 
 describe("RemoveGrantUseCase", () => {
   it("should call find and then the remove for each one", async () => {
-    const { useCase, grantServiceMock } = makeRemoveGrantUseCaseTest();
+    const useCase = RemoveGrantUseCase(mocks.logger, mocks.grantService);
 
-    const grantFindMock = grantServiceMock.findBy.mockReturnValueOnce(
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(
       TE.right([grant, grant])
     );
-    const grantRemoveMock = grantServiceMock.remove.mockReturnValue(
+
+    vi.spyOn(mocks.grantService, "remove").mockReturnValue(
       TE.right(constVoid())
     );
 
@@ -36,20 +38,20 @@ describe("RemoveGrantUseCase", () => {
     )();
 
     expect(actual).toStrictEqual(E.right(constVoid()));
-    expect(grantFindMock).toBeCalledWith({
+    expect(mocks.grantService.findBy).toBeCalledWith({
       clientId: O.some(client.clientId),
       identityId: identity.id,
       remember: true,
     });
-    expect(grantFindMock).toBeCalledTimes(1);
-    expect(grantRemoveMock).toBeCalledTimes(2);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
+    expect(mocks.grantService.remove).toBeCalledTimes(2);
   });
-  it("should map the empty array to NotFound", async () => {
-    const { useCase, grantServiceMock } = makeRemoveGrantUseCaseTest();
 
-    const grantFindMock = grantServiceMock.findBy.mockReturnValueOnce(
-      TE.right([])
-    );
+  it("should map the empty array to NotFound", async () => {
+    const useCase = RemoveGrantUseCase(mocks.logger, mocks.grantService);
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(TE.right([]));
+
     const actual = await useCase(
       client.clientId.organizationId,
       client.clientId.serviceId,
@@ -57,14 +59,16 @@ describe("RemoveGrantUseCase", () => {
     )();
 
     expect(actual).toStrictEqual(E.left(makeNotFoundError("Grant not found")));
-    expect(grantFindMock).toBeCalledTimes(1);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
   });
-  it("should map Errors", async () => {
-    const { useCase, grantServiceMock } = makeRemoveGrantUseCaseTest();
 
-    const grantFindMock = grantServiceMock.findBy.mockReturnValueOnce(
+  it("should map Errors", async () => {
+    const useCase = RemoveGrantUseCase(mocks.logger, mocks.grantService);
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(
       TE.left(makeDomainError("error"))
     );
+
     const actual = await useCase(
       client.clientId.organizationId,
       client.clientId.serviceId,
@@ -72,6 +76,6 @@ describe("RemoveGrantUseCase", () => {
     )();
 
     expect(actual).toStrictEqual(E.left(makeDomainError("error")));
-    expect(grantFindMock).toBeCalledTimes(1);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
   });
 });

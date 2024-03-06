@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import * as C from "../config";
 import * as E from "fp-ts/Either";
 import * as f from "fp-ts/function";

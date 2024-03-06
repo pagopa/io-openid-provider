@@ -56,7 +56,11 @@ void pipe(
   TE.map(({ config, logger, cosmosdb }) => {
     const { ioAuthClient } = ioBackend.makeIOClients(
       config.IOClient,
-      ioBackend.timeoutFetch
+      (input, init) =>
+        ioBackend.timeoutFetch(
+          input instanceof URL ? input.toString() : input,
+          init
+        )
     );
     const identityService = ioBackend.makeIdentityService(logger, ioAuthClient);
 

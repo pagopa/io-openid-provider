@@ -24,7 +24,7 @@ export const INTERACTION_COLLECTION_NAME = "Interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
 const INTERACTION_PARTITION_KEY_FIELD = "id";
 
-const RequestParamsBaseR = t.interface({
+const RequestParamsBaseR = t.type({
   client_id: t.string,
   redirect_uri: t.string,
   response_type: t.string,
@@ -45,7 +45,7 @@ const RequestParams = t.intersection(
 );
 type RequestParams = t.TypeOf<typeof RequestParams>;
 
-const InteractionBaseR = t.interface({
+const InteractionBaseR = t.type({
   expireAt: Timestamp,
   id: NonEmptyString,
   issuedAt: Timestamp,

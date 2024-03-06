@@ -16,9 +16,8 @@ export const config: Config = {
     baseURL: new URL(envs["IO_BACKEND_BASE_URL"] as string),
   },
   cosmosdb: {
-    cosmosDbName: envs["COSMOSDB_NAME"] as NonEmptyString,
-    cosmosDbUri: envs["COSMOSDB_URI"] as NonEmptyString,
-    masterKey: envs["COSMOSDB_KEY"] as NonEmptyString,
+    cosmosDbName: envs["COSMOSDB_NAME"],
+    connectionString: envs["COSMOSDB_CONNECTION_STRING"],
   },
   features: {
     grant: {

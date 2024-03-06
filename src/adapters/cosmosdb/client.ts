@@ -16,11 +16,7 @@ export const makeCosmosDbClient = (
   config: CosmosDBConfig,
   logger: Logger
 ): TE.TaskEither<string, Database> => {
-  const cosmosdbClient = new CosmosClient({
-    endpoint: config.cosmosDbUri,
-    key: config.masterKey,
-  });
-
+  const cosmosdbClient = new CosmosClient(config.connectionString);
   const instance = cosmosdbClient.database(config.cosmosDbName);
   return pipe(
     E.tryCatch(() => {

@@ -1,15 +1,17 @@
-import each from "jest-each";
-import * as mock from "jest-mock-extended";
+import { describe, it, expect, vi } from "vitest";
+
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import { FIMSUser } from "../../../generated/clients/io-auth/FIMSUser";
-import * as authClient from "../../../generated/clients/io-auth/client";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { identity as fakeIdentity } from "../../../domain/identities/__tests__/data";
 import { makeDomainError, DomainErrorTypes } from "../../../domain/types";
 import { makeIdentityService } from "../identityService";
-import { Logger } from "../../../domain/logger";
 import { SpidLevelEnum } from "../../../generated/clients/io-auth/SpidLevel";
+
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { AccessToken } from "../../../domain/identities/types";
+import { makeLogger } from "../../winston";
 
 const identity = { ...fakeIdentity, id: fakeIdentity.fiscalCode };
 
@@ -22,20 +24,18 @@ const userIdentity: FIMSUser = {
   date_of_birth: new Date(),
 };
 
-const mkResponse = (status: number) => (value: unknown) =>
-  Promise.resolve(
-    t.success({
-      status: status,
-      headers: { "Content-Type": "application/json" },
-      value: value,
-    })
-  );
+const response = <S extends number, T>(
+  status: S,
+  value: T
+): t.Validation<IResponseType<S, T>> =>
+  t.success({
+    status,
+    headers: { "Content-Type": "application/json" },
+    value,
+  });
 
-const makeIdentityServiceTest = () => {
-  const logger = mock.mock<Logger>();
-  const mockAuthClient = mock.mock<authClient.Client>();
-  const identityService = makeIdentityService(logger, mockAuthClient);
-  return { identityService, mockAuthClient };
+const mocks = {
+  logger: makeLogger({ logLevel: "info", logName: "identityService.test" }),
 };
 
 describe("IdentityService", () => {
@@ -46,9 +46,6 @@ describe("IdentityService", () => {
         input: {
           token: "this-is-the-token",
         },
-        responses: {
-          getUserIdentityResp: mkResponse(200)(userIdentity),
-        },
         expected: E.right({
           ...identity,
           acr: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
@@ -56,76 +53,71 @@ describe("IdentityService", () => {
           dateOfBirth: userIdentity.date_of_birth,
           email: userIdentity.email,
         }),
+        getUserForFIMS: vi.fn().mockResolvedValue(response(200, userIdentity)),
       },
       {
         title: "manage unknown error",
         input: {
           token: "this-is-the-token",
         },
-        responses: {
-          getUserIdentityResp: Promise.reject("don't care"),
-        },
         expected: E.left(
           makeDomainError("Unexpected", DomainErrorTypes.GENERIC_ERROR)
         ),
+        getUserForFIMS: vi.fn().mockRejectedValue("don't care!"),
       },
       {
         title: "return invalid token error given a 401 response",
         input: {
           token: "this-is-the-token",
         },
-        responses: {
-          getUserIdentityResp: mkResponse(401)(userIdentity),
-        },
         expected: E.left(
           makeDomainError("401", DomainErrorTypes.GENERIC_ERROR)
         ),
+        getUserForFIMS: vi.fn().mockResolvedValue(response(401, undefined)),
       },
       {
         title: "return bad request error given a 400 response",
         input: {
           token: "this-is-the-token",
         },
-        responses: {
-          getUserIdentityResp: mkResponse(400)(userIdentity),
-        },
         expected: E.left(
           makeDomainError("400", DomainErrorTypes.GENERIC_ERROR)
         ),
+        getUserForFIMS: vi.fn().mockResolvedValue(response(400, userIdentity)),
       },
       {
-        title: "return unknown error given a 501 response",
+        title: "return unknown error given a 500 response",
         input: {
           token: "this-is-the-token",
-        },
-        responses: {
-          getUserIdentityResp: mkResponse(501)(userIdentity),
         },
         expected: E.left(
           makeDomainError("Bad Request", DomainErrorTypes.GENERIC_ERROR)
         ),
+        getUserForFIMS: vi.fn().mockResolvedValue(response(500, userIdentity)),
       },
     ];
 
-    each(records).it(
+    it.each(records)(
       "should $title",
-      async ({ input, responses, expected }) => {
-        const { identityService, mockAuthClient } = makeIdentityServiceTest();
-        const { token } = input;
-        const { getUserIdentityResp } = responses;
-
-        const functionRecorded =
-          mockAuthClient.getUserForFIMS.mockReturnValueOnce(
-            getUserIdentityResp
-          );
-
-        const actual = await identityService.authenticate(token)();
-
-        expect(functionRecorded).toHaveBeenCalledWith({
-          Bearer: `Bearer ${token}`,
+      async ({ input, expected, getUserForFIMS }) => {
+        const identityService = makeIdentityService(mocks.logger, {
+          getUserForFIMS,
         });
-        expect(functionRecorded).toHaveBeenCalledTimes(1);
-        expect(actual).toEqual(expected);
+
+        const tokenOrError = AccessToken.decode(input.token);
+
+        if (E.isRight(tokenOrError)) {
+          const actual = await identityService.authenticate(
+            tokenOrError.right
+          )();
+          expect(getUserForFIMS).toHaveBeenCalledTimes(1);
+          expect(getUserForFIMS).toHaveBeenCalledWith({
+            Bearer: `Bearer ${tokenOrError.right}`,
+          });
+          expect(actual).toEqual(expected);
+        }
+
+        expect.hasAssertions();
       }
     );
   });

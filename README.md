@@ -79,7 +79,7 @@ make start.local
 1. Add a new client:
 
 ``` sh
-curl --request POST 'http://localhost:3001/admin/clients' \
+curl --request POST 'http://localhost:3001/clients' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "redirect_uris": [

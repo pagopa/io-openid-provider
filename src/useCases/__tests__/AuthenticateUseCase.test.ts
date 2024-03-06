@@ -1,46 +1,45 @@
-import * as mock from "jest-mock-extended";
+import { vi, describe, it, expect } from "vitest";
+
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
 import { AuthenticateUseCase } from "../AuthenticateUseCase";
-import {
-  DomainErrorTypes,
-  makeDomainError,
-  unauthorizedError,
-} from "../../domain/types";
-import { IdentityService } from "../../domain/identities/IdentityService";
+import { unauthorizedError } from "../../domain/types";
 import { identity } from "../../domain/identities/__tests__/data";
+import { makeLogger } from "../../adapters/winston";
 
-const makeAuthenticateUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const identityServiceMock = mock.mock<IdentityService>();
-  const useCase = AuthenticateUseCase(logger, identityServiceMock);
-  return { logger, identityServiceMock, useCase };
+import { identityService } from "../../adapters/vitest";
+
+const mocks = {
+  identityService,
+  logger: makeLogger({
+    logLevel: "info",
+    logName: "AuthenticateUseCase.test",
+  }),
 };
 
 describe("AuthenticateUseCase", () => {
   it("should return an error if the token is invalid", async () => {
-    const { useCase, identityServiceMock } = makeAuthenticateUseCaseTest();
+    const useCase = AuthenticateUseCase(mocks.logger, mocks.identityService);
 
     const actual0 = await useCase(undefined)();
-    expect(actual0).toStrictEqual(E.left(unauthorizedError));
-
-    const identityAuthenticate =
-      identityServiceMock.authenticate.mockReturnValue(
-        TE.left(makeDomainError("Error", DomainErrorTypes.GENERIC_ERROR))
-      );
     const actual1 = await useCase("invalid")();
-    expect(actual1).toStrictEqual(E.left(unauthorizedError));
-    expect(identityAuthenticate).toBeCalledWith("invalid");
-    expect(identityAuthenticate).toBeCalledTimes(1);
-  });
-  it("should return the identity if the token is valid", async () => {
-    const { useCase, identityServiceMock } = makeAuthenticateUseCaseTest();
 
-    const identityAuthenticate =
-      identityServiceMock.authenticate.mockReturnValue(TE.right(identity));
+    expect(actual0).toStrictEqual(E.left(unauthorizedError));
+    expect(actual1).toStrictEqual(E.left(unauthorizedError));
+    expect(mocks.identityService.authenticate).toBeCalledWith("invalid");
+    expect(mocks.identityService.authenticate).toBeCalledTimes(1);
+  });
+
+  it("should return the identity if the token is valid", async () => {
+    const useCase = AuthenticateUseCase(mocks.logger, mocks.identityService);
+
+    vi.spyOn(mocks.identityService, "authenticate").mockReturnValueOnce(
+      TE.right(identity)
+    );
+
     const actual = await useCase("valid")();
+
     expect(actual).toStrictEqual(E.right(identity));
-    expect(identityAuthenticate).toBeCalledTimes(1);
+    expect(mocks.identityService.authenticate).toBeCalledTimes(1);
   });
 });

@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import * as fc from "fast-check";
 import * as E from "fp-ts/Either";
 import { client } from "./data";
