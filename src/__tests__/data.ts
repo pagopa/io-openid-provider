@@ -44,6 +44,5 @@ export const config: Config = {
     cookiesKey: envs["COOKIES_KEY"] as string,
     jwkPrimary: envs["JWK_PRIMARY"] as string,
     jwkSecondary: envs["JWK_SECONDARY"] as string,
-    defaultRequestTimeoutMs: 10000,
   },
 };
