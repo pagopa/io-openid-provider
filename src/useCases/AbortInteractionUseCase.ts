@@ -1,10 +1,10 @@
-import { constVoid, pipe } from "fp-ts/function";
-import * as TE from "fp-ts/TaskEither";
-import { InteractionService } from "../domain/interactions/InteractionService";
-import { InteractionId } from "../domain/interactions/types";
-import { Logger } from "../domain/logger";
-import { DomainError } from "../domain/types";
-import { fromTEOtoTE, show } from "../domain/utils";
+import { constVoid, pipe } from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { InteractionService } from "../domain/interactions/InteractionService.js";
+import { InteractionId } from "../domain/interactions/types.js";
+import { Logger } from "../domain/logger/index.js";
+import { DomainError } from "../domain/types/index.js";
+import { fromTEOtoTE, show } from "../domain/utils.js";
 
 export type AbortInteractionUseCaseError = DomainError;
 

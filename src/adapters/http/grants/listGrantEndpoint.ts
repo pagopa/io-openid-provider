@@ -1,13 +1,13 @@
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import { responses } from "@pagopa/ts-commons";
-import { Grant } from "../../../domain/grants/types";
-import { FiscalCode } from "../../../generated/definitions/FiscalCode";
-import { APIGrantList } from "../../../generated/definitions/APIGrantList";
-import { ListGrantUseCase } from "../../../useCases/ListGrantUseCase";
-import { IdentityId } from "../../../domain/identities/types";
-import { DomainErrorTypes } from "../../../domain/types";
-import { makeAPIGrant } from "./findGrantEndpoint";
+import { Grant } from "../../../domain/grants/types.js";
+import { FiscalCode } from "../../../generated/definitions/FiscalCode.js";
+import { APIGrantList } from "../../../generated/definitions/APIGrantList.js";
+import { ListGrantUseCase } from "../../../useCases/ListGrantUseCase.js";
+import { IdentityId } from "../../../domain/identities/types.js";
+import { DomainErrorTypes } from "../../../domain/types/index.js";
+import { makeAPIGrant } from "./findGrantEndpoint.js";
 
 const makeAPIGrantList = (list: ReadonlyArray<Grant>): APIGrantList => ({
   items: list.map(makeAPIGrant),

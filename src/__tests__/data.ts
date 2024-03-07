@@ -1,6 +1,6 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Config } from "../config";
-import { Seconds } from "../domain/types";
+import { Seconds } from "../domain/types/index.js";
 import * as jose2 from "jose2";
 
 const jwk = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);

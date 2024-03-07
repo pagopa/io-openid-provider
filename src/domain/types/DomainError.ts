@@ -1,6 +1,6 @@
-import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model.js";
 import * as t from "io-ts";
-import * as PR from "io-ts/PathReporter";
+import * as PR from "io-ts/lib/PathReporter.js";
 
 export enum DomainErrorTypes {
   GENERIC_ERROR = "GENERIC_ERROR",

@@ -1,19 +1,19 @@
 /* eslint-disable functional/prefer-readonly-type */
-import { constVoid, pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
-import { Identity } from "../../domain/identities/types";
-import { IdentityService } from "../../domain/identities/IdentityService";
-import { Client } from "../../domain/clients/types";
-import { ClientService } from "../../domain/clients/ClientService";
-import { DomainError } from "../../domain/types";
-import { Interaction } from "../../domain/interactions/types";
-import { InteractionService } from "../../domain/interactions/InteractionService";
-import { Session } from "../../domain/sessions/types";
-import { SessionService } from "../../domain/sessions/SessionService";
-import { Grant } from "../../domain/grants/types";
-import { GrantService } from "../../domain/grants/GrantService";
-import { IdentityIdAndGrantId } from "../http/openidConnect/nodeOidcProvider/utils";
+import { constVoid, pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { Identity } from "../../domain/identities/types.js";
+import { IdentityService } from "../../domain/identities/IdentityService.js";
+import { Client } from "../../domain/clients/types.js";
+import { ClientService } from "../../domain/clients/ClientService.js";
+import { DomainError } from "../../domain/types/index.js";
+import { Interaction } from "../../domain/interactions/types.js";
+import { InteractionService } from "../../domain/interactions/InteractionService.js";
+import { Session } from "../../domain/sessions/types.js";
+import { SessionService } from "../../domain/sessions/SessionService.js";
+import { Grant } from "../../domain/grants/types.js";
+import { GrantService } from "../../domain/grants/GrantService.js";
+import { IdentityIdAndGrantId } from "../http/openidConnect/nodeOidcProvider/utils.js";
 
 const upsertEntityTE =
   <K, V>(store: Map<K, V>) =>

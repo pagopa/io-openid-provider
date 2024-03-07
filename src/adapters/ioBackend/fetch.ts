@@ -1,6 +1,6 @@
 import { agent } from "@pagopa/ts-commons";
-import * as fetch from "@pagopa/ts-commons/lib/fetch";
-import { Millisecond } from "@pagopa/ts-commons/lib/units";
+import * as fetch from "@pagopa/ts-commons/lib/fetch.js";
+import { Millisecond } from "@pagopa/ts-commons/lib/units.js";
 
 // HTTP external requests timeout in milliseconds
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;

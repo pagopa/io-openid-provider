@@ -1,7 +1,7 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IdentityId } from "../identities/types";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { IdentityId } from "../identities/types.js";
 
 interface UidBrand {
   readonly Uid: unique symbol;

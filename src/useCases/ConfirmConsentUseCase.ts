@@ -1,16 +1,20 @@
 import * as crypto from "crypto";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../domain/grants/GrantService";
-import { Grant, GrantId } from "../domain/grants/types";
-import { InteractionService } from "../domain/interactions/InteractionService";
-import { Interaction, InteractionId } from "../domain/interactions/types";
-import { Logger } from "../domain/logger";
-import { DomainError, makeDomainError, Seconds } from "../domain/types";
-import { fromTEOtoTE, show } from "../domain/utils";
-import { findValidGrant } from "./utils";
-import { Features } from ".";
+import { pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Grant, GrantId } from "../domain/grants/types.js";
+import { InteractionService } from "../domain/interactions/InteractionService.js";
+import { Interaction, InteractionId } from "../domain/interactions/types.js";
+import { Logger } from "../domain/logger/index.js";
+import {
+  DomainError,
+  makeDomainError,
+  Seconds,
+} from "../domain/types/index.js";
+import { fromTEOtoTE, show } from "../domain/utils.js";
+import { findValidGrant } from "./utils.js";
+import { Features } from "./index.js";
 
 type ConfirmConsentUseCaseError = DomainError;
 

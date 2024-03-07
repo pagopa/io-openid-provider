@@ -1,26 +1,26 @@
 import * as t from "io-ts";
-import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp";
+import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp.js";
 import { Container } from "@azure/cosmos";
-import { Option } from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option.js";
 
 import {
   CosmosErrors,
   CosmosResource,
   CosmosdbModel,
   toCosmosErrorResponse,
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { asyncIterableToArray } from "@pagopa/io-functions-commons/dist/src/utils/async";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { TaskEither } from "fp-ts/lib/TaskEither";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import { pipe } from "fp-ts/lib/function";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model.js";
+import { asyncIterableToArray } from "@pagopa/io-functions-commons/dist/src/utils/async.js";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as RA from "fp-ts/lib/ReadonlyArray.js";
+import { pipe } from "fp-ts/lib/function.js";
 import {
   GrantTypes,
   OrganizationId,
   ResponseTypes,
-} from "../../../domain/clients/types";
+} from "../../../domain/clients/types.js";
 
 export const CLIENT_COLLECTION_NAME = "Client";
 const CLIENT_MODEL_PK_FIELD = "id";

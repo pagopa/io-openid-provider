@@ -1,13 +1,13 @@
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../domain/logger";
-import { GrantService } from "../domain/grants/GrantService";
-import { Grant } from "../domain/grants/types";
-import { IdentityId } from "../domain/identities/types";
-import { OrganizationId, ServiceId } from "../domain/clients/types";
-import { DomainError, makeNotFoundError } from "../domain/types";
+import { pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as RA from "fp-ts/lib/ReadonlyArray.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { Logger } from "../domain/logger/index.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Grant } from "../domain/grants/types.js";
+import { IdentityId } from "../domain/identities/types.js";
+import { OrganizationId, ServiceId } from "../domain/clients/types.js";
+import { DomainError, makeNotFoundError } from "../domain/types/index.js";
 
 export type FindGrantUseCaseError = DomainError;
 
@@ -30,7 +30,7 @@ export const FindGrantUseCase =
       TE.map(RA.head),
       TE.fold(
         (error) => {
-          logger.error("Some error during FindGrantUseCase", error.causedBy);
+          logger.error("Some error during FindGrantUseCase.js", error.causedBy);
           return TE.left(error);
         },
         O.fold(

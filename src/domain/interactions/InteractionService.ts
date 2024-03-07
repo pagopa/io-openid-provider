@@ -1,7 +1,7 @@
-import { Option } from "fp-ts/Option";
-import { TaskEither } from "fp-ts/TaskEither";
-import { DomainError } from "../types";
-import { Interaction, InteractionId } from "./types";
+import { Option } from "fp-ts/lib/Option.js";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import { DomainError } from "../types/index.js";
+import { Interaction, InteractionId } from "./types.js";
 
 /**
  * Represents the only entry point that is allowed to work with the Interaction storage

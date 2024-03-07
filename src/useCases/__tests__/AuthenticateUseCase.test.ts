@@ -1,9 +1,9 @@
 import { vi, describe, it, expect } from "vitest";
 
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import { AuthenticateUseCase } from "../AuthenticateUseCase";
-import { unauthorizedError } from "../../domain/types";
+import { unauthorizedError } from "../../domain/types/index.js";
 import { identity } from "../../domain/identities/__tests__/data";
 import { makeLogger } from "../../adapters/winston";
 

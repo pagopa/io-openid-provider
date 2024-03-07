@@ -1,9 +1,9 @@
-import * as O from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../domain/grants/GrantService";
-import { Grant } from "../domain/grants/types";
-import { DomainError } from "../domain/types";
-import { IdentityId } from "../domain/identities/types";
+import * as O from "fp-ts/lib/Option.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Grant } from "../domain/grants/types.js";
+import { DomainError } from "../domain/types/index.js";
+import { IdentityId } from "../domain/identities/types.js";
 
 export type ListGrantUseCaseError = DomainError;
 

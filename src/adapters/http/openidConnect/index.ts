@@ -3,9 +3,9 @@
  * to the OpenID Connect protocol
  */
 import express from "express";
-import { AppEnv } from "..";
-import { makeConfiguration, makeProvider } from "./nodeOidcProvider";
-import { makeInteractionRouter } from "./nodeOidcProvider/interactions";
+import { AppEnv } from "../index.js";
+import { makeConfiguration, makeProvider } from "./nodeOidcProvider/index.js";
+import { makeInteractionRouter } from "./nodeOidcProvider/interactions.js";
 
 /**
  * Create and return a Router that manage all OpenID Connect endpoints

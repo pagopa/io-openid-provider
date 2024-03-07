@@ -1,24 +1,24 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp";
+import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp.js";
 import { Container } from "@azure/cosmos";
-import { Option } from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option.js";
 
 import {
   CosmosErrors,
   CosmosResource,
   toCosmosErrorResponse,
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { TaskEither } from "fp-ts/lib/TaskEither";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model.js";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { pipe } from "fp-ts/lib/function.js";
 import {
   CosmosdbModelTTL,
   Ttl,
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
-import { GrantId } from "../../../domain/grants/types";
-import { IdentityId } from "../../../domain/identities/types";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl.js";
+import { GrantId } from "../../../domain/grants/types.js";
+import { IdentityId } from "../../../domain/identities/types.js";
 
 export const INTERACTION_COLLECTION_NAME = "Interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";

@@ -1,15 +1,18 @@
 import { vi, describe, it, expect } from "vitest";
 
-import { constVoid } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import { constVoid } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 
 import { RemoveGrantUseCase } from "../RemoveGrantUseCase";
 import { client } from "../../domain/clients/__tests__/data";
 import { identity } from "../../domain/identities/__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
-import { makeDomainError, makeNotFoundError } from "../../domain/types";
+import {
+  makeDomainError,
+  makeNotFoundError,
+} from "../../domain/types/index.js";
 import { makeLogger } from "../../adapters/winston";
 
 import { grantService } from "../../adapters/vitest";

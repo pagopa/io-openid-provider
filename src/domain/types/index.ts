@@ -1,3 +1,3 @@
-export * from "./DomainError";
-export * from "./Seconds";
-export * from "./IdPattern";
+export * from "./DomainError.js";
+export * from "./Seconds.js";
+export * from "./IdPattern.js";

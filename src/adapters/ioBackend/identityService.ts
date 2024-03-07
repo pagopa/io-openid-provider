@@ -1,16 +1,16 @@
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { flow, pipe } from "fp-ts/lib/function.js";
 import {
   DomainError,
   DomainErrorTypes,
   makeDomainError,
-} from "../../domain/types";
-import { IdentityService } from "../../domain/identities/IdentityService";
-import * as authClient from "../../generated/clients/io-auth/client";
-import { AccessToken, Identity } from "../../domain/identities/types";
-import { Logger } from "../../domain/logger";
-import { show } from "../../domain/utils";
+} from "../../domain/types/index.js";
+import { IdentityService } from "../../domain/identities/IdentityService.js";
+import * as authClient from "../../generated/clients/io-auth/client.js";
+import { AccessToken, Identity } from "../../domain/identities/types.js";
+import { Logger } from "../../domain/logger/index.js";
+import { show } from "../../domain/utils.js";
 
 const authenticate =
   (logger: Logger, client: authClient.Client) =>

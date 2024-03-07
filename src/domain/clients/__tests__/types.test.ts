@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import * as fc from "fast-check";
-import * as E from "fp-ts/Either";
+import * as E from "fp-ts/lib/Either.js";
 import { client } from "./data";
 import * as d from "../types";
 

@@ -1,15 +1,15 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import * as PR from "io-ts/PathReporter";
-import * as E from "fp-ts/Either";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
-import { pipe } from "fp-ts/lib/function";
-import { LogConfig } from "./adapters/winston";
-import { CosmosDBConfig } from "./adapters/cosmosdb";
-import { IOClientConfig } from "./adapters/ioBackend";
-import { Seconds } from "./domain/types";
-import { Features } from "./useCases";
+import * as PR from "io-ts/lib/PathReporter.js";
+import * as E from "fp-ts/lib/Either.js";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url.js";
+import { pipe } from "fp-ts/lib/function.js";
+import { LogConfig } from "./adapters/winston/index.js";
+import { CosmosDBConfig } from "./adapters/cosmosdb/index.js";
+import { IOClientConfig } from "./adapters/ioBackend/index.js";
+import { Seconds } from "./domain/types/Seconds.js";
+import { Features } from "./useCases/index.js";
 
 interface ServerConfig {
   readonly hostname: string;

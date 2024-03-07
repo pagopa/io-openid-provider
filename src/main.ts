@@ -1,29 +1,29 @@
 /** This is the main application entry point, the initialization of the adapters are done here */
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-import { makeApplication, startApplication } from "./adapters/http";
-import * as ioBackend from "./adapters/ioBackend";
-import * as adapter from "./adapters/cosmosdb";
-import { makeLogger, makeAppInsightsLogger } from "./adapters/winston";
-import { parseConfig } from "./config";
-import { makeUseCases } from "./useCases";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { pipe } from "fp-ts/lib/function.js";
+import { makeApplication, startApplication } from "./adapters/http/index.js";
+import * as ioBackend from "./adapters/ioBackend/index.js";
+import * as adapter from "./adapters/cosmosdb/index.js";
+import { makeLogger, makeAppInsightsLogger } from "./adapters/winston/index.js";
+import { parseConfig } from "./config.js";
+import { makeUseCases } from "./useCases/index.js";
 import {
   CLIENT_COLLECTION_NAME,
   ClientModel,
-} from "./adapters/cosmosdb/model/client";
-import { makeCosmosDbClient } from "./adapters/cosmosdb/client";
+} from "./adapters/cosmosdb/model/client.js";
+import { makeCosmosDbClient } from "./adapters/cosmosdb/client.js";
 import {
   GRANT_COLLECTION_NAME,
   GrantModel,
-} from "./adapters/cosmosdb/model/grant";
+} from "./adapters/cosmosdb/model/grant.js";
 import {
   INTERACTION_COLLECTION_NAME,
   InteractionModel,
-} from "./adapters/cosmosdb/model/interaction";
+} from "./adapters/cosmosdb/model/interaction.js";
 import {
   SESSION_COLLECTION_NAME,
   SessionModel,
-} from "./adapters/cosmosdb/model/session";
+} from "./adapters/cosmosdb/model/session.js";
 
 /** Log the given string and exit with status 1 */
 const exit = (error: string): void => {

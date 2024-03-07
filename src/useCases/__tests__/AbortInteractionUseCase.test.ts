@@ -1,11 +1,11 @@
 import { vi, describe, it, expect } from "vitest";
 
-import { constVoid } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import { constVoid } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 
-import { DomainErrorTypes, makeDomainError } from "../../domain/types";
+import { DomainErrorTypes, makeDomainError } from "../../domain/types/index.js";
 
 import { interaction } from "../../domain/interactions/__tests__/data";
 import { interactionService } from "../../adapters/vitest";

@@ -1,15 +1,18 @@
-// import { constVoid } from "fp-ts/lib/function";
+// import { constVoid } from "fp-ts/lib/function.js";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as PR from "io-ts/PathReporter";
-import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
-import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
-import { Logger } from "../../domain/logger";
-import { DomainError, cosmosErrorsToDomainError } from "../../domain/types";
-import { show } from "../../domain/utils";
+import { pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import * as PR from "io-ts/lib/PathReporter.js";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model.js";
+import { Ttl } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl.js";
+import { Logger } from "../../domain/logger/index.js";
+import {
+  DomainError,
+  cosmosErrorsToDomainError,
+} from "../../domain/types/index.js";
+import { show } from "../../domain/utils.js";
 
 export const makeTE =
   (logger: Logger) =>

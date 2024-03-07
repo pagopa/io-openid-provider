@@ -1,23 +1,23 @@
 import * as t from "io-ts";
-import { pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
 import * as oidc from "oidc-provider";
-import { Logger } from "../../../../../domain/logger";
-import { InteractionService } from "../../../../../domain/interactions/InteractionService";
-import { GrantId } from "../../../../../domain/grants/types";
-import { IdentityId } from "../../../../../domain/identities/types";
+import { Logger } from "../../../../../domain/logger/index.js";
+import { InteractionService } from "../../../../../domain/interactions/InteractionService.js";
+import { GrantId } from "../../../../../domain/grants/types.js";
+import { IdentityId } from "../../../../../domain/identities/types.js";
 import {
   InteractionId,
   Interaction,
   makeResult,
-} from "../../../../../domain/interactions/types";
+} from "../../../../../domain/interactions/types.js";
 import {
   DateFromNumericDate,
   destroyFromTE,
   findFromTEO,
   makeNotImplementedAdapter,
   upsertFromTE,
-} from "../utils";
+} from "../utils.js";
 
 const interactionToAdapterPayload = (
   item: Interaction

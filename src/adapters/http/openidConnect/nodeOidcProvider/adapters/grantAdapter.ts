@@ -1,14 +1,14 @@
 import * as oidc from "oidc-provider";
-import { Logger } from "../../../../../domain/logger";
-import { GrantService } from "../../../../../domain/grants/GrantService";
-import { Grant } from "../../../../../domain/grants/types";
+import { Logger } from "../../../../../domain/logger/index.js";
+import { GrantService } from "../../../../../domain/grants/GrantService.js";
+import { Grant } from "../../../../../domain/grants/types.js";
 import {
   makeNotImplementedAdapter,
   findFromTEO,
   destroyFromTE,
   IdentityIdAndGrantId,
   DateFromNumericDate,
-} from "../utils";
+} from "../utils.js";
 
 export const grantToAdapterPayload = (entity: Grant): oidc.AdapterPayload => ({
   accountId: entity.subjects.identityId,

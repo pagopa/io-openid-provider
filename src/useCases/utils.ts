@@ -1,15 +1,15 @@
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as TE from "fp-ts/TaskEither";
-import { GrantService } from "../domain/grants/GrantService";
-import { Grant } from "../domain/grants/types";
+import { pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as RA from "fp-ts/lib/ReadonlyArray.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Grant } from "../domain/grants/types.js";
 import {
   ConsentResult,
   Interaction,
   LoginResult,
-} from "../domain/interactions/types";
-import { DomainError } from "../domain/types";
+} from "../domain/interactions/types.js";
+import { DomainError } from "../domain/types/index.js";
 
 /**
  * Try to retrieve a valid grant given an interaciton

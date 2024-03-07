@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import * as E from "fp-ts/Either";
+import * as E from "fp-ts/lib/Either.js";
 import * as s from "../sessionService";
 import { session } from "../../../domain/sessions/__tests__/data";
 import { aCosmosResourceMetadata } from "./data";

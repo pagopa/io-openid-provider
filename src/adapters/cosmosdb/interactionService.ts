@@ -1,15 +1,15 @@
 import * as t from "io-ts";
-import { pipe, constVoid } from "fp-ts/function";
-import * as E from "fp-ts/Either";
-import { Interaction, makeResult } from "../../domain/interactions/types";
-import { InteractionService } from "../../domain/interactions/InteractionService";
-import { Logger } from "../../domain/logger";
-import { getTTL, makeTE, makeTEOption } from "./utils";
+import { pipe, constVoid } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import { Interaction, makeResult } from "../../domain/interactions/types.js";
+import { InteractionService } from "../../domain/interactions/InteractionService.js";
+import { Logger } from "../../domain/logger/index.js";
+import { getTTL, makeTE, makeTEOption } from "./utils.js";
 import {
   CosmosInteraction,
   InteractionModel,
   RetrievedInteraction,
-} from "./model/interaction";
+} from "./model/interaction.js";
 
 export const toRecord = (entity: Interaction): CosmosInteraction => ({
   error:

@@ -4,21 +4,21 @@
  */
 import express from "express";
 import * as oidc from "oidc-provider";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/Either";
-import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as T from "fp-ts/lib/Task.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import Provider from "oidc-provider";
 import {
   ProcessInteractionUseCase,
   CollectConsent,
-} from "../../../../useCases/ProcessInteractionUseCase";
-import { Config } from "../../../../config";
-import { InteractionId } from "../../../../domain/interactions/types";
-import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase";
-import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase";
-import { formatError } from "../../../../domain/types";
-import { grantToAdapterPayload } from "./adapters/grantAdapter";
+} from "../../../../useCases/ProcessInteractionUseCase.js";
+import { Config } from "../../../../config.js";
+import { InteractionId } from "../../../../domain/interactions/types.js";
+import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase.js";
+import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase.js";
+import { formatError } from "../../../../domain/types/index.js";
+import { grantToAdapterPayload } from "./adapters/grantAdapter.js";
 
 const interactionFinishedTE = (
   provider: Provider,
@@ -26,7 +26,13 @@ const interactionFinishedTE = (
   res: express.Response,
   result: oidc.InteractionResults & { readonly error?: string }
 ) =>
-  TE.tryCatch(() => provider.interactionFinished(req, res, result), E.toError);
+  TE.tryCatch(
+    () => provider.interactionFinished(req, res, result),
+    (e) => {
+      console.log(e);
+      return E.toError(e);
+    }
+  );
 
 const renderConsent = (res: express.Response, renderData: CollectConsent) =>
   E.tryCatch(
@@ -65,8 +71,11 @@ const getInteractionHandler =
       ),
       // render the result
       TE.fold(
-        (error) =>
-          interactionFinishedTE(provider, req, res, { error: error.kind }),
+        (error) => {
+          return interactionFinishedTE(provider, req, res, {
+            error: error.kind,
+          });
+        },
         (result) => {
           switch (result.kind) {
             case "LoginResult":
@@ -90,7 +99,11 @@ const getInteractionHandler =
       ),
       // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft((_) => {
+        console.log(_);
+        console.log("called next");
+        next();
+      })
     );
     return response();
   };

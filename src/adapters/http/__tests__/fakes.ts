@@ -4,7 +4,7 @@ import { identity } from "../../../domain/identities/__tests__/data";
 import { config } from "../../../__tests__/data";
 import * as inMemory from "../../inMemory";
 import { makeLogger } from "../../winston";
-import { Grant } from "../../../domain/grants/types";
+import { Grant } from "../../../domain/grants/types.js";
 import { makeUseCases } from "../../../useCases";
 
 /**

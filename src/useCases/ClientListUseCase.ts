@@ -1,10 +1,13 @@
-import { pipe } from "fp-ts/function";
-import * as TE from "fp-ts/TaskEither";
-import { Client } from "../domain/clients/types";
-import { ClientSelector, ClientService } from "../domain/clients/ClientService";
-import { Logger } from "../domain/logger";
-import { DomainError } from "../domain/types";
-import { show } from "../domain/utils";
+import { pipe } from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { Client } from "../domain/clients/types.js";
+import {
+  ClientSelector,
+  ClientService,
+} from "../domain/clients/ClientService.js";
+import { Logger } from "../domain/logger/index.js";
+import { DomainError } from "../domain/types/index.js";
+import { show } from "../domain/utils.js";
 
 export type ClientListUseCaseError = DomainError;
 

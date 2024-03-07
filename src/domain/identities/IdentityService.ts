@@ -1,6 +1,6 @@
-import { TaskEither } from "fp-ts/TaskEither";
-import { DomainError } from "../types";
-import { AccessToken, Identity } from "./types";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import { DomainError } from "../types/index.js";
+import { AccessToken, Identity } from "./types.js";
 
 /**
  * The service that manage the identities, an Identity is something that

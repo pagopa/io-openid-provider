@@ -1,8 +1,8 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { Client } from "../clients/types";
-import { IdentityId } from "../identities/types";
-import { IdPattern } from "../types";
+import { Client } from "../clients/types.js";
+import { IdentityId } from "../identities/types.js";
+import { IdPattern } from "../types/index.js";
 
 interface GrantIdBrand {
   readonly GrantId: unique symbol;

@@ -1,22 +1,22 @@
 import express from "express";
-import { pipe } from "fp-ts/function";
-import * as O from "fp-ts/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as RA from "fp-ts/lib/ReadonlyArray.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import { responses } from "@pagopa/ts-commons";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
-} from "@pagopa/ts-commons/lib/request_middleware";
-import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
-import { APIClientList } from "../../../generated/definitions/APIClientList";
-import { APIClientDetail } from "../../../generated/definitions/APIClientDetail";
+} from "@pagopa/ts-commons/lib/request_middleware.js";
+import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param.js";
+import { APIClientList } from "../../../generated/definitions/APIClientList.js";
+import { APIClientDetail } from "../../../generated/definitions/APIClientDetail.js";
 import {
   Client,
   OrganizationId,
   ServiceId,
-} from "../../../domain/clients/types";
-import { ClientListUseCase } from "../../../useCases/ClientListUseCase";
+} from "../../../domain/clients/types.js";
+import { ClientListUseCase } from "../../../useCases/ClientListUseCase.js";
 
 const makeAPIClientDetail = (input: Client): APIClientDetail => ({
   client_id: Client.props.clientId.encode(input.clientId),

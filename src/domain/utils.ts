@@ -1,7 +1,11 @@
-import { pipe } from "fp-ts/lib/function";
-import { Option } from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
-import { DomainError, DomainErrorTypes, makeDomainError } from "./types";
+import { pipe } from "fp-ts/lib/function.js";
+import { Option } from "fp-ts/lib/Option.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import {
+  DomainError,
+  DomainErrorTypes,
+  makeDomainError,
+} from "./types/index.js";
 
 export const show = <T>(_: T) => JSON.stringify(_, null, 2);
 

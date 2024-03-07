@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import { makeRegistrationAccessTokenAdapter } from "../registrationAccessTokenAdapter";
 import { notImplementedError } from "../../utils";
-import { constVoid } from "fp-ts/lib/function";
+import { constVoid } from "fp-ts/lib/function.js";
 import { makeLogger } from "../../../../../winston";
 
 const mocks = {

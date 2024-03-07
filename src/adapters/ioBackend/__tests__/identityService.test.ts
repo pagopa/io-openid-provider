@@ -1,11 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 
 import * as t from "io-ts";
-import * as E from "fp-ts/Either";
+import * as E from "fp-ts/lib/Either.js";
 import { FIMSUser } from "../../../generated/clients/io-auth/FIMSUser";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { identity as fakeIdentity } from "../../../domain/identities/__tests__/data";
-import { makeDomainError, DomainErrorTypes } from "../../../domain/types";
+import {
+  makeDomainError,
+  DomainErrorTypes,
+} from "../../../domain/types/index.js";
 import { makeIdentityService } from "../identityService";
 import { SpidLevelEnum } from "../../../generated/clients/io-auth/SpidLevel";
 
