@@ -11,7 +11,6 @@
     "generate:clients:io-auth": "rimraf ./src/generated/clients/io-auth && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-backend/v13.0.0/openapi/generated/api_fims.yaml --no-strict --out-dir ./src/generated/clients/io-auth --request-types --response-decoders --client",
     "start": "node dist/main.js",
     "dev": "tsc && node -r dotenv/config dist/main.js",
-    "prebuild": "shx rm -rf dist && yarn generate",
     "build": "tsc",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
