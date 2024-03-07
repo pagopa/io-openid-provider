@@ -27,7 +27,7 @@ export const AbortInteractionUseCase =
           );
           return error;
         },
-        (_) => constVoid()
+        () => constVoid()
       )
     );
 export type AbortInteractionUseCase = ReturnType<

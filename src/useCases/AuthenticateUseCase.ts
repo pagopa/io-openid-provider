@@ -23,7 +23,7 @@ export const AuthenticateUseCase =
         pipe(
           // validate the token
           AccessToken.decode(accessToken),
-          E.mapLeft((_) => {
+          E.mapLeft(() => {
             logger.info("AuthenticateUseCase: invalid access-token");
             return unauthorizedError;
           })

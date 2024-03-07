@@ -29,7 +29,7 @@ export const makeCosmosDbClient = (
         logger.error("Error connecting to the database :(.", error);
         return show(error);
       },
-      (_) => {
+      () => {
         logger.info("Connected successfully to the database!");
         return instance;
       }

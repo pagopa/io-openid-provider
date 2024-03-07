@@ -42,7 +42,6 @@ export const makeTEOption =
     decode: (t0: T0) => t.Validation<T1>,
     fn: () => TE.TaskEither<CosmosErrors, O.Option<T0>>
   ): TE.TaskEither<DomainError, O.Option<T1>> => {
-    // eslint-disable-next-line sonarjs/no-identical-functions
     const decodeOpt = (t0: O.Option<T0>) =>
       pipe(
         t0,

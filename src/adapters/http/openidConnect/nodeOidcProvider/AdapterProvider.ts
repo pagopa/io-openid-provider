@@ -39,7 +39,6 @@ export const makeAdapterProvider =
     const registrationAccessTokenAdapter =
       makeRegistrationAccessTokenAdapter(logger);
 
-    // eslint-disable-next-line sonarjs/no-small-switch
     switch (name) {
       case "Client":
         return clientAdapter;

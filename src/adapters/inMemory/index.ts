@@ -1,4 +1,3 @@
-/* eslint-disable functional/prefer-readonly-type */
 import { constVoid, pipe } from "fp-ts/lib/function.js";
 import * as O from "fp-ts/lib/Option.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
@@ -76,7 +75,7 @@ export const makeClientService = (
           )(selector.serviceId)
       ),
     remove: (id) => removeByIdTE(store)(id.serviceId),
-    upsert: upsertEntityTE(store)((_) => _.clientId.serviceId),
+    upsert: upsertEntityTE(store)(({ clientId }) => clientId.serviceId),
   };
 };
 
@@ -89,7 +88,7 @@ export const makeInteractionService = (
   return {
     find: findByIdTE(store),
     remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.id),
+    upsert: upsertEntityTE(store)(({ id }) => id),
   };
 };
 
@@ -112,15 +111,15 @@ export const makeGrantService = (
             selector.clientId,
             O.fold(
               () => false,
-              (_) => _.serviceId === grant.subjects.clientId.serviceId
+              ({ serviceId }) => serviceId === grant.subjects.clientId.serviceId
             )
           ) &&
           selector.identityId === grant.subjects.identityId &&
           grant.remember === selector.remember
       ),
     remove: (idn, grn) => removeByIdTE(store)(encodeId([idn, grn])),
-    upsert: upsertEntityTE(store)((_) =>
-      encodeId([_.subjects.identityId, _.id])
+    upsert: upsertEntityTE(store)(({ subjects, id }) =>
+      encodeId([subjects.identityId, id])
     ),
   };
 };
@@ -133,10 +132,10 @@ export const makeSessionService = (
     find: findByIdTE(store),
     findByUid: (uid) => findByTE(store)((s) => s.uid === uid),
     remove: removeByIdTE(store),
-    upsert: upsertEntityTE(store)((_) => _.id),
+    upsert: upsertEntityTE(store)(({ id }) => id),
   };
 };
 
 export const makeIdentityService = (identity: Identity): IdentityService => ({
-  authenticate: (_accessToken) => TE.right(identity),
+  authenticate: () => TE.right(identity),
 });

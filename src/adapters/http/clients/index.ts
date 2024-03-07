@@ -47,7 +47,7 @@ const getClientListEndpointHandler =
     pipe(
       clientListUseCase({ organizationId, serviceId }),
       TE.bimap(
-        (_) => responses.ResponseErrorInternal("Internal Error"),
+        () => responses.ResponseErrorInternal("Internal Error"),
         (r) => responses.ResponseSuccessJson(makeAPIClientList(r))
       ),
       TE.toUnion

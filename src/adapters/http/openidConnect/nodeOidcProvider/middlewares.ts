@@ -13,7 +13,6 @@ export const disableAuthClientsEndpointMiddleware =
     if (registrationUrl && ctx.url.startsWith(`${registrationUrl}/`)) {
       const clientId = ctx.url.replace(`${registrationUrl}/`, "");
       if (clientId !== "") {
-        // eslint-disable-next-line functional/immutable-data
         ctx.headers.authorization = `Bearer ${clientId}`;
       }
     }
@@ -32,11 +31,9 @@ export const updateDiscoveryResponseMiddleware: koa.Middleware = async (
   if (ctx.oidc?.route === "discovery") {
     // The system at the moment doesn't expose to internel
     // the token endpoint but we can't disable it from configuration
-    // eslint-disable-next-line functional/immutable-data
     ctx.body.token_endpoint = undefined;
     // The system provides the registration endpoint but for
     // internal use only, this is why it is removed here
-    // eslint-disable-next-line functional/immutable-data
     ctx.body.registration_endpoint = undefined;
   }
 };

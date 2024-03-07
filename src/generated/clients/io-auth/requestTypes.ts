@@ -87,6 +87,7 @@ export function getUserForFIMSDecoder<
   | r.IResponseType<429, A4, never>
   | r.IResponseType<500, A5, never>
 > {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const isDecoder = (d: any): d is t.Type<A0, C0> =>
     typeof d["_A"] !== "undefined";
 

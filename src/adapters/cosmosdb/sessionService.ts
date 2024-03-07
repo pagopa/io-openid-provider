@@ -48,7 +48,7 @@ export const makeSessionService = (
   remove: (id) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => sessionModel.delete(id)
     ),
   upsert: (definition) => {

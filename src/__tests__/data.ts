@@ -2,6 +2,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Config } from "../config";
 import { Seconds } from "../domain/types/index.js";
 import * as jose2 from "jose2";
+import { LogLevel } from "../adapters/winston/index.js";
 
 const jwk = jose2.JWK.generateSync("EC", "P-256", { use: "sig" }).toJWK(true);
 
@@ -32,7 +33,7 @@ export const config: Config = {
   },
   issuer: new URL(envs["ISSUER"] as string),
   logger: {
-    logLevel: envs["LOG_LEVEL"] as any,
+    logLevel: envs["LOG_LEVEL"] as LogLevel,
     logName: envs["APPLICATION_NAME"] as string,
   },
   server: {

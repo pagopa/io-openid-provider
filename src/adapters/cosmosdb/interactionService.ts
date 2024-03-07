@@ -66,7 +66,7 @@ export const makeInteractionService = (
   remove: (id) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => interactionModel.delete(id)
     ),
   upsert: (definition) => {

@@ -29,7 +29,7 @@ const authenticate =
       }),
       TE.chainEitherK(
         flow(
-          E.mapLeft((_) =>
+          E.mapLeft(() =>
             makeDomainError("Decoding error", DomainErrorTypes.GENERIC_ERROR)
           )
         )

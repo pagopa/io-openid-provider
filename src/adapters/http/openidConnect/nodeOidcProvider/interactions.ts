@@ -53,7 +53,7 @@ const getInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       TE.chain((interactionId) =>
@@ -93,7 +93,7 @@ const getInteractionHandler =
       ),
       // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_) => {
+      TE.mapLeft(() => {
         next();
       })
     );
@@ -111,7 +111,7 @@ const postInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       // run the logic to confirm the consent
@@ -130,7 +130,7 @@ const postInteractionHandler =
       // send the result
       T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // on any strange error call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft(() => next())
     );
     return response();
   };
@@ -146,7 +146,7 @@ const getInteractionAbortHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       // run the abort interaction logic
@@ -156,7 +156,7 @@ const getInteractionAbortHandler =
         (errMsg) => ({
           error: errMsg.kind,
         }),
-        (_) => ({
+        () => ({
           error: "access denied",
           error_description: "End-User aborted interaction",
         })
@@ -167,7 +167,7 @@ const getInteractionAbortHandler =
       T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft(() => next())
     )();
 
 /**

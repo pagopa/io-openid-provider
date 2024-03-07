@@ -49,7 +49,7 @@ export const makeClientService = (
   remove: (id) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => clientModel.delete(id.serviceId, id.organizationId)
     ),
   upsert: (definition) => {

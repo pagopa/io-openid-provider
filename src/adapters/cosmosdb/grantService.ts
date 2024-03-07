@@ -68,7 +68,7 @@ export const makeGrantService = (
   remove: (identityId, grantId) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => grantModel.delete(grantId, identityId)
     ),
   upsert: (definition) => {

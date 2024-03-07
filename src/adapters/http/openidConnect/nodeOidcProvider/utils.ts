@@ -84,7 +84,7 @@ export const destroyFromTE =
           )
       ),
       TE.toUnion,
-      T.map((_) => constVoid())
+      T.map(() => constVoid())
     )();
 
 export const findFromTEO =

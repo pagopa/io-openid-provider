@@ -40,18 +40,18 @@ const findAccountAdapter =
     logger: Logger,
     authenticateUseCase: AuthenticateUseCase
   ): oidc.FindAccount =>
-  (ctx, _sub, _token) => {
+  (ctx) => {
     const accountId = ctx.oidc.session?.accountId;
     const accessToken = ctx.cookies.get(authenticationCookieKey);
     if (accountId && accessToken) {
       return {
         accountId,
-        claims: (_use, _scope, _claims, _rejected) =>
+        claims: () =>
           pipe(
             authenticateUseCase(accessToken),
             TE.map(makeAccountClaims),
             TE.fold(
-              (_) => () => Promise.reject(_),
+              (error) => () => Promise.reject(error),
               (claims) => () => Promise.resolve(claims)
             )
           )(),
@@ -184,7 +184,6 @@ export const makeProvider = (
   // Add the middleware that remove some fields from response of discovert endpoint
   provider.use(updateDiscoveryResponseMiddleware);
 
-  // eslint-disable-next-line functional/immutable-data
   provider.proxy = config.server.enableProxy;
 
   return provider;
