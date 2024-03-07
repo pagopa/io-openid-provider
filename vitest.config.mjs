@@ -5,5 +5,8 @@ export default defineConfig({
     setupFiles: ["dotenv/config"],
     environment: "node",
     onConsoleLog: () => false,
+    coverage: {
+      include: ["src"],
+    },
   },
 });
