@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 import * as C from "../config";
 import * as E from "fp-ts/lib/Either.js";
