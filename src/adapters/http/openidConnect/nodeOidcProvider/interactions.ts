@@ -26,13 +26,7 @@ const interactionFinishedTE = (
   res: express.Response,
   result: oidc.InteractionResults & { readonly error?: string }
 ) =>
-  TE.tryCatch(
-    () => provider.interactionFinished(req, res, result),
-    (e) => {
-      console.log(e);
-      return E.toError(e);
-    }
-  );
+  TE.tryCatch(() => provider.interactionFinished(req, res, result), E.toError);
 
 const renderConsent = (res: express.Response, renderData: CollectConsent) =>
   E.tryCatch(
@@ -100,8 +94,6 @@ const getInteractionHandler =
       // the finishInteraction can terminate in error,
       // in this case call next
       TE.mapLeft((_) => {
-        console.log(_);
-        console.log("called next");
         next();
       })
     );
