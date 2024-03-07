@@ -369,4 +369,4 @@ $RECYCLE.BIN/
 
 ### custom ###
 # ignore the stuff generated from open-api definition
-src/generated
+# src/generated
