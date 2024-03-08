@@ -30,7 +30,7 @@ export const FindGrantUseCase =
       TE.map(RA.head),
       TE.fold(
         (error) => {
-          logger.error("Some error during FindGrantUseCase.js", error.causedBy);
+          logger.error("Some error during FindGrantUseCase", error.causedBy);
           return TE.left(error);
         },
         O.fold(
