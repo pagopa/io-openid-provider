@@ -1,9 +1,9 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { Option } from "fp-ts/Option";
-import { TaskEither } from "fp-ts/TaskEither";
-import { DomainError } from "../types";
-import { Client, ClientId, OrganizationId, ServiceId } from "./types";
+import { Option } from "fp-ts/lib/Option.js";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import { DomainError } from "../types/index.js";
+import { Client, ClientId, OrganizationId, ServiceId } from "./types.js";
 
 export const ClientSelector = t.type({
   organizationId: tt.option(OrganizationId),

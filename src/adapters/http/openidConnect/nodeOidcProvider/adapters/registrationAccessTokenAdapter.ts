@@ -1,7 +1,7 @@
-import { constVoid } from "fp-ts/function";
+import { constVoid } from "fp-ts/lib/function.js";
 import * as oidc from "oidc-provider";
-import { Logger } from "../../../../../domain/logger";
-import { makeNotImplementedAdapter } from "../utils";
+import { Logger } from "../../../../../domain/logger/index.js";
+import { makeNotImplementedAdapter } from "../utils.js";
 
 /**
  * Return an Adapter of RegistrationAccessToken entity that produce a token given

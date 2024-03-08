@@ -1,11 +1,11 @@
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
 import {
   NonEmptyString,
   OrganizationFiscalCode,
-} from "@pagopa/ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings.js";
 
 // ServiceId is just a string
 export const ServiceId = NonEmptyString;

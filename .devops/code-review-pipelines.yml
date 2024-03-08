@@ -61,9 +61,9 @@ stages:
         steps:
         - template: templates/node-job-setup/template.yaml@pagopaCommons
         
-        - script: |
-            yarn generate
-          displayName: 'Create auto generated files'              
+#        - script: |
+#            yarn generate
+#          displayName: 'Create auto generated files'              
 
         - script: |
             yarn test:coverage

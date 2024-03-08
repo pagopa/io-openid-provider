@@ -1,17 +1,17 @@
-import { Logger } from "../domain/logger";
-import { IdentityService } from "../domain/identities/IdentityService";
-import { InteractionService } from "../domain/interactions/InteractionService";
-import { ClientService } from "../domain/clients/ClientService";
-import { GrantService } from "../domain/grants/GrantService";
-import { Seconds } from "../domain/types";
-import { AbortInteractionUseCase } from "./AbortInteractionUseCase";
-import { AuthenticateUseCase } from "./AuthenticateUseCase";
-import { ClientListUseCase } from "./ClientListUseCase";
-import { ConfirmConsentUseCase } from "./ConfirmConsentUseCase";
-import { FindGrantUseCase } from "./FindGrantUseCases";
-import { ProcessInteractionUseCase } from "./ProcessInteractionUseCase";
-import { RemoveGrantUseCase } from "./RemoveGrantUseCase";
-import { ListGrantUseCase } from "./ListGrantUseCase";
+import { Logger } from "../domain/logger/index.js";
+import { IdentityService } from "../domain/identities/IdentityService.js";
+import { InteractionService } from "../domain/interactions/InteractionService.js";
+import { ClientService } from "../domain/clients/ClientService.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Seconds } from "../domain/types/index.js";
+import { AbortInteractionUseCase } from "./AbortInteractionUseCase.js";
+import { AuthenticateUseCase } from "./AuthenticateUseCase.js";
+import { ClientListUseCase } from "./ClientListUseCase.js";
+import { ConfirmConsentUseCase } from "./ConfirmConsentUseCase.js";
+import { FindGrantUseCase } from "./FindGrantUseCases.js";
+import { ProcessInteractionUseCase } from "./ProcessInteractionUseCase.js";
+import { RemoveGrantUseCase } from "./RemoveGrantUseCase.js";
+import { ListGrantUseCase } from "./ListGrantUseCase.js";
 
 export interface Features {
   readonly grant: {

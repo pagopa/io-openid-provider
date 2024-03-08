@@ -1,12 +1,16 @@
-import { constVoid, pipe } from "fp-ts/lib/function";
+import { constVoid, pipe } from "fp-ts/lib/function.js";
 import * as t from "io-ts";
-import * as E from "fp-ts/Either";
-import { Logger } from "../../domain/logger";
-import { SessionService } from "../../domain/sessions/SessionService";
-import { Session, SessionId, Uid } from "../../domain/sessions/types";
-import { IdentityId } from "../../domain/identities/types";
-import { getTTL, makeTE, makeTEOption } from "./utils";
-import { CosmosSession, RetrievedSession, SessionModel } from "./model/session";
+import * as E from "fp-ts/lib/Either.js";
+import { Logger } from "../../domain/logger/index.js";
+import { SessionService } from "../../domain/sessions/SessionService.js";
+import { Session, SessionId, Uid } from "../../domain/sessions/types.js";
+import { IdentityId } from "../../domain/identities/types.js";
+import { getTTL, makeTE, makeTEOption } from "./utils.js";
+import {
+  CosmosSession,
+  RetrievedSession,
+  SessionModel,
+} from "./model/session.js";
 
 export const toRecord = (entity: Session): CosmosSession => ({
   expireAt: entity.expireAt,
@@ -44,7 +48,7 @@ export const makeSessionService = (
   remove: (id) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => sessionModel.delete(id)
     ),
   upsert: (definition) => {

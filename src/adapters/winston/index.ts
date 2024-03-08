@@ -1,8 +1,8 @@
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
-import { pipe } from "fp-ts/lib/function";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights.js";
+import { pipe } from "fp-ts/lib/function.js";
 
 import { TelemetryClient } from "applicationinsights";
-import * as winston from "winston";
+import winston from "winston";
 import Transport from "winston-transport";
 
 export class ApplicationInsightTransport extends Transport {

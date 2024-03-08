@@ -1,25 +1,25 @@
 import * as t from "io-ts";
-import * as O from "fp-ts/Option";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-import { Identity } from "../domain/identities/types";
-import { Interaction, InteractionId } from "../domain/interactions/types";
-import { Grant } from "../domain/grants/types";
-import { Client } from "../domain/clients/types";
-import { InteractionService } from "../domain/interactions/InteractionService";
-import { GrantService } from "../domain/grants/GrantService";
-import { IdentityService } from "../domain/identities/IdentityService";
-import { Logger } from "../domain/logger";
-import { fromTEOtoTE, show } from "../domain/utils";
-import { ClientService } from "../domain/clients/ClientService";
+import * as O from "fp-ts/lib/Option.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { pipe } from "fp-ts/lib/function.js";
+import { Identity } from "../domain/identities/types.js";
+import { Interaction, InteractionId } from "../domain/interactions/types.js";
+import { Grant } from "../domain/grants/types.js";
+import { Client } from "../domain/clients/types.js";
+import { InteractionService } from "../domain/interactions/InteractionService.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { IdentityService } from "../domain/identities/IdentityService.js";
+import { Logger } from "../domain/logger/index.js";
+import { fromTEOtoTE, show } from "../domain/utils.js";
+import { ClientService } from "../domain/clients/ClientService.js";
 import {
   DomainError,
   DomainErrorTypes,
   makeDomainError,
-} from "../domain/types";
-import { AuthenticateUseCase } from "./AuthenticateUseCase";
-import { findValidGrant } from "./utils";
-import { Features } from ".";
+} from "../domain/types/index.js";
+import { AuthenticateUseCase } from "./AuthenticateUseCase.js";
+import { findValidGrant } from "./utils.js";
+import { Features } from "./index.js";
 
 export const LoginResult = t.type({
   identity: Identity,

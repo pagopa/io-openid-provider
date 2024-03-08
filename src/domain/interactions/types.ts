@@ -1,9 +1,9 @@
 import * as t from "io-ts";
 import * as tt from "io-ts-types";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IdentityId } from "../identities/types";
-import { Client } from "../clients/types";
-import { GrantId } from "../grants/types";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { IdentityId } from "../identities/types.js";
+import { Client } from "../clients/types.js";
+import { GrantId } from "../grants/types.js";
 
 interface InteractionIdBrand {
   readonly InteractionId: unique symbol;

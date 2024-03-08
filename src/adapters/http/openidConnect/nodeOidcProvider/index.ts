@@ -1,27 +1,27 @@
-import { pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import Provider from "oidc-provider";
 import * as oidc from "oidc-provider";
-import { ClientService } from "../../../../domain/clients/ClientService";
-import { Config } from "../../../../config";
-import { Logger } from "../../../../domain/logger";
-import { InteractionService } from "../../../../domain/interactions/InteractionService";
-import { SessionService } from "../../../../domain/sessions/SessionService";
-import { GrantService } from "../../../../domain/grants/GrantService";
-import { Identity } from "../../../../domain/identities/types";
-import { AuthenticateUseCase } from "../../../../useCases/AuthenticateUseCase";
+import { ClientService } from "../../../../domain/clients/ClientService.js";
+import { Config } from "../../../../config.js";
+import { Logger } from "../../../../domain/logger/index.js";
+import { InteractionService } from "../../../../domain/interactions/InteractionService.js";
+import { SessionService } from "../../../../domain/sessions/SessionService.js";
+import { GrantService } from "../../../../domain/grants/GrantService.js";
+import { Identity } from "../../../../domain/identities/types.js";
+import { AuthenticateUseCase } from "../../../../useCases/AuthenticateUseCase.js";
 import {
   Client,
   OrganizationId,
   ServiceId,
-} from "../../../../domain/clients/types";
-import { show } from "../../../../domain/utils";
-import { makeAdapterProvider } from "./AdapterProvider";
+} from "../../../../domain/clients/types.js";
+import { show } from "../../../../domain/utils.js";
+import { makeAdapterProvider } from "./AdapterProvider.js";
 import {
   disableAuthClientsEndpointMiddleware,
   updateDiscoveryResponseMiddleware,
-} from "./middlewares";
+} from "./middlewares.js";
 
 export const makeAccountClaims = (identity: Identity): oidc.AccountClaims => ({
   acr: identity.acr,
@@ -40,18 +40,18 @@ const findAccountAdapter =
     logger: Logger,
     authenticateUseCase: AuthenticateUseCase
   ): oidc.FindAccount =>
-  (ctx, _sub, _token) => {
+  (ctx) => {
     const accountId = ctx.oidc.session?.accountId;
     const accessToken = ctx.cookies.get(authenticationCookieKey);
     if (accountId && accessToken) {
       return {
         accountId,
-        claims: (_use, _scope, _claims, _rejected) =>
+        claims: () =>
           pipe(
             authenticateUseCase(accessToken),
             TE.map(makeAccountClaims),
             TE.fold(
-              (_) => () => Promise.reject(_),
+              (error) => () => Promise.reject(error),
               (claims) => () => Promise.resolve(claims)
             )
           )(),
@@ -184,7 +184,6 @@ export const makeProvider = (
   // Add the middleware that remove some fields from response of discovert endpoint
   provider.use(updateDiscoveryResponseMiddleware);
 
-  // eslint-disable-next-line functional/immutable-data
   provider.proxy = config.server.enableProxy;
 
   return provider;

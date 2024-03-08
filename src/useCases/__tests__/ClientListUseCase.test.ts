@@ -1,34 +1,37 @@
-import * as mock from "jest-mock-extended";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
+import { vi, describe, it, expect } from "vitest";
+
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+
 import { ClientListUseCase } from "../ClientListUseCase";
-import { ClientService } from "../../domain/clients/ClientService";
+
 import { client } from "../../domain/clients/__tests__/data";
 
-const makeClientListUseCaseTest = () => {
-  const logger = mock.mock<Logger>();
-  const clientServiceMock = mock.mock<ClientService>();
-  const useCase = ClientListUseCase(logger, clientServiceMock);
-  return { logger, clientServiceMock, useCase };
+import { clientService } from "../../adapters/vitest";
+import { makeLogger } from "../../adapters/winston";
+
+const mocks = {
+  clientService,
+  logger: makeLogger({ logLevel: "info", logName: "ClientListUseCase.test" }),
 };
 
 describe("ClientListUseCase", () => {
   it("should call client list as expected", async () => {
-    const { useCase, clientServiceMock } = makeClientListUseCaseTest();
+    const useCase = ClientListUseCase(mocks.logger, mocks.clientService);
+
     const selector = {
       serviceId: O.some(client.clientId.serviceId),
       organizationId: O.some(client.clientId.organizationId),
     };
 
-    const clientList = clientServiceMock.list.mockReturnValueOnce(
+    vi.spyOn(mocks.clientService, "list").mockReturnValueOnce(
       TE.right([client])
     );
 
     const actual = await useCase(selector)();
     expect(actual).toStrictEqual(E.right([client]));
-    expect(clientList).toBeCalledWith(selector);
-    expect(clientList).toBeCalledTimes(1);
+    expect(mocks.clientService.list).toBeCalledWith(selector);
+    expect(mocks.clientService.list).toBeCalledTimes(1);
   });
 });

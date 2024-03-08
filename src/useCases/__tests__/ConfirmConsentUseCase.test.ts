@@ -1,12 +1,11 @@
-import * as mock from "jest-mock-extended";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import { Logger } from "../../domain/logger";
-import { GrantService } from "../../domain/grants/GrantService";
-import { InteractionService } from "../../domain/interactions/InteractionService";
+import { vi, describe, it, expect } from "vitest";
+
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+
 import { ConfirmConsentUseCase } from "../ConfirmConsentUseCase";
-import { makeNotFoundError } from "../../domain/types";
+import { makeNotFoundError } from "../../domain/types/index.js";
 import {
   afterConsentInteraction,
   afterLoginInteraction,
@@ -14,159 +13,217 @@ import {
 } from "../../domain/interactions/__tests__/data";
 import { config } from "../../__tests__/data";
 import { grant } from "../../domain/grants/__tests__/data";
-import { Features } from "..";
 
-const makeConfirmConsentUseCaseTest = (
-  features: Features = config.features
-) => {
-  const logger = mock.mock<Logger>();
-  const interactionServiceMock = mock.mock<InteractionService>();
-  const grantServiceMock = mock.mock<GrantService>();
-  const useCase = ConfirmConsentUseCase(
-    logger,
-    features,
-    interactionServiceMock,
-    grantServiceMock
-  );
-  return { logger, interactionServiceMock, grantServiceMock, useCase };
+import { makeLogger } from "../../adapters/winston";
+
+import { interactionService, grantService } from "../../adapters/vitest";
+
+const mocks = {
+  logger: makeLogger({
+    logLevel: "info",
+    logName: "ConfirmConsentUseCase.test",
+  }),
+  interactionService,
+  grantService,
 };
 
 describe("ConfirmConsentUseCase", () => {
   it("should return an error if the interaction doesn't exists", async () => {
-    const { useCase, interactionServiceMock } = makeConfirmConsentUseCaseTest();
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      config.features,
+      mocks.interactionService,
+      mocks.grantService
+    );
 
-    const interactionfind = interactionServiceMock.find.mockReturnValue(
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.none)
     );
+
     const actual = await useCase(interaction.id, false)();
     expect(actual).toStrictEqual(E.left(makeNotFoundError("Not Found")));
-    expect(interactionfind).toBeCalledWith(interaction.id);
+    expect(mocks.interactionService.find).toBeCalledWith(interaction.id);
   });
-  it("should return a new Grant", async () => {
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValueOnce(
+  it("should return a new Grant", async () => {
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      config.features,
+      mocks.interactionService,
+      mocks.grantService
+    );
+
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    const grantFindBy = grantServiceMock.findBy.mockReturnValueOnce(
-      TE.right([])
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
     );
-    grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(TE.right([]));
+
+    vi.spyOn(mocks.grantService, "upsert").mockReturnValueOnce(TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, false)();
     expect(actual).toStrictEqual(E.right(grant));
-    expect(grantFindBy).toBeCalledTimes(1);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
   });
-  it("should reject expired remebered grant", async () => {
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValueOnce(
+  it("should reject expired remebered grant", async () => {
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      config.features,
+      mocks.interactionService,
+      mocks.grantService
+    );
+
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    const grantFindBy = grantServiceMock.findBy.mockReturnValueOnce(
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
+    );
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(
       TE.right([{ ...grant, expireAt: grant.issuedAt }])
     );
-    grantServiceMock.upsert.mockImplementationOnce(TE.right);
+
+    vi.spyOn(mocks.grantService, "upsert").mockImplementationOnce(TE.right);
 
     const actual = await useCase(afterLoginInteraction.id, false)();
     // check that the grant is different from the expired one
     expect(actual).not.toStrictEqual(E.right(grant));
-    expect(grantFindBy).toBeCalledWith({
+    expect(mocks.grantService.findBy).toBeCalledWith({
       clientId: O.some(afterLoginInteraction.params.client_id),
       identityId: grant.subjects.identityId,
       remember: true,
     });
-    expect(grantFindBy).toBeCalledTimes(1);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
   });
   it("should return the grant remebered if any", async () => {
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest();
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      config.features,
+      mocks.interactionService,
+      mocks.grantService
+    );
 
-    interactionServiceMock.find.mockReturnValueOnce(
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    const grantFindBy = grantServiceMock.findBy.mockReturnValueOnce(
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
+    );
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(
       TE.right([grant])
     );
-    grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
+
+    vi.spyOn(mocks.grantService, "upsert").mockReturnValueOnce(TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, false)();
     expect(actual).toStrictEqual(E.right(grant));
-    expect(grantFindBy).toBeCalledWith({
+    expect(mocks.grantService.findBy).toBeCalledWith({
       clientId: O.some(afterLoginInteraction.params.client_id),
       identityId: grant.subjects.identityId,
       remember: true,
     });
-    expect(grantFindBy).toBeCalledTimes(1);
+    expect(mocks.grantService.findBy).toBeCalledTimes(1);
   });
-  it("should return the grant referenced by the given interaction", async () => {
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest();
 
-    interactionServiceMock.find.mockReturnValueOnce(
+  it("should return the grant referenced by the given interaction", async () => {
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      config.features,
+      mocks.interactionService,
+      mocks.grantService
+    );
+
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterConsentInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    grantServiceMock.upsert.mockImplementationOnce((_) => TE.right(grant));
-    grantServiceMock.find.mockImplementationOnce((_0, _1) =>
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
+    );
+
+    vi.spyOn(mocks.grantService, "upsert").mockReturnValueOnce(TE.right(grant));
+
+    vi.spyOn(mocks.grantService, "find").mockReturnValueOnce(
       TE.right(O.some(grant))
     );
 
     const actual = await useCase(afterConsentInteraction.id, false)();
     expect(actual).toStrictEqual(E.right(grant));
   });
+
   it("should save the grant as to remember", async () => {
     const { grantTTL } = config.features.grant;
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest({
+
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      {
         ...config.features,
         grant: { enableRememberGrantFeature: true, grantTTL },
-      });
+      },
+      mocks.interactionService,
+      mocks.grantService
+    );
 
-    interactionServiceMock.find.mockReturnValueOnce(
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
-    const grantUpsert = grantServiceMock.upsert.mockImplementationOnce((_) =>
-      TE.right(grant)
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
     );
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(TE.right([]));
+
+    vi.spyOn(mocks.grantService, "upsert").mockReturnValueOnce(TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, true)();
     expect(actual).toStrictEqual(E.right(grant));
-    expect(grantUpsert).toBeCalledTimes(1);
-    expect(grantUpsert).toBeCalledWith(
+    expect(mocks.grantService.upsert).toBeCalledTimes(1);
+    expect(mocks.grantService.upsert).toBeCalledWith(
       expect.objectContaining({
         remember: true,
       })
     );
   });
+
   it("should ignore the rememberGrant if the feature is disabled", async () => {
     const { grantTTL } = config.features.grant;
-    const { useCase, interactionServiceMock, grantServiceMock } =
-      makeConfirmConsentUseCaseTest({
+
+    const useCase = ConfirmConsentUseCase(
+      mocks.logger,
+      {
         ...config.features,
         grant: { enableRememberGrantFeature: false, grantTTL },
-      });
+      },
+      mocks.interactionService,
+      mocks.grantService
+    );
 
-    interactionServiceMock.find.mockReturnValueOnce(
+    vi.spyOn(mocks.interactionService, "find").mockReturnValueOnce(
       TE.right(O.some(afterLoginInteraction))
     );
-    interactionServiceMock.upsert.mockImplementationOnce((_) => TE.right(_));
-    grantServiceMock.findBy.mockReturnValueOnce(TE.right([]));
-    const grantUpsert = grantServiceMock.upsert.mockImplementationOnce((_) =>
-      TE.right(grant)
+
+    vi.spyOn(mocks.interactionService, "upsert").mockImplementationOnce(
+      TE.right
     );
+
+    vi.spyOn(mocks.grantService, "findBy").mockReturnValueOnce(TE.right([]));
+
+    vi.spyOn(mocks.grantService, "upsert").mockReturnValueOnce(TE.right(grant));
 
     const actual = await useCase(afterLoginInteraction.id, true)();
     expect(actual).toStrictEqual(E.right(grant));
-    expect(grantUpsert).toBeCalledTimes(1);
-    expect(grantUpsert).toBeCalledWith(
+    expect(mocks.grantService.upsert).toBeCalledTimes(1);
+    expect(mocks.grantService.upsert).toBeCalledWith(
       expect.objectContaining({
         remember: false,
       })

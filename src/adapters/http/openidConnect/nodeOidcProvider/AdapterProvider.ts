@@ -1,14 +1,14 @@
 import * as oidc from "oidc-provider";
-import { Logger } from "../../../../domain/logger";
-import { ClientService } from "../../../../domain/clients/ClientService";
-import { InteractionService } from "../../../../domain/interactions/InteractionService";
-import { SessionService } from "../../../../domain/sessions/SessionService";
-import { GrantService } from "../../../../domain/grants/GrantService";
-import { makeClientAdapter } from "./adapters/clientAdapter";
-import { makeInteractionAdapter } from "./adapters/interactionAdapter";
-import { makeRegistrationAccessTokenAdapter } from "./adapters/registrationAccessTokenAdapter";
-import { makeSessionAdapter } from "./adapters/sessionAdapter";
-import { makeGrantAdapter } from "./adapters/grantAdapter";
+import { Logger } from "../../../../domain/logger/index.js";
+import { ClientService } from "../../../../domain/clients/ClientService.js";
+import { InteractionService } from "../../../../domain/interactions/InteractionService.js";
+import { SessionService } from "../../../../domain/sessions/SessionService.js";
+import { GrantService } from "../../../../domain/grants/GrantService.js";
+import { makeClientAdapter } from "./adapters/clientAdapter.js";
+import { makeInteractionAdapter } from "./adapters/interactionAdapter.js";
+import { makeRegistrationAccessTokenAdapter } from "./adapters/registrationAccessTokenAdapter.js";
+import { makeSessionAdapter } from "./adapters/sessionAdapter.js";
+import { makeGrantAdapter } from "./adapters/grantAdapter.js";
 
 export type AdapterProvider = (
   name: "Client" | "Interaction" | "RegistrationAccessToken" | string
@@ -39,7 +39,6 @@ export const makeAdapterProvider =
     const registrationAccessTokenAdapter =
       makeRegistrationAccessTokenAdapter(logger);
 
-    // eslint-disable-next-line sonarjs/no-small-switch
     switch (name) {
       case "Client":
         return clientAdapter;

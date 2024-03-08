@@ -1,19 +1,21 @@
 import * as http from "http";
-import * as path from "path";
 import express from "express";
 import helmet from "helmet";
-import * as cookies from "cookie-parser";
-import { Config } from "../../config";
-import { Logger } from "../../domain/logger";
-import { ClientService } from "../../domain/clients/ClientService";
-import { GrantService } from "../../domain/grants/GrantService";
-import { InteractionService } from "../../domain/interactions/InteractionService";
-import { SessionService } from "../../domain/sessions/SessionService";
-import { UseCases } from "../../useCases";
-import * as openidConnect from "./openidConnect";
-import * as clients from "./clients";
-import * as grants from "./grants";
-import * as info from "./info";
+import cookies from "cookie-parser";
+
+import { Config } from "../../config.js";
+import { Logger } from "../../domain/logger/index.js";
+import { ClientService } from "../../domain/clients/ClientService.js";
+import { GrantService } from "../../domain/grants/GrantService.js";
+import { InteractionService } from "../../domain/interactions/InteractionService.js";
+import { SessionService } from "../../domain/sessions/SessionService.js";
+import { UseCases } from "../../useCases/index.js";
+import * as openidConnect from "./openidConnect/index.js";
+import * as clients from "./clients/index.js";
+import * as grants from "./grants/index.js";
+import * as info from "./info/index.js";
+
+//const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 /**
  * This trait defined all the dependencies required by the Application.
@@ -55,12 +57,12 @@ export const makeApplication = ({
   // Add a middleware to parse urlencoded bodies
   application.use(express.urlencoded());
   // Add a middleware that parse cookies
-  application.use(cookies.default());
+  application.use(cookies());
   // Serve static files
-  application.use(express.static(path.join(__dirname, "public")));
+  application.use(express.static("public"));
 
   // Template engine configuration
-  application.set("views", path.join(__dirname, "views"));
+  application.set("views", "views");
   application.set("view engine", "ejs");
 
   application.use(info.makeRouter(config));

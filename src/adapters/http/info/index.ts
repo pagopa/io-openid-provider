@@ -1,10 +1,10 @@
 import express from "express";
-import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import * as responses from "@pagopa/ts-commons/lib/responses";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-import { Config } from "../../../config";
-import { GetInfo } from "../../../generated/definitions/GetInfo";
+import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware.js";
+import * as responses from "@pagopa/ts-commons/lib/responses.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { pipe } from "fp-ts/lib/function.js";
+import { Config } from "../../../config.js";
+import { GetInfo } from "../../../generated/definitions/GetInfo.js";
 
 type GetInfoEndpointResponse =
   | responses.IResponseSuccessJson<GetInfo>

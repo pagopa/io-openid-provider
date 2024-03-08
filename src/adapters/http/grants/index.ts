@@ -2,19 +2,19 @@ import express from "express";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
-} from "@pagopa/ts-commons/lib/request_middleware";
-import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import { FiscalCode } from "../../../generated/definitions/FiscalCode";
-import { Logger } from "../../../domain/logger";
-import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
-import { ServiceId } from "../../../generated/definitions/ServiceId";
-import { RequiredHeaderMiddleware } from "../utils";
-import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
-import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
-import { ListGrantUseCase } from "../../../useCases/ListGrantUseCase";
-import { deleteGrantEndpointHandler } from "./deleteGrantEndpoint";
-import { findGrantEndpoint } from "./findGrantEndpoint";
-import { listGrantEndpoint } from "./listGrantEndpoint";
+} from "@pagopa/ts-commons/lib/request_middleware.js";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param.js";
+import { FiscalCode } from "../../../generated/definitions/FiscalCode.js";
+import { Logger } from "../../../domain/logger/index.js";
+import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode.js";
+import { ServiceId } from "../../../generated/definitions/ServiceId.js";
+import { RequiredHeaderMiddleware } from "../utils.js";
+import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases.js";
+import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase.js";
+import { ListGrantUseCase } from "../../../useCases/ListGrantUseCase.js";
+import { deleteGrantEndpointHandler } from "./deleteGrantEndpoint.js";
+import { findGrantEndpoint } from "./findGrantEndpoint.js";
+import { listGrantEndpoint } from "./listGrantEndpoint.js";
 
 export const makeRouter = (
   logger: Logger,

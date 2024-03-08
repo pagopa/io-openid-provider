@@ -1,5 +1,4 @@
 export interface CosmosDBConfig {
-  readonly cosmosDbUri: string;
-  readonly masterKey: string;
+  readonly connectionString: string;
   readonly cosmosDbName: string;
 }

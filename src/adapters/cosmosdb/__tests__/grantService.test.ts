@@ -1,4 +1,6 @@
-import * as E from "fp-ts/Either";
+import { describe, it, expect } from "vitest";
+
+import * as E from "fp-ts/lib/Either.js";
 import * as s from "../grantService";
 import { grant } from "../../../domain/grants/__tests__/data";
 import { aCosmosResourceMetadata } from "./data";

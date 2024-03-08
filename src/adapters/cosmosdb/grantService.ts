@@ -1,14 +1,14 @@
 import * as t from "io-ts";
-import { constVoid, pipe } from "fp-ts/function";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import { Grant, GrantId } from "../../domain/grants/types";
-import { GrantService } from "../../domain/grants/GrantService";
-import { Logger } from "../../domain/logger";
-import { IdentityId } from "../../domain/identities/types";
-import { ClientId } from "../../domain/clients/types";
-import { getTTL, makeTE, makeTEOption } from "./utils";
-import { CosmosGrant, GrantModel, RetrievedGrant } from "./model/grant";
+import { constVoid, pipe } from "fp-ts/lib/function.js";
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import { Grant, GrantId } from "../../domain/grants/types.js";
+import { GrantService } from "../../domain/grants/GrantService.js";
+import { Logger } from "../../domain/logger/index.js";
+import { IdentityId } from "../../domain/identities/types.js";
+import { ClientId } from "../../domain/clients/types.js";
+import { getTTL, makeTE, makeTEOption } from "./utils.js";
+import { CosmosGrant, GrantModel, RetrievedGrant } from "./model/grant.js";
 
 export const toRecord = (entity: Grant): CosmosGrant => ({
   clientId: Grant.props.subjects.props.clientId.encode(
@@ -68,7 +68,7 @@ export const makeGrantService = (
   remove: (identityId, grantId) =>
     makeTE(logger)(
       "remove",
-      (_) => E.right(constVoid()),
+      () => E.right(constVoid()),
       () => grantModel.delete(grantId, identityId)
     ),
   upsert: (definition) => {

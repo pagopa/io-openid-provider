@@ -2,12 +2,12 @@
  * Use a singleton CosmosDB client across functions.
  */
 import { CosmosClient, Database } from "@azure/cosmos";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
-import { Logger } from "../../domain/logger";
-import { show } from "../../domain/utils";
-import { CosmosDBConfig } from "./types";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import * as E from "fp-ts/lib/Either.js";
+import { pipe } from "fp-ts/lib/function.js";
+import { Logger } from "../../domain/logger/index.js";
+import { show } from "../../domain/utils.js";
+import { CosmosDBConfig } from "./types.js";
 
 /**
  * Create and check the connection to the database
@@ -16,11 +16,7 @@ export const makeCosmosDbClient = (
   config: CosmosDBConfig,
   logger: Logger
 ): TE.TaskEither<string, Database> => {
-  const cosmosdbClient = new CosmosClient({
-    endpoint: config.cosmosDbUri,
-    key: config.masterKey,
-  });
-
+  const cosmosdbClient = new CosmosClient(config.connectionString);
   const instance = cosmosdbClient.database(config.cosmosDbName);
   return pipe(
     E.tryCatch(() => {
@@ -33,7 +29,7 @@ export const makeCosmosDbClient = (
         logger.error("Error connecting to the database :(.", error);
         return show(error);
       },
-      (_) => {
+      () => {
         logger.info("Connected successfully to the database!");
         return instance;
       }

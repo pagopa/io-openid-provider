@@ -1,22 +1,22 @@
 import * as oidc from "oidc-provider";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
-import { Logger } from "../../../../../domain/logger";
-import { ClientService } from "../../../../../domain/clients/ClientService";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import { Logger } from "../../../../../domain/logger/index.js";
+import { ClientService } from "../../../../../domain/clients/ClientService.js";
 import {
   Client,
   ClientId,
   GrantTypes,
   ResponseTypes,
-} from "../../../../../domain/clients/types";
+} from "../../../../../domain/clients/types.js";
 import {
   makeNotImplementedAdapter,
   findFromTEO,
   destroyFromTE,
   upsertFromTE,
   DateFromNumericDate,
-} from "../utils";
+} from "../utils.js";
 
 const clientToAdapterPayload = (client: Client): oidc.AdapterPayload => ({
   application_type: "web",

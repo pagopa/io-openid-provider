@@ -1,16 +1,16 @@
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import { responses } from "@pagopa/ts-commons";
-import { FiscalCode } from "../../../generated/definitions/FiscalCode";
-import { Logger } from "../../../domain/logger";
-import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
-import { ServiceId } from "../../../generated/definitions/ServiceId";
-import { IResponseNoContent, ResponseNoContent } from "../utils";
-import { OrganizationId } from "../../../domain/clients/types";
-import { IdentityId } from "../../../domain/identities/types";
-import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase";
-import { DomainErrorTypes } from "../../../domain/types";
-import { show } from "../../../domain/utils";
+import { FiscalCode } from "../../../generated/definitions/FiscalCode.js";
+import { Logger } from "../../../domain/logger/index.js";
+import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode.js";
+import { ServiceId } from "../../../generated/definitions/ServiceId.js";
+import { IResponseNoContent, ResponseNoContent } from "../utils.js";
+import { OrganizationId } from "../../../domain/clients/types.js";
+import { IdentityId } from "../../../domain/identities/types.js";
+import { RemoveGrantUseCase } from "../../../useCases/RemoveGrantUseCase.js";
+import { DomainErrorTypes } from "../../../domain/types/index.js";
+import { show } from "../../../domain/utils.js";
 
 type DeleteGrantEndpointHandler =
   | IResponseNoContent

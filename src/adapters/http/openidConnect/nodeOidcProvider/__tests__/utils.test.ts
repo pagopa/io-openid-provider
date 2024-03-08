@@ -1,7 +1,8 @@
+import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import * as mock from "jest-mock-extended";
-import * as E from "fp-ts/Either";
-import { Logger } from "../../../../../domain/logger";
+
+import * as E from "fp-ts/lib/Either.js";
+
 import { identity } from "../../../../../domain/identities/__tests__/data";
 import { grant } from "../../../../../domain/grants/__tests__/data";
 import {
@@ -11,11 +12,17 @@ import {
   IdentityIdAndGrantId,
 } from "../utils";
 
+import { makeLogger } from "../../../../winston";
+
+const mocks = {
+  logger: makeLogger({ logLevel: "info", logName: "utils.test" }),
+};
+
 describe("makeNotImplementedAdapter", () => {
   it("should implements all functions", async () => {
     const id = "id";
-    const loggerMock = mock.mock<Logger>();
-    const adapter = makeNotImplementedAdapter("Test", loggerMock);
+
+    const adapter = makeNotImplementedAdapter("Test", mocks.logger);
 
     await expect(adapter.consume(id)).rejects.toThrowError(notImplementedError);
     await expect(adapter.destroy(id)).rejects.toThrowError(notImplementedError);

@@ -1,14 +1,17 @@
-import { constVoid, flow, pipe } from "fp-ts/function";
+import { constVoid, flow, pipe } from "fp-ts/lib/function.js";
 import * as t from "io-ts";
-import * as O from "fp-ts/Option";
-import * as E from "fp-ts/Either";
-import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
+import * as O from "fp-ts/lib/Option.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as T from "fp-ts/lib/Task.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import * as oidc from "oidc-provider";
-import { Logger } from "../../../../domain/logger";
-import { DomainError, makeDomainError } from "../../../../domain/types";
-import { IdentityId } from "../../../../domain/identities/types";
-import { GrantId } from "../../../../domain/grants/types";
+import { Logger } from "../../../../domain/logger/index.js";
+import {
+  DomainError,
+  makeDomainError,
+} from "../../../../domain/types/index.js";
+import { IdentityId } from "../../../../domain/identities/types.js";
+import { GrantId } from "../../../../domain/grants/types.js";
 
 export const notImplementedError = new Error("Not Implemented");
 
@@ -81,7 +84,7 @@ export const destroyFromTE =
           )
       ),
       TE.toUnion,
-      T.map((_) => constVoid())
+      T.map(() => constVoid())
     )();
 
 export const findFromTEO =

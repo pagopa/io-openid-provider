@@ -1,17 +1,21 @@
 import * as oidc from "oidc-provider";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/function";
-import * as E from "fp-ts/Either";
-import { Logger } from "../../../../../domain/logger";
-import { SessionService } from "../../../../../domain/sessions/SessionService";
-import { Session, SessionId, Uid } from "../../../../../domain/sessions/types";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import { Logger } from "../../../../../domain/logger/index.js";
+import { SessionService } from "../../../../../domain/sessions/SessionService.js";
+import {
+  Session,
+  SessionId,
+  Uid,
+} from "../../../../../domain/sessions/types.js";
 import {
   makeNotImplementedAdapter,
   findFromTEO,
   destroyFromTE,
   upsertFromTE,
   DateFromNumericDate,
-} from "../utils";
+} from "../utils.js";
 
 const sessionToAdapterPayload = (entity: Session): oidc.AdapterPayload => ({
   accountId: entity.identityId,

@@ -1,21 +1,21 @@
 import * as t from "io-ts";
-import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp";
+import { Timestamp } from "@pagopa/io-functions-commons/dist/generated/definitions/Timestamp.js";
 import { Container } from "@azure/cosmos";
-import { Option } from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option.js";
 
 import {
   CosmosErrors,
   CosmosResource,
   toCosmosErrorResponse,
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model.js";
 import {
   CosmosdbModelTTL,
   Ttl,
-} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { TaskEither } from "fp-ts/lib/TaskEither";
-import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+} from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl.js";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings.js";
+import { TaskEither } from "fp-ts/lib/TaskEither.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { pipe } from "fp-ts/lib/function.js";
 
 export const SESSION_COLLECTION_NAME = "Session";
 const SESSION_MODEL_PK_FIELD = "id";

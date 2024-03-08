@@ -4,21 +4,21 @@
  */
 import express from "express";
 import * as oidc from "oidc-provider";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/Either";
-import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as T from "fp-ts/lib/Task.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import Provider from "oidc-provider";
 import {
   ProcessInteractionUseCase,
   CollectConsent,
-} from "../../../../useCases/ProcessInteractionUseCase";
-import { Config } from "../../../../config";
-import { InteractionId } from "../../../../domain/interactions/types";
-import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase";
-import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase";
-import { formatError } from "../../../../domain/types";
-import { grantToAdapterPayload } from "./adapters/grantAdapter";
+} from "../../../../useCases/ProcessInteractionUseCase.js";
+import { Config } from "../../../../config.js";
+import { InteractionId } from "../../../../domain/interactions/types.js";
+import { ConfirmConsentUseCase } from "../../../../useCases/ConfirmConsentUseCase.js";
+import { AbortInteractionUseCase } from "../../../../useCases/AbortInteractionUseCase.js";
+import { formatError } from "../../../../domain/types/index.js";
+import { grantToAdapterPayload } from "./adapters/grantAdapter.js";
 
 const interactionFinishedTE = (
   provider: Provider,
@@ -53,7 +53,7 @@ const getInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       TE.chain((interactionId) =>
@@ -65,8 +65,11 @@ const getInteractionHandler =
       ),
       // render the result
       TE.fold(
-        (error) =>
-          interactionFinishedTE(provider, req, res, { error: error.kind }),
+        (error) => {
+          return interactionFinishedTE(provider, req, res, {
+            error: error.kind,
+          });
+        },
         (result) => {
           switch (result.kind) {
             case "LoginResult":
@@ -90,7 +93,9 @@ const getInteractionHandler =
       ),
       // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft(() => {
+        next();
+      })
     );
     return response();
   };
@@ -106,7 +111,7 @@ const postInteractionHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       // run the logic to confirm the consent
@@ -125,7 +130,7 @@ const postInteractionHandler =
       // send the result
       T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // on any strange error call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft(() => next())
     );
     return response();
   };
@@ -141,7 +146,7 @@ const getInteractionAbortHandler =
       TE.fromEither(
         pipe(
           InteractionId.decode(req.params.id),
-          E.mapLeft((_) => formatError)
+          E.mapLeft(() => formatError)
         )
       ),
       // run the abort interaction logic
@@ -151,7 +156,7 @@ const getInteractionAbortHandler =
         (errMsg) => ({
           error: errMsg.kind,
         }),
-        (_) => ({
+        () => ({
           error: "access denied",
           error_description: "End-User aborted interaction",
         })
@@ -162,7 +167,7 @@ const getInteractionAbortHandler =
       T.chain((result) => interactionFinishedTE(provider, req, res, result)),
       // the finishInteraction can terminate in error,
       // in this case call next
-      TE.mapLeft((_) => next())
+      TE.mapLeft(() => next())
     )();
 
 /**

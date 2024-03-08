@@ -1,10 +1,15 @@
+import { describe, it, expect } from "vitest";
+
 import * as middlewares from "../middlewares";
 import { configuration } from "./data";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const makeCtx = (url: string): any => ({
   url,
   headers: {},
 });
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 const nextFn = () => {
   return Promise.resolve({});
 };

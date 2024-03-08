@@ -1,13 +1,13 @@
 // TODO: Move this file into io-functions-commons
-import { IRequestMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import { IRequestMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware.js";
 import * as t from "io-ts";
-import * as E from "fp-ts/Either";
+import * as E from "fp-ts/lib/Either.js";
 import {
   HttpStatusCodeEnum,
   IResponse,
   ResponseErrorFromValidationErrors,
-} from "@pagopa/ts-commons/lib/responses";
-import { pipe } from "fp-ts/lib/function";
+} from "@pagopa/ts-commons/lib/responses.js";
+import { pipe } from "fp-ts/lib/function.js";
 
 /**
  * Returns a request middleware that extract an optional

@@ -1,11 +1,11 @@
-import { flow, pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import { IdentityService } from "../domain/identities/IdentityService";
-import { AccessToken, Identity } from "../domain/identities/types";
-import { Logger } from "../domain/logger";
-import { show } from "../domain/utils";
-import { unauthorizedError, UnauthorizedError } from "../domain/types";
+import { flow, pipe } from "fp-ts/lib/function.js";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { IdentityService } from "../domain/identities/IdentityService.js";
+import { AccessToken, Identity } from "../domain/identities/types.js";
+import { Logger } from "../domain/logger/index.js";
+import { show } from "../domain/utils.js";
+import { unauthorizedError, UnauthorizedError } from "../domain/types/index.js";
 
 type AuthenticateUseCaseError = UnauthorizedError;
 
@@ -23,7 +23,7 @@ export const AuthenticateUseCase =
         pipe(
           // validate the token
           AccessToken.decode(accessToken),
-          E.mapLeft((_) => {
+          E.mapLeft(() => {
             logger.info("AuthenticateUseCase: invalid access-token");
             return unauthorizedError;
           })

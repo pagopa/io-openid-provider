@@ -1,7 +1,7 @@
 import { strings } from "@pagopa/ts-commons";
 import * as tt from "io-ts-types";
 import * as t from "io-ts";
-import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings.js";
 
 interface AccessTokenBrand {
   readonly AccessToken: unique symbol;

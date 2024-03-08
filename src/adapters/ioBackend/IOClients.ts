@@ -1,4 +1,4 @@
-import * as authClient from "../../generated/clients/io-auth/client";
+import * as authClient from "../../generated/clients/io-auth/client.js";
 
 export interface IOClientConfig {
   readonly baseURL: URL;

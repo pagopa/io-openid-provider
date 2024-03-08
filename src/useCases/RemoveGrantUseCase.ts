@@ -1,13 +1,13 @@
-import * as TE from "fp-ts/TaskEither";
-import { constVoid, pipe } from "fp-ts/function";
-import { some } from "fp-ts/lib/Option";
-import * as RA from "fp-ts/ReadonlyArray";
-import { OrganizationId, ServiceId } from "../domain/clients/types";
-import { GrantService } from "../domain/grants/GrantService";
-import { Logger } from "../domain/logger";
-import { DomainError, makeNotFoundError } from "../domain/types";
-import { IdentityId } from "../domain/identities/types";
-import { show } from "../domain/utils";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import { constVoid, pipe } from "fp-ts/lib/function.js";
+import { some } from "fp-ts/lib/Option.js";
+import * as RA from "fp-ts/lib/ReadonlyArray.js";
+import { OrganizationId, ServiceId } from "../domain/clients/types.js";
+import { GrantService } from "../domain/grants/GrantService.js";
+import { Logger } from "../domain/logger/index.js";
+import { DomainError, makeNotFoundError } from "../domain/types/index.js";
+import { IdentityId } from "../domain/identities/types.js";
+import { show } from "../domain/utils.js";
 
 export type RemoveGrantUseCaseError = DomainError;
 

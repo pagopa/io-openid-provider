@@ -1,15 +1,15 @@
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import { responses } from "@pagopa/ts-commons";
-import { FiscalCode } from "../../../generated/definitions/FiscalCode";
-import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode";
-import { ServiceId } from "../../../generated/definitions/ServiceId";
-import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail";
-import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases";
-import { OrganizationId } from "../../../domain/clients/types";
-import { IdentityId } from "../../../domain/identities/types";
-import { Grant } from "../../../domain/grants/types";
-import { DomainErrorTypes } from "../../../domain/types";
+import { FiscalCode } from "../../../generated/definitions/FiscalCode.js";
+import { OrganizationFiscalCode } from "../../../generated/definitions/OrganizationFiscalCode.js";
+import { ServiceId } from "../../../generated/definitions/ServiceId.js";
+import { APIGrantDetail } from "../../../generated/definitions/APIGrantDetail.js";
+import { FindGrantUseCase } from "../../../useCases/FindGrantUseCases.js";
+import { OrganizationId } from "../../../domain/clients/types.js";
+import { IdentityId } from "../../../domain/identities/types.js";
+import { Grant } from "../../../domain/grants/types.js";
+import { DomainErrorTypes } from "../../../domain/types/index.js";
 
 export const makeAPIGrant = (grant: Grant): APIGrantDetail => ({
   expireAt: grant.expireAt,
