@@ -20,7 +20,7 @@ import {
 import { GrantId } from "../../../domain/grants/types.js";
 import { IdentityId } from "../../../domain/identities/types.js";
 
-export const INTERACTION_COLLECTION_NAME = "Interaction";
+export const INTERACTION_COLLECTION_NAME = "interaction";
 const INTERACTION_MODEL_PK_FIELD = "id";
 const INTERACTION_PARTITION_KEY_FIELD = "id";
 

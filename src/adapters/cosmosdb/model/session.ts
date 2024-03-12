@@ -17,7 +17,7 @@ import { TaskEither } from "fp-ts/lib/TaskEither.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
 import { pipe } from "fp-ts/lib/function.js";
 
-export const SESSION_COLLECTION_NAME = "Session";
+export const SESSION_COLLECTION_NAME = "session";
 const SESSION_MODEL_PK_FIELD = "id";
 const SESSION_PARTITION_KEY_FIELD = "id";
 

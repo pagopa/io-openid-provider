@@ -21,7 +21,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model_ttl.js";
 import { IdentityId } from "../../../domain/identities/types.js";
 
-export const GRANT_COLLECTION_NAME = "Grant";
+export const GRANT_COLLECTION_NAME = "grant";
 const GRANT_MODEL_PK_FIELD = "id";
 const GRANT_PARTITION_KEY_FIELD = "identityId";
 
