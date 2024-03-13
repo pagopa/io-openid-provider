@@ -1,6 +1,6 @@
 {
   "name": "io-openid-provider",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "OpenID Provider service",
   "type": "module",
   "scripts": {
