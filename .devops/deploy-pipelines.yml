@@ -99,7 +99,7 @@ stages:
       pool:
         name: $(AGENT_POOL)
       dependsOn:
-        - Deploy_${{ app.Key }}_to_staging
+        - Prepare_artifact
       jobs:
         - job: 'do_healthcheck_${{ app.Key }}'       
           steps:  
