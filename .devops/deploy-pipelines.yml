@@ -93,13 +93,36 @@ stages:
           - publish: $(System.DefaultWorkingDirectory)/bundle
             artifact: Bundle
 
+  # Deploy on staging slot
+  - ${{ each app in parameters.PRODUCTION_APPS }}:
+    - stage: Deploy_${{ app.Key }}_to_staging
+      dependsOn:
+        - Prepare_artifact
+      jobs:
+        - job: 'do_deploy_${{ app.Key }}'
+          steps:
+            - checkout: none
+            - download: current
+              artifact: Bundle
+
+            - task: AzureWebApp@1
+              inputs:
+                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+                resourceGroupName: '${{ app.Value.rg }}'
+                appType: 'webApp'
+                appName: '${{ app.Value.appname }}'
+                package: '$(Pipeline.Workspace)/Bundle'
+                deploymentMethod: 'auto'
+                deployToSlotOrASE: true
+              displayName: Deploy
+
   # Check that the staging instance is healthy
   - ${{ each app in parameters.PRODUCTION_APPS }}:
     - stage: Healthcheck_${{ app.Key }}
       pool:
         name: $(AGENT_POOL)
       dependsOn:
-        - Prepare_artifact
+        - Deploy_${{ app.Key }}_to_staging
       jobs:
         - job: 'do_healthcheck_${{ app.Key }}'       
           steps:  
