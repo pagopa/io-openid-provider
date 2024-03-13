@@ -27,8 +27,8 @@ parameters:
     type: object
     default:
       fims:
-        appname: io-p-citizen-auth-weu-prod01-app-fims
-        rg: io-p-weu-fims-rg
+        appname: io-p-fims-oidc-provider-app
+        rg: io-p-fims-rg
 
 trigger: none
 pr: none
@@ -50,46 +50,6 @@ resources:
       endpoint: 'pagopa'
 
 stages:
-
-  # Create a relase
-  # Activated when ONE OF these are met:
-  # - is on branch main 
-  # - is a tag in the form v{version}-RELEASE
-  - stage: Release
-    condition:
-      and(
-        succeeded(),
-        or(
-          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-          and(
-            startsWith(variables['Build.SourceBranch'], 'refs/tags'),
-            endsWith(variables['Build.SourceBranch'], '-RELEASE')
-          )
-        )
-      )
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - job: make_release
-        steps:
-        - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-          - template: templates/node-job-setup/template.yaml@pagopaCommons
-            parameters:
-              persistCredentials: true
-              gitReference: main
-          - template: templates/node-github-release/template.yaml@pagopaCommons
-            parameters:
-              release_branch: main
-              semver: '${{ parameters.RELEASE_SEMVER }}'
-              gitEmail: $(GIT_EMAIL)
-              gitUsername: $(GIT_USERNAME)
-              gitHubConnection: $(GITHUB_CONNECTION)
-
-        - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-          - script: |
-              echo "We assume this reference to be a valid release: $(Build.SourceBranch). Therefore, there is no need to bundle a new release."
-            displayName: 'Skip release bundle'
-
 
   # Prepare Artifact
   - stage: Prepare_artifact
@@ -135,30 +95,6 @@ stages:
           - publish: $(System.DefaultWorkingDirectory)/bundle
             artifact: Bundle
 
-  # Deploy on staging slot
-  - ${{ each app in parameters.PRODUCTION_APPS }}:
-    - stage: Deploy_${{ app.Key }}_to_staging
-      dependsOn:
-        - Prepare_artifact
-      jobs:
-        - job: 'do_deploy_${{ app.Key }}'
-          steps:
-            - checkout: none
-            - download: current
-              artifact: Bundle
-
-            - task: AzureWebApp@1
-              inputs:
-                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-                resourceGroupName: '${{ app.Value.rg }}'
-                appType: 'webApp'
-                appName: '${{ app.Value.appname }}'
-                package: '$(Pipeline.Workspace)/Bundle'
-                deploymentMethod: 'auto'
-                deployToSlotOrASE: true
-                slotName: 'staging'
-              displayName: Deploy to staging slot
-
   # Check that the staging instance is healthy
   - ${{ each app in parameters.PRODUCTION_APPS }}:
     - stage: Healthcheck_${{ app.Key }}
@@ -172,27 +108,5 @@ stages:
             - checkout: none
             - script: |
                 # fails if response status is not 2xx
-                curl -f 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+                curl -f 'https://${{ app.Value.appname }}.azurewebsites.net/$(HEALTHCHECK_PATH)'
               displayName: 'Healthcheck'
-
-  # Promote the staging instance to production
-  - ${{ each app in parameters.PRODUCTION_APPS }}:
-    - stage: Swap_${{ app.Key }}_to_production
-      dependsOn:
-        - Deploy_${{ app.Key }}_to_staging
-        # Wait for every healthcheck to succeed
-        # This implied that no app is swapped to prod if at least one healthcheck fails
-        - ${{ each appInner in parameters.PRODUCTION_APPS }}:
-          - Healthcheck_${{ appInner.Key }}
-      jobs:
-        - job: 'do_deploy_${{ app.Key }}'       
-          steps:  
-            - checkout: none
-            - task: AzureAppServiceManage@0
-              inputs:
-                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-                resourceGroupName: '${{ app.Value.rg }}'
-                webAppName: '${{ app.Value.appname }}'
-                sourceSlot: staging
-                swapWithProduction: true
-              displayName: Swap with production slot
