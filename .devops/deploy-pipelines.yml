@@ -27,8 +27,8 @@ parameters:
     type: object
     default:
       fims:
-        appname: io-p-citizen-auth-weu-prod01-app-fims
-        rg: io-p-weu-fims-rg
+        appname: io-p-fims-openid-provider-app
+        rg: io-p-fims-rg
 
 trigger: none
 pr: none
