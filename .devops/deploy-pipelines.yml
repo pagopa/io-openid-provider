@@ -27,7 +27,7 @@ parameters:
     type: object
     default:
       fims:
-        appname: io-p-fims-oidc-provider-app
+        appname: io-p-fims-openid-provider-app
         rg: io-p-fims-rg
 
 trigger: none
